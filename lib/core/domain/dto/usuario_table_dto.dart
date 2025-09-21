@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:nexa_app/core/database/app_database.dart';
-import 'package:nexa_app/core/domain/dto/base_dto.dart';
-import 'package:nexa_app/core/domain/dto/base_table_dto.dart';
+import 'package:nexa_app/core/domain/dto/base/base_dto.dart';
+import 'package:nexa_app/core/domain/dto/base/base_table_dto.dart';
 
 class UsuarioTableDto extends BaseTableDto {
   final String remoteId;

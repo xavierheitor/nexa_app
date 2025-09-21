@@ -1,4 +1,4 @@
-import 'package:nexa_app/core/domain/dto/base_dto.dart';
+import 'package:nexa_app/core/domain/dto/base/base_dto.dart';
 import 'package:nexa_app/core/utils/errors/app_exception.dart';
 
 /// Mixin para validações específicas de tabelas de banco de dados

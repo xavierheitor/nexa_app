@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:nexa_app/core/domain/dto/base_dto.dart';
-import 'package:nexa_app/core/domain/dto/drift_dto_mixin.dart';
-import 'package:nexa_app/core/domain/dto/table_validation_mixin.dart';
+import 'package:nexa_app/core/domain/dto/base/base_dto.dart';
+import 'package:nexa_app/core/domain/dto/base/drift_dto_mixin.dart';
+import 'package:nexa_app/core/domain/dto/base/table_validation_mixin.dart';
 import 'package:nexa_app/core/utils/errors/app_exception.dart';
 
 /// Classe base para DTOs de tabelas do Drift

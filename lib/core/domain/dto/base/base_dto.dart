@@ -15,24 +15,25 @@ abstract class BaseDto {
     if (value == null) {
       throw RequiredFieldError(fieldName, value);
     }
-    
+
     final stringValue = value.toString().trim();
     if (stringValue.isEmpty) {
       throw RequiredFieldError(fieldName, value);
     }
-    
+
     return stringValue;
   }
 
   /// Converte data opcional com tratamento de erro
-  static DateTime? parseOptionalDateTime(dynamic value, [String fieldName = 'dateTime']) {
+  static DateTime? parseOptionalDateTime(dynamic value,
+      [String fieldName = 'dateTime']) {
     if (value == null) return null;
-    
+
     try {
       if (value is DateTime) return value;
       if (value is String) return DateTime.parse(value);
       if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
-      
+
       throw TypeConversionError(fieldName, value, 'DateTime ou String');
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -41,16 +42,17 @@ abstract class BaseDto {
   }
 
   /// Converte data obrigatória com tratamento de erro
-  static DateTime parseRequiredDateTime(dynamic value, [String fieldName = 'dateTime']) {
+  static DateTime parseRequiredDateTime(dynamic value,
+      [String fieldName = 'dateTime']) {
     if (value == null) {
       throw RequiredFieldError(fieldName, value);
     }
-    
+
     try {
       if (value is DateTime) return value;
       if (value is String) return DateTime.parse(value);
       if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
-      
+
       throw TypeConversionError(fieldName, value, 'DateTime ou String');
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -59,36 +61,32 @@ abstract class BaseDto {
   }
 
   /// Valida string com tamanho mínimo e máximo
-  static String validateStringLength(
-    String value, 
-    String fieldName, 
-    {int minLength = 0, 
-    int? maxLength}
-  ) {
+  static String validateStringLength(String value, String fieldName,
+      {int minLength = 0, int? maxLength}) {
     final trimmedValue = value.trim();
-    
+
     if (trimmedValue.length < minLength) {
-      throw DtoError('$fieldName deve ter pelo menos $minLength caracteres', 
-                    field: fieldName, value: value);
+      throw DtoError('$fieldName deve ter pelo menos $minLength caracteres',
+          field: fieldName, value: value);
     }
-    
+
     if (maxLength != null && trimmedValue.length > maxLength) {
-      throw DtoError('$fieldName deve ter no máximo $maxLength caracteres', 
-                    field: fieldName, value: value);
+      throw DtoError('$fieldName deve ter no máximo $maxLength caracteres',
+          field: fieldName, value: value);
     }
-    
+
     return trimmedValue;
   }
 
   /// Converte número opcional
   static int? parseOptionalInt(dynamic value, [String fieldName = 'int']) {
     if (value == null) return null;
-    
+
     try {
       if (value is int) return value;
       if (value is double) return value.toInt();
       if (value is String) return int.parse(value);
-      
+
       throw TypeConversionError(fieldName, value, 'int, double ou String');
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -101,12 +99,12 @@ abstract class BaseDto {
     if (value == null) {
       throw RequiredFieldError(fieldName, value);
     }
-    
+
     try {
       if (value is int) return value;
       if (value is double) return value.toInt();
       if (value is String) return int.parse(value);
-      
+
       throw TypeConversionError(fieldName, value, 'int, double ou String');
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -117,7 +115,7 @@ abstract class BaseDto {
   /// Converte boolean opcional
   static bool? parseOptionalBool(dynamic value, [String fieldName = 'bool']) {
     if (value == null) return null;
-    
+
     try {
       if (value is bool) return value;
       if (value is String) {
@@ -126,7 +124,7 @@ abstract class BaseDto {
         if (lowerValue == 'false' || lowerValue == '0') return false;
       }
       if (value is int) return value != 0;
-      
+
       throw TypeConversionError(fieldName, value, 'bool, String ou int');
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -139,7 +137,7 @@ abstract class BaseDto {
     if (value == null) {
       throw RequiredFieldError(fieldName, value);
     }
-    
+
     try {
       if (value is bool) return value;
       if (value is String) {
@@ -148,7 +146,7 @@ abstract class BaseDto {
         if (lowerValue == 'false' || lowerValue == '0') return false;
       }
       if (value is int) return value != 0;
-      
+
       throw TypeConversionError(fieldName, value, 'bool, String ou int');
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -157,14 +155,15 @@ abstract class BaseDto {
   }
 
   /// Converte double opcional
-  static double? parseOptionalDouble(dynamic value, [String fieldName = 'double']) {
+  static double? parseOptionalDouble(dynamic value,
+      [String fieldName = 'double']) {
     if (value == null) return null;
-    
+
     try {
       if (value is double) return value;
       if (value is int) return value.toDouble();
       if (value is String) return double.parse(value);
-      
+
       throw TypeConversionError(fieldName, value, 'double, int ou String');
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -173,16 +172,17 @@ abstract class BaseDto {
   }
 
   /// Converte double obrigatório
-  static double parseRequiredDouble(dynamic value, [String fieldName = 'double']) {
+  static double parseRequiredDouble(dynamic value,
+      [String fieldName = 'double']) {
     if (value == null) {
       throw RequiredFieldError(fieldName, value);
     }
-    
+
     try {
       if (value is double) return value;
       if (value is int) return value.toDouble();
       if (value is String) return double.parse(value);
-      
+
       throw TypeConversionError(fieldName, value, 'double, int ou String');
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -192,9 +192,7 @@ abstract class BaseDto {
 
   /// Obtém valor com fallback para diferentes chaves
   static T? getValueWithFallback<T>(
-    Map<String, dynamic> json, 
-    List<String> keys
-  ) {
+      Map<String, dynamic> json, List<String> keys) {
     for (final key in keys) {
       if (json.containsKey(key) && json[key] != null) {
         return json[key] as T?;
@@ -205,10 +203,8 @@ abstract class BaseDto {
 
   /// Obtém string com fallback para diferentes chaves
   static String getStringWithFallback(
-    Map<String, dynamic> json, 
-    List<String> keys, 
-    {String defaultValue = ''}
-  ) {
+      Map<String, dynamic> json, List<String> keys,
+      {String defaultValue = ''}) {
     for (final key in keys) {
       if (json.containsKey(key) && json[key] != null) {
         return json[key].toString();

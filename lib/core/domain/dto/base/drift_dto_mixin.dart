@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:nexa_app/core/domain/dto/base_dto.dart';
+import 'package:nexa_app/core/domain/dto/base/base_dto.dart';
 
 /// Mixin para DTOs que se integram com Drift
 /// Fornece métodos para conversão entre DTO e entidades do Drift
