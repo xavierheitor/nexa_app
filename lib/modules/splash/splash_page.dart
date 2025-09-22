@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:nexa_app/modules/splash/splash_controller.dart';
 
 /// Página de splash com design minimalista e moderno.
 ///
@@ -44,6 +46,9 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// Obtém instância do controlador via GetX.
+    final controller = Get.find<SplashController>();
+
     /// Obtém tema atual para cores e estilos.
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
