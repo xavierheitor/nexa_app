@@ -1,9 +1,29 @@
 import 'package:get/get.dart';
+import 'package:nexa_app/core/core_app/services/auth_service.dart';
+import 'package:nexa_app/core/core_app/session/session_manager.dart';
+import 'package:nexa_app/core/database/app_database.dart';
+import 'package:nexa_app/core/domain/repositories/usuario_repo.dart';
+import 'package:nexa_app/core/utils/network/dio_client.dart';
 
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
-    // TODO: implement dependencies
-    throw UnimplementedError();
+    // === Core (DB, API) ===
+    // Banco local (Drift) e cliente HTTP (Dio)
+    Get.put(AppDatabase(), permanent: true);
+    Get.put(DioClient(), permanent: true);
+
+    // === Repositories ===
+    // Abstração de acesso a dados e APIs
+    Get.lazyPut(() => UsuarioRepo(dio: Get.find(), db: Get.find()),
+        fenix: true);
+
+    // === Services ===
+    // Lógica de negócio centralizada
+    Get.lazyPut(() => AuthService(usuarioRepo: Get.find()), fenix: true);
+
+    // === Session Manager ===
+    // Gerenciador centralizado de sessão
+    Get.put(SessionManager(authService: Get.find()), permanent: true);
   }
 }
