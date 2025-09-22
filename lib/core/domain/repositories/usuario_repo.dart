@@ -338,39 +338,147 @@ class UsuarioRepo {
     await usuarioDao.deletar(id);
   }
 
+  // ============================================================================
+  // OPERAÇÕES DE AUTENTICAÇÃO (API)
+  // ============================================================================
+
+  /// Autentica um usuário através da API externa.
+  ///
+  /// Realiza login do usuário enviando credenciais para o servidor
+  /// e retorna dados completos de autenticação incluindo tokens
+  /// de acesso e informações do usuário.
+  ///
+  /// ## Parâmetros:
+  /// - `matricula`: Matrícula do usuário (String)
+  /// - `senha`: Senha do usuário (String)
+  ///
+  /// ## Retorno:
+  /// - `Future<LoginResponseDto>`: Dados completos de autenticação
+  ///
+  /// ## Comportamento:
+  /// - Envia credenciais para endpoint de login
+  /// - Processa resposta JSON da API
+  /// - Converte para DTO tipado e validado
+  /// - Trata erros de rede e validação
+  /// - Registra logs detalhados de erro
+  ///
+  /// ## Casos de Uso:
+  /// - Login inicial do usuário
+  /// - Autenticação após logout
+  /// - Validação de credenciais
+  /// - Obtenção de tokens de acesso
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final loginData = await usuarioRepo.login('12345', 'senha123');
+  /// print('Token: ${loginData.token}');
+  /// print('Usuário: ${loginData.nome}');
+  /// ```
+  ///
+  /// ## Tratamento de Erros:
+  /// - **Rede**: Falhas de conectividade ou timeout
+  /// - **Autenticação**: Credenciais inválidas (401)
+  /// - **Validação**: Dados de resposta inválidos
+  /// - **Servidor**: Erros internos do servidor (500)
+  ///
+  /// ## Logs:
+  /// - Registra erros detalhados com stack trace
+  /// - Tag específica: `UsuarioRepositoryImpl`
+  /// - Contexto: `[usuario_repository_impl - login]`
   Future<LoginResponseDto> login(String matricula, String senha) async {
     try {
+      /// Envia requisição POST para endpoint de login com credenciais.
       final response = await dio.post(ApiConstants.login, data: {
         'matricula': matricula,
         'senha': senha,
       });
-      return LoginResponseDto.fromJson(response.data);
+
+      /// Converte resposta JSON para DTO tipado com validação completa.
+      return await LoginResponseDto.fromJson(response.data);
     } catch (e, s) {
+      /// Trata erro bruto e converte para AppException padronizada.
       final erro = ErrorHandler.tratar(e, s);
+
+      /// Registra erro detalhado para debugging e monitoramento.
       AppLogger.e(
         '[usuario_repository_impl - login] ${erro.mensagem}',
         tag: 'UsuarioRepositoryImpl',
         error: e,
         stackTrace: s,
       );
+
+      /// Re-lança erro tratado para camada superior.
       throw erro;
     }
   }
 
+  /// Renova tokens de autenticação usando refresh token.
+  ///
+  /// Solicita novos tokens de acesso ao servidor usando o refresh token
+  /// válido, mantendo a sessão do usuário ativa sem necessidade de
+  /// nova autenticação com credenciais.
+  ///
+  /// ## Parâmetros:
+  /// - `refreshToken`: Token de renovação válido (String)
+  ///
+  /// ## Retorno:
+  /// - `Future<LoginResponseDto>`: Novos dados de autenticação
+  ///
+  /// ## Comportamento:
+  /// - Envia refresh token para endpoint de renovação
+  /// - Recebe novos tokens de acesso e refresh
+  /// - Converte resposta para DTO tipado e validado
+  /// - Trata erros de token expirado ou inválido
+  /// - Registra logs detalhados de erro
+  ///
+  /// ## Casos de Uso:
+  /// - Renovação automática de tokens
+  /// - Manutenção de sessão ativa
+  /// - Recuperação após expiração de token
+  /// - Sincronização de tokens com servidor
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final novosTokens = await usuarioRepo.refreshToken(refreshToken);
+  /// print('Novo token: ${novosTokens.token}');
+  /// ```
+  ///
+  /// ## Tratamento de Erros:
+  /// - **Token Expirado**: Refresh token inválido ou expirado (401)
+  /// - **Rede**: Falhas de conectividade ou timeout
+  /// - **Validação**: Dados de resposta inválidos
+  /// - **Servidor**: Erros internos do servidor (500)
+  ///
+  /// ## Logs:
+  /// - Registra erros detalhados com stack trace
+  /// - Tag específica: `UsuarioRepositoryImpl`
+  /// - Contexto: `[usuario_repository_impl - refreshToken]`
+  ///
+  /// ## ⚠️ Importante:
+  /// Se este método falhar, o usuário precisará fazer novo login
+  /// com credenciais, pois o refresh token pode ter expirado.
   Future<LoginResponseDto> refreshToken(String refreshToken) async {
     try {
+      /// Envia requisição POST para endpoint de renovação com refresh token.
       final response = await dio.post(ApiConstants.refreshToken, data: {
         'refreshToken': refreshToken,
       });
-      return LoginResponseDto.fromJson(response.data);
+
+      /// Converte resposta JSON para DTO tipado com validação completa.
+      return await LoginResponseDto.fromJson(response.data);
     } catch (e, s) {
+      /// Trata erro bruto e converte para AppException padronizada.
       final erro = ErrorHandler.tratar(e, s);
+
+      /// Registra erro detalhado para debugging e monitoramento.
       AppLogger.e(
         '[usuario_repository_impl - refreshToken] ${erro.mensagem}',
         tag: 'UsuarioRepositoryImpl',
         error: e,
         stackTrace: s,
       );
+
+      /// Re-lança erro tratado para camada superior.
       throw erro;
     }
   }

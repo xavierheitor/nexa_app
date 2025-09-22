@@ -1,15 +1,120 @@
 import 'package:nexa_app/core/domain/dto/base/base_dto.dart';
 import 'package:nexa_app/core/domain/dto/base/base_table_dto.dart';
 
+/// DTO para resposta de login da API.
+///
+/// Representa os dados retornados pelo servidor após autenticação bem-sucedida,
+/// incluindo tokens de acesso, informações do usuário e metadados de expiração.
+/// Este DTO é usado exclusivamente para comunicação com a API e não persiste
+/// no banco de dados local.
+///
+/// ## Funcionalidades Principais:
+///
+/// 1. **Tokens de Autenticação**: Token de acesso e refresh token
+/// 2. **Informações do Usuário**: Dados básicos do usuário autenticado
+/// 3. **Controle de Expiração**: Datas de validade dos tokens
+/// 4. **Validação de Dados**: Verificação de integridade dos campos
+/// 5. **Serialização**: Conversão bidirecional JSON ↔ DTO
+/// 6. **Identificação Única**: UUID e matrícula do usuário
+///
+/// ## Arquitetura:
+///
+/// - **Response DTO**: Específico para respostas de API
+/// - **Não Persistente**: Não é salvo no banco local
+/// - **Validação Rigorosa**: Todos os campos são obrigatórios
+/// - **Type Safety**: Conversões seguras de tipos
+///
+/// ## Fluxo de Uso:
+///
+/// 1. Recebe resposta JSON da API de login
+/// 2. Valida estrutura e tipos dos dados
+/// 3. Converte para DTO tipado
+/// 4. Permite acesso seguro aos dados de autenticação
+/// 5. Usado para configurar sessão do usuário
+///
+/// ## Exemplo de Uso:
+///
+/// ```dart
+/// final response = await dio.post('/auth/login', data: credentials);
+/// final loginData = await LoginResponseDto.fromJson(response.data);
+///
+/// print('Token: ${loginData.token}');
+/// print('Usuário: ${loginData.nome}');
+/// print('Expira em: ${loginData.expiresAt}');
+/// ```
+///
+/// ## Dependências:
+/// - `BaseTableDto`: Funcionalidades base de DTOs de tabela
+/// - `BaseDto`: Métodos de validação e conversão
+/// - Campos de API: Token, refresh token, dados do usuário
 class LoginResponseDto extends BaseTableDto {
+  // ============================================================================
+  // PROPRIEDADES DE AUTENTICAÇÃO
+  // ============================================================================
+
+  /// Token de acesso JWT para autenticação de requisições.
+  ///
+  /// Token principal usado para autorizar requisições subsequentes à API.
+  /// Deve ser incluído no header Authorization como "Bearer {token}".
+  /// Tem validade limitada definida por `expiresAt`.
   final String token;
+
+  /// Token de renovação para obter novos tokens de acesso.
+  ///
+  /// Token especial usado para renovar o token de acesso quando ele expira,
+  /// sem necessidade de nova autenticação com credenciais. Tem validade
+  /// mais longa definida por `refreshTokenExpiresAt`.
   final String refreshToken;
+
+  /// Data e hora de expiração do token de acesso.
+  ///
+  /// Define quando o token de acesso se torna inválido e precisa ser renovado.
+  /// Após esta data, requisições com o token atual falharão com erro 401.
   final DateTime expiresAt;
+
+  /// Data e hora de expiração do refresh token.
+  ///
+  /// Define quando o refresh token se torna inválido. Após esta data,
+  /// é necessário fazer novo login com credenciais para obter novos tokens.
   final DateTime refreshTokenExpiresAt;
+
+  // ============================================================================
+  // PROPRIEDADES DO USUÁRIO
+  // ============================================================================
+
+  /// Identificador único universal do usuário.
+  ///
+  /// UUID gerado pelo servidor para identificação única do usuário
+  /// no sistema, independente de matrícula ou outros identificadores.
   final String uuid;
+
+  /// Nome completo do usuário autenticado.
+  ///
+  /// Nome de exibição do usuário, usado em interfaces e logs.
+  /// Valor retornado pelo servidor após validação das credenciais.
   final String nome;
+
+  /// Matrícula do usuário no sistema.
+  ///
+  /// Identificador de negócio do usuário, usado para login e
+  /// identificação em processos internos da aplicação.
   final String matricula;
 
+  /// Construtor do DTO de resposta de login.
+  ///
+  /// Inicializa todas as propriedades necessárias para representar
+  /// uma resposta completa de autenticação da API.
+  ///
+  /// ## Parâmetros:
+  /// - `token`: Token de acesso JWT (obrigatório)
+  /// - `refreshToken`: Token de renovação (obrigatório)
+  /// - `expiresAt`: Data de expiração do token (obrigatório)
+  /// - `refreshTokenExpiresAt`: Data de expiração do refresh token (obrigatório)
+  /// - `uuid`: UUID do usuário (obrigatório)
+  /// - `nome`: Nome do usuário (obrigatório)
+  /// - `matricula`: Matrícula do usuário (obrigatório)
+  /// - `id`: ID da resposta (obrigatório)
+  /// - `createdAt`: Data de criação da resposta (obrigatório)
   LoginResponseDto({
     required this.token,
     required this.refreshToken,
@@ -22,16 +127,53 @@ class LoginResponseDto extends BaseTableDto {
     required super.createdAt,
   });
 
+  // ============================================================================
+  // IMPLEMENTAÇÕES OBRIGATÓRIAS (NÃO APLICÁVEIS PARA RESPONSE DTO)
+  // ============================================================================
+
+  /// Método não aplicável para DTOs de resposta de API.
+  ///
+  /// LoginResponseDto não persiste no banco local, portanto não possui
+  /// representação como entidade do Drift. Este método lança exceção
+  /// para indicar uso incorreto.
   @override
   toCompanion() {
-    throw UnimplementedError();
+    throw UnimplementedError(
+        'LoginResponseDto não possui Companion - é um DTO de resposta de API');
   }
 
+  /// Método não aplicável para DTOs de resposta de API.
+  ///
+  /// LoginResponseDto não persiste no banco local, portanto não possui
+  /// representação como entidade do Drift. Este método lança exceção
+  /// para indicar uso incorreto.
   @override
   toEntity() {
-    throw UnimplementedError();
+    throw UnimplementedError(
+        'LoginResponseDto não possui Entity - é um DTO de resposta de API');
   }
 
+  // ============================================================================
+  // SERIALIZAÇÃO E VALIDAÇÃO
+  // ============================================================================
+
+  /// Converte os campos específicos do DTO para formato JSON.
+  ///
+  /// Serializa apenas os campos específicos do LoginResponseDto,
+  /// excluindo campos herdados da classe base. Usado internamente
+  /// pelo método `toJson()` da classe pai.
+  ///
+  /// ## Retorno:
+  /// - `Map<String, dynamic>`: Mapa com campos específicos serializados
+  ///
+  /// ## Campos Incluídos:
+  /// - `token`: Token de acesso
+  /// - `refreshToken`: Token de renovação
+  /// - `expiresAt`: Data de expiração do token (ISO 8601)
+  /// - `refreshTokenExpiresAt`: Data de expiração do refresh token (ISO 8601)
+  /// - `uuid`: UUID do usuário
+  /// - `nome`: Nome do usuário
+  /// - `matricula`: Matrícula do usuário
   @override
   Map<String, dynamic> toSpecificJson() {
     return {
@@ -45,29 +187,111 @@ class LoginResponseDto extends BaseTableDto {
     };
   }
 
+  /// Valida os campos específicos do LoginResponseDto.
+  ///
+  /// Executa validações rigorosas em todos os campos obrigatórios,
+  /// garantindo que o DTO está em estado válido para uso. Chamado
+  /// automaticamente pelo método `validate()` da classe base.
+  ///
+  /// ## Validações Executadas:
+  /// - **Token**: String não vazia e válida
+  /// - **RefreshToken**: String não vazia e válida
+  /// - **UUID**: String não vazia e válida
+  /// - **Nome**: String não vazia e válida
+  /// - **Matrícula**: String não vazia e válida
+  /// - **ExpiresAt**: Data válida e não futura
+  /// - **RefreshTokenExpiresAt**: Data válida e não futura
+  ///
+  /// ## Exceções:
+  /// Lança `RequiredFieldError` ou `DtoError` se validação falhar.
   @override
   void validateSpecific() {
+    /// Valida token de acesso (obrigatório e não vazio).
     BaseDto.validateRequiredString(token, 'token');
+
+    /// Valida refresh token (obrigatório e não vazio).
     BaseDto.validateRequiredString(refreshToken, 'refreshToken');
+
+    /// Valida UUID do usuário (obrigatório e não vazio).
     BaseDto.validateRequiredString(uuid, 'uuid');
+
+    /// Valida nome do usuário (obrigatório e não vazio).
     BaseDto.validateRequiredString(nome, 'nome');
+
+    /// Valida matrícula do usuário (obrigatório e não vazio).
     BaseDto.validateRequiredString(matricula, 'matricula');
+
+    /// Valida data de expiração do token (não pode ser futura).
     validateNotFutureDate(expiresAt, 'expiresAt');
+
+    /// Valida data de expiração do refresh token (não pode ser futura).
     validateNotFutureDate(refreshTokenExpiresAt, 'refreshTokenExpiresAt');
   }
 
-  static Future<LoginResponseDto> fromJson(data) {
+  // ============================================================================
+  // FACTORY METHODS
+  // ============================================================================
+
+  /// Cria LoginResponseDto a partir de dados JSON da API.
+  ///
+  /// Factory method que processa a resposta JSON do servidor e cria
+  /// uma instância tipada do DTO com validação completa dos dados.
+  ///
+  /// ## Parâmetros:
+  /// - `data`: Dados JSON da resposta da API (Map<String, dynamic>)
+  ///
+  /// ## Retorno:
+  /// - `Future<LoginResponseDto>`: Instância do DTO criada e validada
+  ///
+  /// ## Processamento:
+  /// 1. Valida estrutura JSON recebida
+  /// 2. Converte campos com tipos apropriados
+  /// 3. Cria instância do DTO
+  /// 4. Executa validação completa
+  /// 5. Retorna DTO pronto para uso
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final response = await dio.post('/auth/login', data: credentials);
+  /// final loginData = await LoginResponseDto.fromJson(response.data);
+  /// ```
+  ///
+  /// ## Exceções:
+  /// Lança `DtoError` se estrutura JSON for inválida ou campos obrigatórios ausentes.
+  static Future<LoginResponseDto> fromJson(Map<String, dynamic> data) async {
     return BaseTableDto.fromJson(data, (json) {
       return LoginResponseDto(
-        token: json['token'],
-        refreshToken: json['refreshToken'],
-        expiresAt: json['expiresAt'],
-        refreshTokenExpiresAt: json['refreshTokenExpiresAt'],
-        uuid: json['uuid'],
-        nome: json['nome'],
-        matricula: json['matricula'],
+        /// Converte e valida token de acesso.
+        token: BaseDto.validateRequiredString(json['token'], 'token'),
+
+        /// Converte e valida refresh token.
+        refreshToken: BaseDto.validateRequiredString(
+            json['refreshToken'], 'refreshToken'),
+
+        /// Converte e valida data de expiração do token.
+        expiresAt:
+            BaseDto.parseRequiredDateTime(json['expiresAt'], 'expiresAt'),
+
+        /// Converte e valida data de expiração do refresh token.
+        refreshTokenExpiresAt: BaseDto.parseRequiredDateTime(
+            json['refreshTokenExpiresAt'], 'refreshTokenExpiresAt'),
+
+        /// Converte e valida UUID do usuário.
+        uuid: BaseDto.validateRequiredString(json['uuid'], 'uuid'),
+
+        /// Converte e valida nome do usuário.
+        nome: BaseDto.validateRequiredString(json['nome'], 'nome'),
+
+        /// Converte e valida matrícula do usuário.
+        matricula:
+            BaseDto.validateRequiredString(json['matricula'], 'matricula'),
+
+        /// Converte e valida ID da resposta.
         id: BaseDto.validateRequiredString(json['id'], 'id'),
-        createdAt: json['createdAt'],
+
+        /// Converte e valida data de criação da resposta.
+        createdAt:
+            BaseDto.parseRequiredDateTime(json['createdAt'], 'createdAt'),
       );
     });
   }
