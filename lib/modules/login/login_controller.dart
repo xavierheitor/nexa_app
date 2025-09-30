@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/services/auth_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
@@ -90,23 +89,17 @@ class LoginController extends GetxController {
   // CONTROLADORES DE FORMULÁRIO
   // ============================================================================
 
-  /// Controlador do campo de matrícula.
+  /// Valor da matrícula como variável observável.
   ///
-  /// Gerencia o estado e valor do campo de entrada de matrícula,
-  /// permitindo acesso programático ao valor e validação.
-  final TextEditingController matriculaController = TextEditingController();
+  /// Gerencia o estado e valor do campo de entrada de matrícula
+  /// usando GetX observables para evitar problemas de lifecycle.
+  final RxString matricula = ''.obs;
 
-  /// Controlador do campo de senha.
+  /// Valor da senha como variável observável.
   ///
-  /// Gerencia o estado e valor do campo de entrada de senha,
-  /// permitindo acesso programático ao valor e validação.
-  final TextEditingController senhaController = TextEditingController();
-
-  /// Chave global do formulário.
-  ///
-  /// Utilizada para validação e controle do formulário de login,
-  /// permitindo validação de campos e submissão controlada.
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  /// Gerencia o estado e valor do campo de entrada de senha
+  /// usando GetX observables para evitar problemas de lifecycle.
+  final RxString senha = ''.obs;
 
   // ============================================================================
   // ESTADO REATIVO
@@ -240,17 +233,16 @@ class LoginController extends GetxController {
 
   /// Executa processo de login do usuário.
   ///
-  /// Valida formulário, autentica usuário via AuthService e navega
-  /// para tela apropriada baseada no resultado da operação.
+  /// Autentica usuário via AuthService e navega para tela apropriada
+  /// baseada no resultado da operação.
   ///
   /// ## Comportamento:
-  /// 1. Valida formulário usando formKey
-  /// 2. Limpa erros anteriores
-  /// 3. Define estado de loading
-  /// 4. Executa autenticação via AuthService
-  /// 5. Trata resultado (sucesso/erro)
-  /// 6. Navega para tela apropriada
-  /// 7. Limpa estado de loading
+  /// 1. Limpa erros anteriores
+  /// 2. Define estado de loading
+  /// 3. Executa autenticação via AuthService
+  /// 4. Trata resultado (sucesso/erro)
+  /// 5. Navega para tela apropriada
+  /// 6. Limpa estado de loading
   ///
   /// ## Casos de Uso:
   /// - Login inicial do usuário
@@ -267,11 +259,6 @@ class LoginController extends GetxController {
   /// - Sucesso: Redireciona para tela principal
   /// - Erro: Mantém na tela de login com feedback
   Future<void> login() async {
-    /// Valida formulário antes de prosseguir.
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
     /// Limpa mensagens de erro anteriores.
     clearError();
 
@@ -279,23 +266,23 @@ class LoginController extends GetxController {
     _isLoading.value = true;
 
     try {
-      /// Obtém valores dos campos de entrada.
-      final matricula = matriculaController.text.trim();
-      final senha = senhaController.text;
-
       /// Registra início da tentativa de login.
-      AppLogger.i('Tentativa de login para matrícula: $matricula',
+      AppLogger.i('Tentativa de login para matrícula: ${matricula.value}',
           tag: 'LoginController');
 
       /// Executa autenticação via AuthService.
-      final usuario = await _authService.login(matricula, senha);
+      final usuario =
+          await _authService.login(matricula.value.trim(), senha.value);
 
       /// Registra sucesso do login.
       AppLogger.i('Login realizado com sucesso para: ${usuario.nome}',
           tag: 'LoginController');
 
-      /// Navega para tela principal.
+      /// Navega para tela principal e limpa o controller.
       Get.offAllNamed(Routes.home);
+
+      /// Limpa o controller após login bem-sucedido.
+      _cleanup();
     } catch (e) {
       /// Trata erro e converte para mensagem amigável.
       final erro = ErrorHandler.tratar(e, StackTrace.current);
@@ -305,12 +292,33 @@ class LoginController extends GetxController {
       _errorMessage.value = mensagemErro.descricao;
 
       /// Registra erro de login.
-      AppLogger.e('Falha no login para matrícula: ${matriculaController.text}',
+      AppLogger.e('Falha no login para matrícula: ${matricula.value}',
           tag: 'LoginController', error: e);
     } finally {
       /// Sempre limpa estado de loading.
       _isLoading.value = false;
     }
+  }
+
+  // ============================================================================
+  // MÉTODOS AUXILIARES
+  // ============================================================================
+
+  /// Limpa o controlador e libera recursos.
+  ///
+  /// Método privado para limpeza manual do controlador,
+  /// usado apenas quando login é bem-sucedido.
+  void _cleanup() {
+    /// Limpa os valores dos campos.
+    matricula.value = '';
+    senha.value = '';
+
+    /// Registra finalização do controlador.
+    AppLogger.d('LoginController finalizado após login bem-sucedido',
+        tag: 'LoginController');
+
+    /// Remove o controller do GetX.
+    Get.delete<LoginController>();
   }
 
   // ============================================================================
@@ -340,11 +348,14 @@ class LoginController extends GetxController {
   ///
   /// Executado quando controlador é removido da memória,
   /// liberando recursos e fazendo limpeza necessária.
+  ///
+  /// NOTA: Este método não deve ser chamado durante logout automático,
+  /// apenas quando o controller é realmente removido do GetX.
   @override
   void onClose() {
-    /// Libera controladores de texto.
-    matriculaController.dispose();
-    senhaController.dispose();
+    /// Limpa os valores dos campos.
+    matricula.value = '';
+    senha.value = '';
 
     /// Registra finalização do controlador.
     AppLogger.d('LoginController finalizado', tag: 'LoginController');

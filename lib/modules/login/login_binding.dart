@@ -64,17 +64,18 @@ class LoginBinding extends Bindings {
   ///
   /// ## Comportamento:
   /// - Utiliza lazy loading para performance
+  /// - `fenix: true` permite recriar o controller após ser deletado
   /// - Resolve dependências de forma automática
-  /// - Cria instância única do controller
   /// - Disponibiliza controller para uso imediato
   @override
   void dependencies() {
     
-    /// Registra LoginController com dependências injetadas.
-    /// Utiliza lazy loading para carregar apenas quando necessário.
+    /// Registra LoginController com fenix: true para recriação automática.
+    /// Isso resolve problemas de hot reload e lifecycle do controller.
     Get.lazyPut(() => LoginController(
           authService: Get.find<AuthService>(),
           sessionManager: Get.find<SessionManager>(),
-        ));
+            ),
+        fenix: true);
   }
 }

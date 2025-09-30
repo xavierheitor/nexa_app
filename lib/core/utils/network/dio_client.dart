@@ -243,6 +243,16 @@ class DioClient {
               return handler.next(error);
             }
 
+            /// Verifica se há um usuário logado e refresh token disponível antes de tentar renovar.
+            final refreshToken = session.usuario?.refreshToken;
+            if (refreshToken == null || refreshToken.isEmpty) {
+              AppLogger.w(
+                  '🚫 Refresh token ausente ou usuário não logado. Redirecionando para login.');
+              await session.logout();
+              await g.Get.offAllNamed('/login');
+              return handler.next(error);
+            }
+
             /// Se já existe um refresh em andamento, aguarda sua conclusão
             /// para evitar múltiplas tentativas simultâneas de renovação.
             if (_isRefreshing) {
@@ -273,12 +283,6 @@ class DioClient {
             _refreshCompleter = Completer();
 
             try {
-              /// Recupera o refresh token do usuário logado.
-              final refreshToken = session.usuario?.refreshToken;
-              if (refreshToken == null || refreshToken.isEmpty) {
-                throw Exception('Refresh token ausente');
-              }
-
               /// Executa a renovação do token através do serviço de autenticação.
               await session.authService
                   .refreshToken(refreshToken)

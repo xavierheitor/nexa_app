@@ -185,42 +185,39 @@ class LoginPage extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(32.0),
-        child: Form(
-          key: controller.formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              /// Título do formulário.
-              Text(
-                'Entrar',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
-                textAlign: TextAlign.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            /// Título do formulário.
+            Text(
+              'Entrar',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
               ),
+              textAlign: TextAlign.center,
+            ),
 
-              const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-              /// Campo de matrícula.
-              _buildMatriculaField(controller, theme, colorScheme),
+            /// Campo de matrícula.
+            _buildMatriculaField(controller, theme, colorScheme),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-              /// Campo de senha.
-              _buildSenhaField(controller, theme, colorScheme),
+            /// Campo de senha.
+            _buildSenhaField(controller, theme, colorScheme),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-              /// Mensagem de erro.
-              Obx(() => _buildErrorMessage(controller, colorScheme)),
+            /// Mensagem de erro.
+            Obx(() => _buildErrorMessage(controller, colorScheme)),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-              /// Botão de login.
-              _buildLoginButton(controller, theme, colorScheme),
-            ],
-          ),
+            /// Botão de login.
+            _buildLoginButton(controller, theme, colorScheme),
+          ],
         ),
       ),
     );
@@ -229,18 +226,19 @@ class LoginPage extends StatelessWidget {
   /// Constrói o campo de entrada para matrícula.
   ///
   /// Cria um campo de texto estilizado para entrada da matrícula
-  /// com validação em tempo real e feedback visual adequado.
+  /// com feedback visual adequado.
   Widget _buildMatriculaField(
     LoginController controller,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    return TextFormField(
-      controller: controller.matriculaController,
+    return TextField(
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.next,
-      validator: controller.validateMatricula,
-      onChanged: (_) => controller.clearError(),
+      onChanged: (value) {
+        controller.matricula.value = value;
+        controller.clearError();
+      },
       decoration: InputDecoration(
         labelText: 'Matrícula',
         hintText: 'Digite sua matrícula',
@@ -267,19 +265,6 @@ class LoginPage extends StatelessWidget {
             width: 2,
           ),
         ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: colorScheme.error,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: colorScheme.error,
-            width: 2,
-          ),
-        ),
         filled: true,
         fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
         contentPadding: const EdgeInsets.symmetric(
@@ -293,19 +278,20 @@ class LoginPage extends StatelessWidget {
   /// Constrói o campo de entrada para senha.
   ///
   /// Cria um campo de texto estilizado para entrada da senha
-  /// com opção de mostrar/ocultar senha e validação em tempo real.
+  /// com opção de mostrar/ocultar senha.
   Widget _buildSenhaField(
     LoginController controller,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    return Obx(() => TextFormField(
-          controller: controller.senhaController,
+    return Obx(() => TextField(
           obscureText: !controller.isPasswordVisible,
           textInputAction: TextInputAction.done,
-          validator: controller.validateSenha,
-          onChanged: (_) => controller.clearError(),
-          onFieldSubmitted: (_) => controller.login(),
+          onChanged: (value) {
+            controller.senha.value = value;
+            controller.clearError();
+          },
+          onSubmitted: (_) => controller.login(),
           decoration: InputDecoration(
             labelText: 'Senha',
             hintText: 'Digite sua senha',
@@ -338,19 +324,6 @@ class LoginPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
                 color: colorScheme.primary,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colorScheme.error,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colorScheme.error,
                 width: 2,
               ),
             ),
