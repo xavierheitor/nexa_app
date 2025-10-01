@@ -258,7 +258,7 @@ class LoginController extends GetxController {
   /// - Erros de servidor
   ///
   /// ## Navegação:
-  /// - Sucesso: Redireciona para tela principal
+  /// - Sucesso: Redireciona para splash (que faz sincronização e depois vai para home)
   /// - Erro: Mantém na tela de login com feedback
   Future<void> login() async {
     /// Limpa mensagens de erro anteriores.
@@ -280,8 +280,10 @@ class LoginController extends GetxController {
       AppLogger.i('Login realizado com sucesso para: ${usuario.nome}',
           tag: 'LoginController');
 
-      /// Navega para tela principal e limpa o controller.
-      Get.offAllNamed(Routes.home);
+      /// Navega para splash para fazer sincronização antes de ir para home.
+      AppLogger.i('Redirecionando para splash para sincronização...',
+          tag: 'LoginController');
+      Get.offAllNamed(Routes.splash);
 
       /// Limpa o controller após login bem-sucedido.
       _cleanup();

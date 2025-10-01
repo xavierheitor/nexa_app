@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:nexa_app/modules/splash/splash_controller.dart';
 
 /// Página de splash com design minimalista e moderno.
 ///
@@ -45,7 +47,7 @@ class SplashPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     /// Obtém instância do controlador via GetX.
-    // final controller = Get.find<SplashController>();
+    final controller = Get.find<SplashController>();
 
     /// Obtém tema atual para cores e estilos.
     final theme = Theme.of(context);
@@ -85,7 +87,7 @@ class SplashPage extends StatelessWidget {
               const SizedBox(height: 24),
 
               /// Texto de carregamento.
-              _buildLoadingText(colorScheme),
+              _buildLoadingText(controller, colorScheme),
             ],
           ),
         ),
@@ -141,14 +143,15 @@ class SplashPage extends StatelessWidget {
   ///
   /// Exibe mensagem informativa para o usuário
   /// durante o processo de inicialização.
-  Widget _buildLoadingText(ColorScheme colorScheme) {
-    return Text(
-      'Carregando...',
-      style: TextStyle(
-        fontSize: 16,
-        color: colorScheme.onSurfaceVariant,
-        fontWeight: FontWeight.w500,
-      ),
-    );
+  Widget _buildLoadingText(
+      SplashController controller, ColorScheme colorScheme) {
+    return Obx(() => Text(
+          controller.statusMessage.value,
+          style: TextStyle(
+            fontSize: 16,
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+        ));
   }
 }
