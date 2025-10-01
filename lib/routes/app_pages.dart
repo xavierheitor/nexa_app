@@ -6,6 +6,10 @@ import 'package:nexa_app/modules/login/login_binding.dart';
 import 'package:nexa_app/modules/login/login_page.dart';
 import 'package:nexa_app/modules/splash/splash_binding.dart';
 import 'package:nexa_app/modules/splash/splash_page.dart';
+import 'package:nexa_app/modules/turno/abrir/abrir_turno_binding.dart';
+import 'package:nexa_app/modules/turno/abrir/abrir_turno_page.dart';
+import 'package:nexa_app/modules/turno/servicos/turno_servicos_binding.dart';
+import 'package:nexa_app/modules/turno/servicos/turno_servicos_page.dart';
 import 'package:nexa_app/routes/routes.dart';
 
 /// Classe responsável pela configuração e gerenciamento das páginas da aplicação.
@@ -128,5 +132,39 @@ class AppPages {
         name: Routes.login,
         page: () => const LoginPage(),
         binding: LoginBinding()), // Sem middlewares - acesso público
+
+    // ========================================================================
+    // ROTAS DE TURNO
+    // ========================================================================
+
+    /// Configuração da página de abrir turno.
+    ///
+    /// Tela para iniciar um novo turno, preenchendo dados do veículo.
+    ///
+    /// **Características:**
+    /// - Protegida por `AuthMiddleware`
+    /// - Formulário de entrada de dados
+    /// - Validações de campos obrigatórios
+    GetPage(
+      name: Routes.turnoAbrir,
+      page: () => const AbrirTurnoPage(),
+      binding: AbrirTurnoBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    /// Configuração da página de serviços do turno.
+    ///
+    /// Tela que lista serviços executados e permite adicionar novos.
+    ///
+    /// **Características:**
+    /// - Protegida por `AuthMiddleware`
+    /// - Lista de serviços com detalhes
+    /// - FAB para adicionar novo serviço
+    GetPage(
+      name: Routes.turnoServicos,
+      page: () => const TurnoServicosPage(),
+      binding: TurnoServicosBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
   ];
 }

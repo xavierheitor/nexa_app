@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/modules/home/home_controller.dart';
+import 'package:nexa_app/routes/routes.dart';
 import 'package:intl/intl.dart';
 
 /// Página principal da aplicação (Home).
@@ -86,63 +87,70 @@ class HomePage extends StatelessWidget {
 
   /// Constrói o card com informações do turno.
   Widget _buildTurnoCard(HomeController controller, ColorScheme colorScheme) {
-    final turno = controller.turnoAtivo.value;
+    final turno = controller.turnoController.turnoAtivo.value;
 
     if (turno == null || !turno.estaAberto) {
-      return _buildSemTurnoCard(colorScheme);
+      return _buildSemTurnoCard(controller, colorScheme);
     }
 
-    return _buildTurnoAtivoCard(turno, colorScheme);
+    return _buildTurnoAtivoCard(controller, turno, colorScheme);
   }
 
   /// Constrói o card quando não há turno aberto.
-  Widget _buildSemTurnoCard(ColorScheme colorScheme) {
+  Widget _buildSemTurnoCard(
+      HomeController controller, ColorScheme colorScheme) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: [
-              colorScheme.surfaceContainerHighest,
-              colorScheme.surfaceContainer,
-            ],
+      child: InkWell(
+        onTap: () => _showAbrirTurnoDialog(controller),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.surfaceContainerHighest,
+                colorScheme.surfaceContainer,
+              ],
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              Icons.info_outline,
-              size: 48,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Nenhum turno aberto',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Abra um turno para começar',
-              style: TextStyle(
-                fontSize: 14,
+          child: Column(
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 48,
                 color: colorScheme.onSurfaceVariant,
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                'Nenhum turno aberto',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Toque aqui para abrir um turno',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   /// Constrói o card com informações do turno ativo.
-  Widget _buildTurnoAtivoCard(dynamic turno, ColorScheme colorScheme) {
+  Widget _buildTurnoAtivoCard(
+      HomeController controller, dynamic turno, ColorScheme colorScheme) {
     final horaInicio = DateFormat('HH:mm').format(turno.horaInicio);
     final duracao = turno.duracao;
     final horas = duracao.inHours;
@@ -151,19 +159,22 @@ class HomePage extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primaryContainer,
-              colorScheme.primary.withOpacity(0.1),
-            ],
+      child: InkWell(
+        onTap: () => _showFecharTurnoDialog(controller),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                colorScheme.primaryContainer,
+                colorScheme.primary.withOpacity(0.1),
+              ],
+            ),
           ),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -258,6 +269,7 @@ class HomePage extends StatelessWidget {
               colorScheme: colorScheme,
             ),
           ],
+        ),
         ),
       ),
     );
@@ -423,6 +435,71 @@ class HomePage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Mostra diálogo para abrir turno.
+  void _showAbrirTurnoDialog(HomeController controller) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Abrir Turno'),
+        content: const Text('Deseja abrir um novo turno?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Get.back();
+              // Navega para tela de abrir turno
+              Get.toNamed(Routes.turnoAbrir);
+            },
+            child: const Text('Abrir Turno'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Mostra diálogo para fechar turno.
+  void _showFecharTurnoDialog(HomeController controller) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Fechar Turno'),
+        content: const Text(
+            'Deseja fechar o turno atual?\nTodos os serviços serão finalizados.'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Get.back();
+              // Fecha o turno
+              final sucesso = await controller.turnoController.fecharTurno();
+              if (sucesso) {
+                Get.snackbar(
+                  'Sucesso',
+                  'Turno fechado com sucesso!',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              } else {
+                Get.snackbar(
+                  'Erro',
+                  'Erro ao fechar turno. Tente novamente.',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Fechar Turno'),
+          ),
+        ],
       ),
     );
   }

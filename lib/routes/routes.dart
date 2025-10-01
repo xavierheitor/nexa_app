@@ -66,4 +66,15 @@ abstract class Routes {
   /// Usada para carregar configurações iniciais, verificar autenticação
   /// e apresentar a logo/marca da aplicação.
   static const String splash = '/splash';
+
+  /// Rota da tela de serviços do turno.
+  ///
+  /// Tela que exibe a lista de serviços executados no turno ativo
+  /// e permite adicionar novos serviços.
+  static const String turnoServicos = '/turno/servicos';
+
+  /// Rota da tela de abrir turno.
+  ///
+  /// Tela para iniciar um novo turno, selecionando veículo e outros dados.
+  static const String turnoAbrir = '/turno/abrir';
 }

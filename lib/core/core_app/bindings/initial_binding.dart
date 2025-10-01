@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/core_app/services/auth_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
 import 'package:nexa_app/core/database/app_database.dart';
@@ -25,5 +26,8 @@ class InitialBinding extends Bindings {
     // === Session Manager ===
     // Gerenciador centralizado de sessão
     Get.put(SessionManager(authService: Get.find()), permanent: true);
+
+    // === Gerenciamento de turno ===
+    Get.put(TurnoController(), permanent: true);
   }
 }
