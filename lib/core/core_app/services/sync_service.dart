@@ -1,3 +1,4 @@
+import 'package:nexa_app/core/sync/sync_manager.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 
 /// Serviço responsável pela sincronização de dados entre servidor e app local.
@@ -21,13 +22,14 @@ import 'package:nexa_app/core/utils/logger/app_logger.dart';
 /// - **Assíncrono**: Todas operações são não-bloqueantes
 /// - **Observável**: Permite acompanhamento de progresso
 /// - **Robusto**: Tratamento completo de erros
+/// - **Modular**: Usa SyncManager para coordenar repositórios
 ///
 /// ## Fluxo de Sincronização:
 ///
 /// 1. Verifica conectividade
 /// 2. Obtém timestamp da última sincronização
-/// 3. Baixa dados modificados do servidor
-/// 4. Atualiza banco local
+/// 3. Baixa dados modificados do servidor via SyncManager
+/// 4. Atualiza banco local via repositórios registrados
 /// 5. Envia dados pendentes para servidor
 /// 6. Atualiza timestamp de sincronização
 /// 7. Notifica conclusão
@@ -39,21 +41,81 @@ import 'package:nexa_app/core/utils/logger/app_logger.dart';
 /// await syncService.sincronizar();
 /// ```
 class SyncService {
+  /// Gerenciador central de sincronização.
+  ///
+  /// Responsável por coordenar a sincronização de todos os repositórios
+  /// registrados, oferecendo métodos para sincronização completa ou seletiva.
+  late final SyncManager _syncManager;
+
   /// Indica se sincronização está em andamento.
   bool _isSyncing = false;
 
   /// Getter para verificar se está sincronizando.
   bool get isSyncing => _isSyncing;
 
+  /// Construtor do serviço de sincronização.
+  ///
+  /// Inicializa o SyncManager e registra os repositórios sincronizáveis.
+  /// Este é o local centralizado onde todos os repositórios devem ser
+  /// registrados para participar do processo de sincronização.
+  ///
+  /// ## Repositórios Registrados:
+  ///
+  /// Atualmente nenhum repositório está registrado. Para adicionar novos
+  /// repositórios sincronizáveis, implemente a interface `SyncableRepository<T>`
+  /// e registre aqui no construtor.
+  ///
+  /// ## Exemplo de Registro:
+  ///
+  /// ```dart
+  /// SyncService() {
+  ///   _syncManager = SyncManager();
+  ///
+  ///   // Registrar repositórios sincronizáveis
+  ///   _syncManager.registrar(UsuarioSyncRepo(dio: dio, dao: usuarioDao));
+  ///   _syncManager.registrar(ProdutoSyncRepo(dio: dio, dao: produtoDao));
+  ///   _syncManager.registrar(CategoriaSyncRepo(dio: dio, dao: categoriaDao));
+  /// }
+  /// ```
+  ///
+  /// ## Onde Implementar Repositórios:
+  ///
+  /// Crie os repositórios sincronizáveis em:
+  /// - `lib/core/domain/repositories/sync/` (recomendado)
+  /// - `lib/core/sync/repositories/` (alternativa)
+  ///
+  /// ## Estrutura Recomendada:
+  ///
+  /// ```
+  /// lib/core/domain/repositories/sync/
+  /// ├── usuario_sync_repo.dart
+  /// ├── produto_sync_repo.dart
+  /// ├── categoria_sync_repo.dart
+  /// └── ...
+  /// ```
+  SyncService() {
+    _syncManager = SyncManager();
+
+    // TODO: Registrar repositórios sincronizáveis aqui
+    // Exemplo:
+    // _syncManager.registrar(UsuarioSyncRepo(dio: dio, dao: usuarioDao));
+
+    AppLogger.i(
+        'SyncService inicializado com ${_syncManager.modulosDisponiveis.length} módulos',
+        tag: 'SyncService');
+  }
+
   /// Executa sincronização completa de dados.
   ///
   /// Sincroniza todos os dados necessários entre servidor e app local,
   /// garantindo que o usuário tenha acesso às informações mais recentes.
+  /// Utiliza o SyncManager para coordenar a sincronização de todos os
+  /// repositórios registrados.
   ///
   /// ## Comportamento:
   /// 1. Verifica se já está sincronizando (evita duplicação)
-  /// 2. Inicia processo de sincronização
-  /// 3. Sincroniza cada tipo de dado necessário
+  /// 2. Inicia processo de sincronização via SyncManager
+  /// 3. Sincroniza todos os módulos registrados
   /// 4. Notifica progresso e conclusão
   /// 5. Trata erros adequadamente
   ///
@@ -73,21 +135,22 @@ class SyncService {
     AppLogger.i('🔄 Iniciando sincronização de dados', tag: 'SyncService');
 
     try {
-      /// Simula delay de sincronização (substituir por chamadas reais à API).
-      /// Em produção, aqui você faria as chamadas de API para sincronizar
-      /// diferentes tipos de dados (usuários, configurações, etc.).
+      /// Executa sincronização completa via SyncManager.
+      /// O SyncManager coordena todos os repositórios registrados.
+      final resultado = await _syncManager.sincronizarTudo();
 
-      AppLogger.d('📥 Sincronizando dados do usuário...', tag: 'SyncService');
-      await Future.delayed(const Duration(seconds: 1));
-
-      AppLogger.d('📥 Sincronizando configurações...', tag: 'SyncService');
-      await Future.delayed(const Duration(seconds: 1));
-
-      AppLogger.d('📤 Enviando dados pendentes...', tag: 'SyncService');
-      await Future.delayed(const Duration(seconds: 1));
-
-      AppLogger.i('✅ Sincronização concluída com sucesso', tag: 'SyncService');
-      return true;
+      if (resultado.sucesso) {
+        AppLogger.i('✅ Sincronização concluída com sucesso',
+            tag: 'SyncService');
+        return true;
+      } else if (resultado.podeContinuar) {
+        AppLogger.w('⚠️ Sincronização parcial - usando dados locais',
+            tag: 'SyncService');
+        return true; // Pode continuar com dados locais
+      } else {
+        AppLogger.e('❌ Falha crítica na sincronização', tag: 'SyncService');
+        return false;
+      }
     } catch (e, stackTrace) {
       /// Trata erro de sincronização.
       AppLogger.e('❌ Erro durante sincronização',
@@ -102,6 +165,8 @@ class SyncService {
   ///
   /// Sincroniza apenas os dados mais críticos e essenciais,
   /// útil para atualizações rápidas sem bloquear o usuário.
+  /// Atualmente executa a mesma sincronização completa, mas pode ser
+  /// customizada para sincronizar apenas módulos específicos.
   ///
   /// ## Retorno:
   /// - `Future<bool>`: true se sincronização foi bem-sucedida, false caso contrário
@@ -115,12 +180,20 @@ class SyncService {
     AppLogger.i('⚡ Iniciando sincronização rápida', tag: 'SyncService');
 
     try {
-      /// Sincroniza apenas dados essenciais.
-      AppLogger.d('📥 Sincronizando dados essenciais...', tag: 'SyncService');
-      await Future.delayed(const Duration(milliseconds: 500));
+      /// Executa sincronização completa (pode ser customizada para módulos específicos).
+      /// TODO: Implementar sincronização seletiva de módulos essenciais
+      final resultado = await _syncManager.sincronizarTudo();
 
-      AppLogger.i('✅ Sincronização rápida concluída', tag: 'SyncService');
-      return true;
+      if (resultado.sucesso) {
+        AppLogger.i('✅ Sincronização rápida concluída', tag: 'SyncService');
+        return true;
+      } else if (resultado.podeContinuar) {
+        AppLogger.w('⚠️ Sincronização rápida parcial', tag: 'SyncService');
+        return true;
+      } else {
+        AppLogger.e('❌ Falha na sincronização rápida', tag: 'SyncService');
+        return false;
+      }
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro durante sincronização rápida',
           tag: 'SyncService', error: e, stackTrace: stackTrace);
@@ -129,6 +202,65 @@ class SyncService {
       _isSyncing = false;
     }
   }
+
+  /// Sincroniza um módulo específico.
+  ///
+  /// Executa sincronização apenas do módulo especificado, útil para
+  /// atualizações pontuais ou correções de dados específicos.
+  ///
+  /// ## Parâmetros:
+  /// - `nomeModulo`: Nome do módulo a ser sincronizado
+  /// - `force`: Se true, força sincronização mesmo com dados locais existentes
+  ///
+  /// ## Retorno:
+  /// - `Future<bool>`: true se sincronização foi bem-sucedida, false caso contrário
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// // Sincronizar apenas usuários
+  /// await syncService.sincronizarModulo('usuario');
+  ///
+  /// // Forçar sincronização de produtos
+  /// await syncService.sincronizarModulo('produto', force: true);
+  /// ```
+  Future<bool> sincronizarModulo(String nomeModulo,
+      {bool force = false}) async {
+    if (_isSyncing) {
+      AppLogger.w('Sincronização já em andamento', tag: 'SyncService');
+      return false;
+    }
+
+    _isSyncing = true;
+    AppLogger.i('🔄 Sincronizando módulo: $nomeModulo', tag: 'SyncService');
+
+    try {
+      await _syncManager.sincronizarModulo(nomeModulo, force: force);
+      AppLogger.i('✅ Módulo $nomeModulo sincronizado com sucesso',
+          tag: 'SyncService');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao sincronizar módulo $nomeModulo',
+          tag: 'SyncService', error: e, stackTrace: stackTrace);
+      return false;
+    } finally {
+      _isSyncing = false;
+    }
+  }
+
+  /// Lista os módulos disponíveis para sincronização.
+  ///
+  /// Retorna uma lista com todos os nomes de módulos que possuem
+  /// repositórios registrados no SyncManager.
+  ///
+  /// ## Retorno:
+  /// - `List<String>`: Lista de nomes de módulos disponíveis
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final modulos = syncService.modulosDisponiveis;
+  /// print('Módulos: $modulos'); // ['usuario', 'produto', 'categoria']
+  /// ```
+  List<String> get modulosDisponiveis => _syncManager.modulosDisponiveis;
 
   /// Cancela sincronização em andamento.
   void cancelar() {
