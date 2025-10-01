@@ -110,6 +110,22 @@ class HomeController extends GetxController {
     try {
       AppLogger.i('Iniciando logout', tag: 'HomeController');
 
+      // Verifica se há turno aberto
+      if (hasTurnoAberto) {
+        AppLogger.w('Tentativa de logout com turno aberto',
+            tag: 'HomeController');
+
+        Get.snackbar(
+          'Turno Aberto',
+          'Não é possível fazer logout com turno aberto. Por favor, feche o turno antes de sair.',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+          backgroundColor: Get.theme.colorScheme.errorContainer,
+          colorText: Get.theme.colorScheme.onErrorContainer,
+        );
+        return;
+      }
+
       isLoading.value = true;
 
       await _authService.logout();
