@@ -246,10 +246,10 @@ class DioClient {
             /// Verifica se há um usuário logado e refresh token disponível antes de tentar renovar.
             final refreshToken = session.usuario?.refreshToken;
             if (refreshToken == null || refreshToken.isEmpty) {
+              /// Se não há refresh token, deixa o erro 401 passar para ser tratado pelo controller.
+              /// Isso permite que erros de login (credenciais inválidas) sejam exibidos corretamente.
               AppLogger.w(
-                  '🚫 Refresh token ausente ou usuário não logado. Redirecionando para login.');
-              await session.logout();
-              await g.Get.offAllNamed('/login');
+                  '🚫 Refresh token ausente. Deixando erro 401 passar para tratamento.');
               return handler.next(error);
             }
 

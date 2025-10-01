@@ -1,5 +1,6 @@
 import 'package:nexa_app/core/domain/dto/base/base_dto.dart';
 import 'package:nexa_app/core/domain/dto/base/base_table_dto.dart';
+import 'package:nexa_app/core/utils/errors/app_exception.dart';
 
 /// DTO para resposta de login da API.
 ///
@@ -12,16 +13,16 @@ import 'package:nexa_app/core/domain/dto/base/base_table_dto.dart';
 ///
 /// 1. **Tokens de Autenticação**: Token de acesso e refresh token
 /// 2. **Informações do Usuário**: Dados básicos do usuário autenticado
-/// 3. **Controle de Expiração**: Datas de validade dos tokens
+/// 3. **Controle de Expiração**: Datas de validade dos tokens (opcionais)
 /// 4. **Validação de Dados**: Verificação de integridade dos campos
 /// 5. **Serialização**: Conversão bidirecional JSON ↔ DTO
-/// 6. **Identificação Única**: UUID e matrícula do usuário
+/// 6. **Identificação**: ID e matrícula do usuário
 ///
 /// ## Arquitetura:
 ///
 /// - **Response DTO**: Específico para respostas de API
 /// - **Não Persistente**: Não é salvo no banco local
-/// - **Validação Rigorosa**: Todos os campos são obrigatórios
+/// - **Validação Rigorosa**: Campos essenciais obrigatórios, datas opcionais
 /// - **Type Safety**: Conversões seguras de tipos
 ///
 /// ## Fluxo de Uso:
@@ -40,7 +41,8 @@ import 'package:nexa_app/core/domain/dto/base/base_table_dto.dart';
 ///
 /// print('Token: ${loginData.token}');
 /// print('Usuário: ${loginData.nome}');
-/// print('Expira em: ${loginData.expiresAt}');
+/// print('Matrícula: ${loginData.matricula}');
+/// print('Expira em: ${loginData.expiresAt ?? "Nunca"}');
 /// ```
 ///
 /// ## Dependências:
@@ -70,23 +72,17 @@ class LoginResponseDto extends BaseTableDto {
   ///
   /// Define quando o token de acesso se torna inválido e precisa ser renovado.
   /// Após esta data, requisições com o token atual falharão com erro 401.
-  final DateTime expiresAt;
+  final DateTime? expiresAt;
 
   /// Data e hora de expiração do refresh token.
   ///
   /// Define quando o refresh token se torna inválido. Após esta data,
   /// é necessário fazer novo login com credenciais para obter novos tokens.
-  final DateTime refreshTokenExpiresAt;
+  final DateTime? refreshTokenExpiresAt;
 
   // ============================================================================
   // PROPRIEDADES DO USUÁRIO
   // ============================================================================
-
-  /// Identificador único universal do usuário.
-  ///
-  /// UUID gerado pelo servidor para identificação única do usuário
-  /// no sistema, independente de matrícula ou outros identificadores.
-  final String uuid;
 
   /// Nome completo do usuário autenticado.
   ///
@@ -108,19 +104,17 @@ class LoginResponseDto extends BaseTableDto {
   /// ## Parâmetros:
   /// - `token`: Token de acesso JWT (obrigatório)
   /// - `refreshToken`: Token de renovação (obrigatório)
-  /// - `expiresAt`: Data de expiração do token (obrigatório)
-  /// - `refreshTokenExpiresAt`: Data de expiração do refresh token (obrigatório)
-  /// - `uuid`: UUID do usuário (obrigatório)
+  /// - `expiresAt`: Data de expiração do token (opcional)
+  /// - `refreshTokenExpiresAt`: Data de expiração do refresh token (opcional)
   /// - `nome`: Nome do usuário (obrigatório)
   /// - `matricula`: Matrícula do usuário (obrigatório)
-  /// - `id`: ID da resposta (obrigatório)
-  /// - `createdAt`: Data de criação da resposta (obrigatório)
+  /// - `id`: ID do usuário (obrigatório)
+  /// - `createdAt`: Data de criação do registro (obrigatório)
   LoginResponseDto({
     required this.token,
     required this.refreshToken,
-    required this.expiresAt,
-    required this.refreshTokenExpiresAt,
-    required this.uuid,
+    this.expiresAt,
+    this.refreshTokenExpiresAt,
     required this.nome,
     required this.matricula,
     required super.id,
@@ -171,7 +165,6 @@ class LoginResponseDto extends BaseTableDto {
   /// - `refreshToken`: Token de renovação
   /// - `expiresAt`: Data de expiração do token (ISO 8601)
   /// - `refreshTokenExpiresAt`: Data de expiração do refresh token (ISO 8601)
-  /// - `uuid`: UUID do usuário
   /// - `nome`: Nome do usuário
   /// - `matricula`: Matrícula do usuário
   @override
@@ -179,9 +172,8 @@ class LoginResponseDto extends BaseTableDto {
     return {
       'token': token,
       'refreshToken': refreshToken,
-      'expiresAt': expiresAt.toIso8601String(),
-      'refreshTokenExpiresAt': refreshTokenExpiresAt.toIso8601String(),
-      'uuid': uuid,
+      'expiresAt': expiresAt?.toIso8601String(),
+      'refreshTokenExpiresAt': refreshTokenExpiresAt?.toIso8601String(),
       'nome': nome,
       'matricula': matricula,
     };
@@ -196,11 +188,10 @@ class LoginResponseDto extends BaseTableDto {
   /// ## Validações Executadas:
   /// - **Token**: String não vazia e válida
   /// - **RefreshToken**: String não vazia e válida
-  /// - **UUID**: String não vazia e válida
   /// - **Nome**: String não vazia e válida
   /// - **Matrícula**: String não vazia e válida
-  /// - **ExpiresAt**: Data válida e não futura
-  /// - **RefreshTokenExpiresAt**: Data válida e não futura
+  /// - **ExpiresAt**: Data válida e não futura (se informado)
+  /// - **RefreshTokenExpiresAt**: Data válida e não futura (se informado)
   ///
   /// ## Exceções:
   /// Lança `RequiredFieldError` ou `DtoError` se validação falhar.
@@ -212,20 +203,21 @@ class LoginResponseDto extends BaseTableDto {
     /// Valida refresh token (obrigatório e não vazio).
     BaseDto.validateRequiredString(refreshToken, 'refreshToken');
 
-    /// Valida UUID do usuário (obrigatório e não vazio).
-    BaseDto.validateRequiredString(uuid, 'uuid');
-
     /// Valida nome do usuário (obrigatório e não vazio).
     BaseDto.validateRequiredString(nome, 'nome');
 
     /// Valida matrícula do usuário (obrigatório e não vazio).
     BaseDto.validateRequiredString(matricula, 'matricula');
 
-    /// Valida data de expiração do token (não pode ser futura).
-    validateNotFutureDate(expiresAt, 'expiresAt');
+    /// Valida data de expiração do token se informada (não pode ser futura).
+    if (expiresAt != null) {
+      validateNotFutureDate(expiresAt!, 'expiresAt');
+    }
 
-    /// Valida data de expiração do refresh token (não pode ser futura).
-    validateNotFutureDate(refreshTokenExpiresAt, 'refreshTokenExpiresAt');
+    /// Valida data de expiração do refresh token se informada (não pode ser futura).
+    if (refreshTokenExpiresAt != null) {
+      validateNotFutureDate(refreshTokenExpiresAt!, 'refreshTokenExpiresAt');
+    }
   }
 
   // ============================================================================
@@ -260,6 +252,12 @@ class LoginResponseDto extends BaseTableDto {
   /// Lança `DtoError` se estrutura JSON for inválida ou campos obrigatórios ausentes.
   static Future<LoginResponseDto> fromJson(Map<String, dynamic> data) async {
     return BaseTableDto.fromJson(data, (json) {
+      /// Extrai dados do objeto usuário aninhado.
+      final usuario = json['usuario'] as Map<String, dynamic>?;
+      if (usuario == null) {
+        throw DtoError('Campo obrigatório não informado', field: 'usuario');
+      }
+
       return LoginResponseDto(
         /// Converte e valida token de acesso.
         token: BaseDto.validateRequiredString(json['token'], 'token'),
@@ -268,30 +266,26 @@ class LoginResponseDto extends BaseTableDto {
         refreshToken: BaseDto.validateRequiredString(
             json['refreshToken'], 'refreshToken'),
 
-        /// Converte e valida data de expiração do token.
+        /// Converte data de expiração do token (opcional).
         expiresAt:
-            BaseDto.parseRequiredDateTime(json['expiresAt'], 'expiresAt'),
+            BaseDto.parseOptionalDateTime(json['expiresAt'], 'expiresAt'),
 
-        /// Converte e valida data de expiração do refresh token.
-        refreshTokenExpiresAt: BaseDto.parseRequiredDateTime(
+        /// Converte data de expiração do refresh token (opcional).
+        refreshTokenExpiresAt: BaseDto.parseOptionalDateTime(
             json['refreshTokenExpiresAt'], 'refreshTokenExpiresAt'),
 
-        /// Converte e valida UUID do usuário.
-        uuid: BaseDto.validateRequiredString(json['uuid'], 'uuid'),
+        /// Converte e valida nome do usuário (do objeto aninhado).
+        nome: BaseDto.validateRequiredString(usuario['nome'], 'usuario.nome'),
 
-        /// Converte e valida nome do usuário.
-        nome: BaseDto.validateRequiredString(json['nome'], 'nome'),
+        /// Converte e valida matrícula do usuário (do objeto aninhado).
+        matricula: BaseDto.validateRequiredString(
+            usuario['matricula'], 'usuario.matricula'),
 
-        /// Converte e valida matrícula do usuário.
-        matricula:
-            BaseDto.validateRequiredString(json['matricula'], 'matricula'),
+        /// Converte ID do usuário de int para String (do objeto aninhado).
+        id: usuario['id']?.toString() ?? '',
 
-        /// Converte e valida ID da resposta.
-        id: BaseDto.validateRequiredString(json['id'], 'id'),
-
-        /// Converte e valida data de criação da resposta.
-        createdAt:
-            BaseDto.parseRequiredDateTime(json['createdAt'], 'createdAt'),
+        /// Usa data atual como createdAt (não vem da API).
+        createdAt: DateTime.now(),
       );
     });
   }

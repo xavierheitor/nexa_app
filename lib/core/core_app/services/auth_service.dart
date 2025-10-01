@@ -126,7 +126,7 @@ class AuthService {
       /// Converte dados de resposta da API para entidade de usuário local.
       final usuario = UsuarioTableDto(
         id: loginResponse.id,
-        remoteId: loginResponse.uuid,
+        remoteId: loginResponse.id,
         nome: loginResponse.nome,
         matricula: loginResponse.matricula,
         token: loginResponse.token,

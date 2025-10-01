@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/services/auth_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
@@ -291,6 +293,9 @@ class LoginController extends GetxController {
       /// Define mensagem de erro para exibição.
       _errorMessage.value = mensagemErro.descricao;
 
+      /// Exibe snackbar com tipo de erro específico.
+      _showErrorSnackbar(erro, mensagemErro);
+
       /// Registra erro de login.
       AppLogger.e('Falha no login para matrícula: ${matricula.value}',
           tag: 'LoginController', error: e);
@@ -304,6 +309,78 @@ class LoginController extends GetxController {
   // MÉTODOS AUXILIARES
   // ============================================================================
 
+  /// Exibe snackbar com informações específicas do erro.
+  ///
+  /// Mostra o tipo de erro (401, timeout, servidor, etc.) em um snackbar
+  /// colorido baseado na severidade do erro.
+  void _showErrorSnackbar(dynamic erro, dynamic mensagemErro) {
+    String titulo;
+    Color backgroundColor;
+    Color textColor = Colors.white;
+
+    /// Determina o tipo de erro baseado no código ou tipo de exceção.
+    if (erro is DioException) {
+      switch (erro.type) {
+        case DioExceptionType.connectionTimeout:
+        case DioExceptionType.sendTimeout:
+        case DioExceptionType.receiveTimeout:
+          titulo = '⏱️ Timeout do Servidor';
+          backgroundColor = Colors.orange;
+          break;
+        case DioExceptionType.badResponse:
+          final statusCode = erro.response?.statusCode;
+          if (statusCode == 401) {
+            titulo = '🔐 Credenciais Inválidas';
+            backgroundColor = Colors.red;
+          } else if (statusCode == 500) {
+            titulo = '🔥 Erro Interno do Servidor';
+            backgroundColor = Colors.red.shade800;
+          } else if (statusCode != null &&
+              statusCode >= 400 &&
+              statusCode < 500) {
+            titulo = '❌ Erro de Cliente ($statusCode)';
+            backgroundColor = Colors.red;
+          } else {
+            titulo = '⚠️ Erro do Servidor ($statusCode)';
+            backgroundColor = Colors.red;
+          }
+          break;
+        case DioExceptionType.cancel:
+          titulo = '🚫 Requisição Cancelada';
+          backgroundColor = Colors.grey;
+          break;
+        case DioExceptionType.connectionError:
+          titulo = '🌐 Erro de Conexão';
+          backgroundColor = Colors.red.shade700;
+          break;
+        default:
+          titulo = '❌ Erro de Rede';
+          backgroundColor = Colors.red;
+      }
+    } else {
+      titulo = '⚠️ Erro Desconhecido';
+      backgroundColor = Colors.grey.shade600;
+    }
+
+    /// Exibe o snackbar com as informações do erro.
+    Get.snackbar(
+      titulo,
+      mensagemErro.descricao,
+      backgroundColor: backgroundColor,
+      colorText: textColor,
+      snackPosition: SnackPosition.TOP,
+      duration: const Duration(seconds: 4),
+      margin: const EdgeInsets.all(16),
+      borderRadius: 8,
+      icon: Icon(
+        erro is DioException && erro.response?.statusCode == 401
+            ? Icons.lock_outline
+            : Icons.error_outline,
+        color: textColor,
+      ),
+    );
+  }
+
   /// Limpa o controlador e libera recursos.
   ///
   /// Método privado para limpeza manual do controlador,
@@ -314,7 +391,7 @@ class LoginController extends GetxController {
     senha.value = '';
 
     /// Registra finalização do controlador.
-    AppLogger.d('LoginController finalizado após login bem-sucedido',
+    AppLogger.d('LoginController finalizado após login bem-sucedido', 
         tag: 'LoginController');
 
     /// Remove o controller do GetX.

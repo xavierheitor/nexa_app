@@ -1,6 +1,6 @@
 abstract class ApiConstants {
   static const int maxRefreshAttempts = 3;
-  static const baseUrl = 'http://172.20.10.6:3001/api';
+  static const baseUrl = 'http://192.168.1.211:3001/api';
 
   static const login = '/auth/login';
   static const refreshToken = '/auth/refresh';

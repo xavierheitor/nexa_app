@@ -101,7 +101,39 @@ class ErrorHandler {
       /// Para outros erros Dio, extrai informações da resposta HTTP.
       /// Cria ApiException com status code e mensagem do servidor.
       final statusCode = error.response?.statusCode;
-      final message = error.response?.data?['message'] ?? 'Erro desconhecido';
+      final responseData = error.response?.data;
+
+      /// Extrai mensagem de erro de forma segura, tratando diferentes formatos de resposta.
+      String message = 'Erro desconhecido';
+
+      if (responseData != null) {
+        if (responseData is Map<String, dynamic>) {
+          /// Resposta em formato JSON com campos de erro.
+          /// Verifica se message é um objeto aninhado ou string.
+          final messageField = responseData['message'];
+
+          if (messageField is Map<String, dynamic>) {
+            /// Message é um objeto aninhado (estrutura do servidor NestJS).
+            message = messageField['message'] ??
+                messageField['error'] ??
+                'Erro no servidor';
+          } else if (messageField is String) {
+            /// Message é uma string simples.
+            message = messageField;
+          } else {
+            /// Fallback para outros campos ou mensagem padrão.
+            message = responseData['error'] ??
+                responseData['msg'] ??
+                'Erro no servidor';
+          }
+        } else if (responseData is String) {
+          /// Resposta em formato texto simples.
+          message = responseData;
+        } else {
+          /// Outros formatos, converte para string.
+          message = responseData.toString();
+        }
+      }
 
       return ApiException(message, statusCode: statusCode, stack: stack);
     }
@@ -152,10 +184,36 @@ class ErrorHandler {
         /// Erros de API e comunicação com servidores externos.
         /// Foca em problemas de conectividade e disponibilidade.
         case TipoErro.api:
+
+          /// Para erros de API, usa a mensagem específica do servidor quando disponível.
+          final descricao = error.mensagem.isNotEmpty
+              ? error.mensagem
+              : 'Não foi possível acessar os servidores. Tente novamente mais tarde.';
+
+          /// Determina o título baseado no status code quando disponível.
+          String titulo = 'Erro de conexão';
+          if (error is ApiException && error.statusCode != null) {
+            switch (error.statusCode) {
+              case 401:
+                titulo = 'Credenciais inválidas';
+                break;
+              case 403:
+                titulo = 'Acesso negado';
+                break;
+              case 404:
+                titulo = 'Recurso não encontrado';
+                break;
+              case 500:
+                titulo = 'Erro interno do servidor';
+                break;
+              default:
+                titulo = 'Erro de conexão';
+            }
+          }
+
           return MensagemErro(
-            titulo: 'Erro de conexão',
-            descricao:
-                'Não foi possível acessar os servidores. Tente novamente mais tarde.',
+            titulo: titulo,
+            descricao: descricao,
           );
 
         /// Problemas de processamento e manipulação de dados.
