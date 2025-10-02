@@ -17,8 +17,12 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:nexa_app/core/database/daos/usuario_dao.dart';
+import 'package:nexa_app/core/database/daos/tipo_veiculo_dao.dart';
+import 'package:nexa_app/core/database/daos/veiculo_dao.dart';
 import 'package:nexa_app/core/database/logging_executor.dart';
 import 'package:nexa_app/core/database/models/usuario_table.dart';
+import 'package:nexa_app/core/database/models/tipo_veiculo_table.dart';
+import 'package:nexa_app/core/database/models/veiculo_table.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -40,8 +44,8 @@ LazyDatabase _openConnection() {
 }
 
 @DriftDatabase(
-  tables: [UsuarioTable],
-  daos: [UsuarioDao],
+  tables: [UsuarioTable, TipoVeiculoTable, VeiculoTable],
+  daos: [UsuarioDao, TipoVeiculoDao, VeiculoDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection()) {
@@ -49,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +64,12 @@ class AppDatabase extends _$AppDatabase {
           if (from == 1 && to == 2) {
             // Migration: renomear coluna uuid para remote_id
             await m.renameColumn(usuarioTable, 'uuid', usuarioTable.remoteId);
+          }
+
+          if (from == 2 && to == 3) {
+            // Migration: adicionar tabelas de veículos e tipos de veículos
+            await m.createTable(tipoVeiculoTable);
+            await m.createTable(veiculoTable);
           }
 
           // versões futuras aqui

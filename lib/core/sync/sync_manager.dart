@@ -31,17 +31,17 @@ import 'package:nexa_app/core/sync/syncable_repository.dart';
 /// class UsuarioSyncRepo implements SyncableRepository<UsuarioDto> {
 ///   @override
 ///   String get nomeEntidade => 'usuario';
-///   
+///
 ///   @override
 ///   Future<List<UsuarioDto>> buscarDaApi() async {
 ///     // Implementar busca na API
 ///   }
-///   
+///
 ///   @override
 ///   Future<void> sincronizarComBanco(List<UsuarioDto> itens) async {
 ///     // Implementar persistência no banco
 ///   }
-///   
+///
 ///   @override
 ///   Future<bool> estaVazio(String entidade) async {
 ///     // Verificar se tabela está vazia
