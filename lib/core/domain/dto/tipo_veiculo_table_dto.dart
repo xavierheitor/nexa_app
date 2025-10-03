@@ -51,8 +51,9 @@ class TipoVeiculoTableDto extends BaseDto
     try {
       // Validação de campos obrigatórios
       final id = BaseDto.validateRequiredString(json['id'], 'id');
+      // Mapeia o 'id' da API para 'remoteId' no DTO
       final remoteId = BaseDto.validateRequiredString(
-          BaseDto.getStringWithFallback(json, ['remoteId', 'remote_id']),
+          BaseDto.getStringWithFallback(json, ['id', 'remoteId', 'remote_id']),
           'remoteId');
       final nome = BaseDto.validateRequiredString(json['nome'], 'nome');
 
