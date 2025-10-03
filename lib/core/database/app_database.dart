@@ -20,6 +20,8 @@ import 'package:nexa_app/core/database/daos/usuario_dao.dart';
 import 'package:nexa_app/core/database/daos/tipo_veiculo_dao.dart';
 import 'package:nexa_app/core/database/daos/veiculo_dao.dart';
 import 'package:nexa_app/core/database/logging_executor.dart';
+import 'package:nexa_app/core/database/models/equipe_table.dart';
+import 'package:nexa_app/core/database/models/tipo_equipe_table.dart';
 import 'package:nexa_app/core/database/models/usuario_table.dart';
 import 'package:nexa_app/core/database/models/tipo_veiculo_table.dart';
 import 'package:nexa_app/core/database/models/veiculo_table.dart';
@@ -44,7 +46,13 @@ LazyDatabase _openConnection() {
 }
 
 @DriftDatabase(
-  tables: [UsuarioTable, TipoVeiculoTable, VeiculoTable],
+  tables: [
+    UsuarioTable,
+    TipoVeiculoTable,
+    VeiculoTable,
+    TipoEquipeTable,
+    EquipeTable
+  ],
   daos: [UsuarioDao, TipoVeiculoDao, VeiculoDao],
 )
 class AppDatabase extends _$AppDatabase {
