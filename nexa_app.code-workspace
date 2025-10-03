@@ -1,0 +1,23 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "git.ignoredRepositories": [
+      "/Users/xavier/flutter/flutter",
+      "/Users/xavier/projetos/nexa/nexa-oper"
+    ],
+    "git.autoRepositoryDetection": "subFolders",
+    "git.detectSubmodules": false,
+    "git.scmProviders": ["git"]
+  },
+  "extensions": {
+    "recommendations": [
+      "dart-code.dart-code",
+      "dart-code.flutter"
+    ]
+  }
+}
+

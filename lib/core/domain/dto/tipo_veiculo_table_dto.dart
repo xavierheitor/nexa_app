@@ -1,29 +1,22 @@
 import 'package:drift/drift.dart';
 import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/domain/dto/base/base_dto.dart';
-import 'package:nexa_app/core/domain/dto/base/base_table_dto.dart';
+import 'package:nexa_app/core/domain/dto/base/drift_dto_mixin.dart';
+import 'package:nexa_app/core/domain/dto/base/table_validation_mixin.dart';
+import 'package:nexa_app/core/utils/errors/app_exception.dart';
 
-class TipoVeiculoTableDto extends BaseTableDto {
+class TipoVeiculoTableDto extends BaseDto
+    with DriftDtoMixin, TableValidationMixin {
+  final String id;
   final String remoteId;
   final String nome;
   final String? descricao;
-  final String? createdBy;
-  final DateTime? updatedAt;
-  final String? updatedBy;
-  final DateTime? deletedAt;
-  final String? deletedBy;
 
   TipoVeiculoTableDto({
-    required super.id,
+    required this.id,
     required this.remoteId,
     required this.nome,
     this.descricao,
-    required super.createdAt,
-    this.createdBy,
-    this.updatedAt,
-    this.updatedBy,
-    this.deletedAt,
-    this.deletedBy,
   });
 
   factory TipoVeiculoTableDto.fromEntity(TipoVeiculoTableData entity) {
@@ -32,12 +25,6 @@ class TipoVeiculoTableDto extends BaseTableDto {
       remoteId: entity.remoteId,
       nome: entity.nome,
       descricao: entity.descricao,
-      createdAt: entity.createdAt,
-      createdBy: entity.createdBy,
-      updatedAt: entity.updatedAt,
-      updatedBy: entity.updatedBy,
-      deletedAt: entity.deletedAt,
-      deletedBy: entity.deletedBy,
     );
   }
 
@@ -47,11 +34,6 @@ class TipoVeiculoTableDto extends BaseTableDto {
       remoteId: Value(remoteId),
       nome: Value(nome),
       descricao: Value(descricao),
-      createdBy: Value(createdBy),
-      updatedAt: Value(updatedAt),
-      updatedBy: Value(updatedBy),
-      deletedAt: Value(deletedAt),
-      deletedBy: Value(deletedBy),
     );
   }
 
@@ -62,17 +44,11 @@ class TipoVeiculoTableDto extends BaseTableDto {
       remoteId: remoteId,
       nome: nome,
       descricao: descricao,
-      createdAt: createdAt,
-      createdBy: createdBy,
-      updatedAt: updatedAt,
-      updatedBy: updatedBy,
-      deletedAt: deletedAt,
-      deletedBy: deletedBy,
     );
   }
 
   factory TipoVeiculoTableDto.fromJson(Map<String, dynamic> json) {
-    return BaseTableDto.fromJson(json, (json) {
+    try {
       // Validação de campos obrigatórios
       final id = BaseDto.validateRequiredString(json['id'], 'id');
       final remoteId = BaseDto.validateRequiredString(
@@ -82,77 +58,60 @@ class TipoVeiculoTableDto extends BaseTableDto {
 
       // Campos opcionais
       final descricao = json['descricao']?.toString();
-      final createdBy = json['createdBy']?.toString();
-      final updatedBy = json['updatedBy']?.toString();
-      final deletedBy = json['deletedBy']?.toString();
-
-      // Tratamento de datas
-      final createdAt = BaseDto.parseRequiredDateTime(
-          BaseDto.getValueWithFallback(json, ['createdAt', 'created_at']) ??
-              DateTime.now(),
-          'createdAt');
-
-      final updatedAt = BaseDto.parseOptionalDateTime(
-          BaseDto.getValueWithFallback(json, ['updatedAt', 'updated_at']),
-          'updatedAt');
-
-      final deletedAt = BaseDto.parseOptionalDateTime(
-          BaseDto.getValueWithFallback(json, ['deletedAt', 'deleted_at']),
-          'deletedAt');
 
       return TipoVeiculoTableDto(
         id: id,
         remoteId: remoteId,
         nome: nome,
         descricao: descricao?.isEmpty == true ? null : descricao,
-        createdAt: createdAt,
-        createdBy: createdBy?.isEmpty == true ? null : createdBy,
-        updatedAt: updatedAt,
-        updatedBy: updatedBy?.isEmpty == true ? null : updatedBy,
-        deletedAt: deletedAt,
-        deletedBy: deletedBy?.isEmpty == true ? null : deletedBy,
       );
-    });
+    } catch (e) {
+      if (e is DtoError) rethrow;
+      throw DtoError('Erro ao processar JSON do DTO: $e');
+    }
   }
 
   @override
+  void validate() {
+    validateRequiredId(id);
+    validateSpecific();
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    try {
+      final json = <String, dynamic>{
+        'id': id,
+      };
+
+      // Adiciona campos específicos da subclasse
+      json.addAll(toSpecificJson());
+
+      return json;
+    } catch (e) {
+      throw DtoError('Erro ao converter DTO para JSON: $e', context: 'toJson');
+    }
+  }
+
   Map<String, dynamic> toSpecificJson() {
     return {
       'remoteId': remoteId,
       'nome': nome,
       'descricao': descricao,
-      'createdBy': createdBy,
-      'updatedAt': updatedAt?.toIso8601String(),
-      'updatedBy': updatedBy,
-      'deletedAt': deletedAt?.toIso8601String(),
-      'deletedBy': deletedBy,
     };
   }
 
-  @override
   void validateSpecific() {
     // Validação do remoteId
-    BaseDto.validateStringLength(remoteId, 'remoteId', minLength: 1, maxLength: 100);
-    
+    BaseDto.validateStringLength(remoteId, 'remoteId',
+        minLength: 1, maxLength: 100);
+
     // Validação do nome
     BaseDto.validateStringLength(nome, 'nome', minLength: 2, maxLength: 100);
-    
+
     // Validação da descrição (opcional)
     if (descricao != null && descricao!.isNotEmpty) {
       BaseDto.validateStringLength(descricao!, 'descricao', maxLength: 255);
-    }
-    
-    // Validação dos campos de auditoria
-    if (createdBy != null && createdBy!.isNotEmpty) {
-      BaseDto.validateStringLength(createdBy!, 'createdBy', maxLength: 100);
-    }
-    
-    if (updatedBy != null && updatedBy!.isNotEmpty) {
-      BaseDto.validateStringLength(updatedBy!, 'updatedBy', maxLength: 100);
-    }
-    
-    if (deletedBy != null && deletedBy!.isNotEmpty) {
-      BaseDto.validateStringLength(deletedBy!, 'deletedBy', maxLength: 100);
     }
   }
 }

@@ -1,0 +1,11 @@
+{
+  "git.ignoredRepositories": [
+    "/Users/xavier/flutter/flutter",
+    "/usr/local/flutter",
+    "/opt/flutter",
+    "**/flutter/flutter"
+  ],
+  "git.autoRepositoryDetection": "subFolders",
+  "git.detectSubmodules": false
+}
+

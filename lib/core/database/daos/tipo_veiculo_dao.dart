@@ -5,14 +5,13 @@ import 'package:nexa_app/core/database/models/tipo_veiculo_table.dart';
 part 'tipo_veiculo_dao.g.dart';
 
 @DriftAccessor(tables: [TipoVeiculoTable])
-class TipoVeiculoDao extends DatabaseAccessor<AppDatabase> with _$TipoVeiculoDaoMixin {
+class TipoVeiculoDao extends DatabaseAccessor<AppDatabase>
+    with _$TipoVeiculoDaoMixin {
   TipoVeiculoDao(super.db);
 
   /// Lista todos os tipos de veículos ativos (não deletados)
   Future<List<TipoVeiculoTableData>> listar() async {
-    return await (select(tipoVeiculoTable)
-          ..where((t) => t.deletedAt.isNull()))
-        .get();
+    return await (select(tipoVeiculoTable)).get();
   }
 
   /// Lista todos os tipos de veículos, incluindo os deletados
@@ -57,7 +56,7 @@ class TipoVeiculoDao extends DatabaseAccessor<AppDatabase> with _$TipoVeiculoDao
   /// Busca tipos de veículos por nome
   Future<List<TipoVeiculoTableData>> buscarPorNome(String nome) async {
     return await (select(tipoVeiculoTable)
-          ..where((t) => t.nome.contains(nome) & t.deletedAt.isNull()))
+          ..where((t) => t.nome.contains(nome)))
         .get();
   }
 
@@ -78,11 +77,9 @@ class TipoVeiculoDao extends DatabaseAccessor<AppDatabase> with _$TipoVeiculoDao
     return await (update(tipoVeiculoTable)
           ..where((t) => t.id.equals(tipoVeiculo.id)))
         .write(TipoVeiculoTableCompanion(
-          nome: Value(tipoVeiculo.nome),
-          descricao: Value(tipoVeiculo.descricao),
-          updatedAt: Value(DateTime.now()),
-          updatedBy: Value(tipoVeiculo.updatedBy),
-        ));
+      nome: Value(tipoVeiculo.nome),
+      descricao: Value(tipoVeiculo.descricao),
+    ));
   }
 
   /// Deleta fisicamente um tipo de veículo por ID
@@ -92,12 +89,9 @@ class TipoVeiculoDao extends DatabaseAccessor<AppDatabase> with _$TipoVeiculoDao
 
   /// Deleta logicamente um tipo de veículo por ID (soft delete)
   Future<int> deletarLogicamente(int id, String deletedBy) async {
-    return await (update(tipoVeiculoTable)
-          ..where((t) => t.id.equals(id)))
+    return await (update(tipoVeiculoTable)..where((t) => t.id.equals(id)))
         .write(TipoVeiculoTableCompanion(
-          deletedAt: Value(DateTime.now()),
-          deletedBy: Value(deletedBy),
-        ));
+    ));
   }
 
   /// Limpa todos os registros da tabela de tipos de veículos

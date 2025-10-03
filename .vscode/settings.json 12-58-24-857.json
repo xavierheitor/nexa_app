@@ -1,0 +1,17 @@
+{
+  "git.detectSubmodules": false,
+  "git.autoRepositoryDetection": "subFolders",
+  "git.scmProviders": ["git"],
+  "git.ignoreLimitWarning": true,
+  "git.ignoreSubmodules": true,
+  "git.ignoredRepositories": [
+    "/Users/xavier/flutter/flutter"
+  ],
+  "files.exclude": {
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/android/app/src/main/java/io/flutter": true,
+    "**/linux/flutter": true,
+    "**/windows/flutter": true
+  }
+}
