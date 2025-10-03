@@ -465,35 +465,4 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
     await veiculoDao.deletar(id);
   }
 
-  /// Remove logicamente um veículo do banco de dados (soft delete).
-  ///
-  /// Marca um veículo como deletado sem removê-lo fisicamente do banco,
-  /// mantendo o registro para auditoria e possibilidade de recuperação.
-  ///
-  /// ## Parâmetros:
-  /// - `id`: Identificador único do veículo a ser removido
-  /// - `deletedBy`: Usuário que está removendo o veículo
-  ///
-  /// ## Retorno:
-  /// - `Future<void>`: Completa quando a exclusão lógica é finalizada
-  ///
-  /// ## Comportamento:
-  /// - Marca registro como deletado (soft delete)
-  /// - Mantém dados para auditoria
-  /// - Operação atômica (sucesso ou falha completa)
-  ///
-  /// ## Casos de Uso:
-  /// - Exclusão segura de veículo
-  /// - Manutenção de histórico
-  /// - Auditoria de operações
-  ///
-  /// ## Exemplo:
-  /// ```dart
-  /// await veiculoRepo.deletarLogicamente(123, 'usuario123');
-  /// print('Veículo removido logicamente');
-  /// ```
-  Future<void> deletarLogicamente(int id, String deletedBy) async {
-    /// Executa exclusão lógica do registro específico por ID.
-    await veiculoDao.deletarLogicamente(id, deletedBy);
-  }
 }

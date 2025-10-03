@@ -741,84 +741,14 @@ class $VeiculoTableTable extends VeiculoTable
           GeneratedColumn.checkTextLength(minTextLength: 7, maxTextLength: 8),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
-  static const VerificationMeta _modeloMeta = const VerificationMeta('modelo');
-  @override
-  late final GeneratedColumn<String> modelo = GeneratedColumn<String>(
-      'modelo', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 2, maxTextLength: 100),
-      type: DriftSqlType.string,
-      requiredDuringInsert: true);
-  static const VerificationMeta _anoMeta = const VerificationMeta('ano');
-  @override
-  late final GeneratedColumn<int> ano = GeneratedColumn<int>(
-      'ano', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _tipoVeiculoIdMeta =
       const VerificationMeta('tipoVeiculoId');
   @override
   late final GeneratedColumn<int> tipoVeiculoId = GeneratedColumn<int>(
       'tipo_veiculo_id', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
-  static const VerificationMeta _createdByMeta =
-      const VerificationMeta('createdBy');
-  @override
-  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
-      'created_by', aliasedName, true,
-      additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
-      type: DriftSqlType.string,
-      requiredDuringInsert: false);
-  static const VerificationMeta _updatedAtMeta =
-      const VerificationMeta('updatedAt');
-  @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-      'updated_at', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
-  static const VerificationMeta _updatedByMeta =
-      const VerificationMeta('updatedBy');
-  @override
-  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
-      'updated_by', aliasedName, true,
-      additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
-      type: DriftSqlType.string,
-      requiredDuringInsert: false);
-  static const VerificationMeta _deletedAtMeta =
-      const VerificationMeta('deletedAt');
-  @override
-  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
-      'deleted_at', aliasedName, true,
-      type: DriftSqlType.dateTime, requiredDuringInsert: false);
-  static const VerificationMeta _deletedByMeta =
-      const VerificationMeta('deletedBy');
-  @override
-  late final GeneratedColumn<String> deletedBy = GeneratedColumn<String>(
-      'deleted_by', aliasedName, true,
-      additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 100),
-      type: DriftSqlType.string,
-      requiredDuringInsert: false);
-  @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        remoteId,
-        placa,
-        modelo,
-        ano,
-        tipoVeiculoId,
-        createdAt,
-        createdBy,
-        updatedAt,
-        updatedBy,
-        deletedAt,
-        deletedBy
-      ];
+  List<GeneratedColumn> get $columns => [id, remoteId, placa, tipoVeiculoId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -844,18 +774,6 @@ class $VeiculoTableTable extends VeiculoTable
     } else if (isInserting) {
       context.missing(_placaMeta);
     }
-    if (data.containsKey('modelo')) {
-      context.handle(_modeloMeta,
-          modelo.isAcceptableOrUnknown(data['modelo']!, _modeloMeta));
-    } else if (isInserting) {
-      context.missing(_modeloMeta);
-    }
-    if (data.containsKey('ano')) {
-      context.handle(
-          _anoMeta, ano.isAcceptableOrUnknown(data['ano']!, _anoMeta));
-    } else if (isInserting) {
-      context.missing(_anoMeta);
-    }
     if (data.containsKey('tipo_veiculo_id')) {
       context.handle(
           _tipoVeiculoIdMeta,
@@ -863,30 +781,6 @@ class $VeiculoTableTable extends VeiculoTable
               data['tipo_veiculo_id']!, _tipoVeiculoIdMeta));
     } else if (isInserting) {
       context.missing(_tipoVeiculoIdMeta);
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
-    }
-    if (data.containsKey('created_by')) {
-      context.handle(_createdByMeta,
-          createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta));
-    }
-    if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
-    }
-    if (data.containsKey('updated_by')) {
-      context.handle(_updatedByMeta,
-          updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta));
-    }
-    if (data.containsKey('deleted_at')) {
-      context.handle(_deletedAtMeta,
-          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
-    }
-    if (data.containsKey('deleted_by')) {
-      context.handle(_deletedByMeta,
-          deletedBy.isAcceptableOrUnknown(data['deleted_by']!, _deletedByMeta));
     }
     return context;
   }
@@ -903,24 +797,8 @@ class $VeiculoTableTable extends VeiculoTable
           .read(DriftSqlType.string, data['${effectivePrefix}remote_id'])!,
       placa: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}placa'])!,
-      modelo: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}modelo'])!,
-      ano: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}ano'])!,
       tipoVeiculoId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}tipo_veiculo_id'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
-      createdBy: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}created_by']),
-      updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at']),
-      updatedBy: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}updated_by']),
-      deletedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
-      deletedBy: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}deleted_by']),
     );
   }
 
@@ -935,53 +813,19 @@ class VeiculoTableData extends DataClass
   final int id;
   final String remoteId;
   final String placa;
-  final String modelo;
-  final int ano;
   final int tipoVeiculoId;
-  final DateTime createdAt;
-  final String? createdBy;
-  final DateTime? updatedAt;
-  final String? updatedBy;
-  final DateTime? deletedAt;
-  final String? deletedBy;
   const VeiculoTableData(
       {required this.id,
       required this.remoteId,
       required this.placa,
-      required this.modelo,
-      required this.ano,
-      required this.tipoVeiculoId,
-      required this.createdAt,
-      this.createdBy,
-      this.updatedAt,
-      this.updatedBy,
-      this.deletedAt,
-      this.deletedBy});
+      required this.tipoVeiculoId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['remote_id'] = Variable<String>(remoteId);
     map['placa'] = Variable<String>(placa);
-    map['modelo'] = Variable<String>(modelo);
-    map['ano'] = Variable<int>(ano);
     map['tipo_veiculo_id'] = Variable<int>(tipoVeiculoId);
-    map['created_at'] = Variable<DateTime>(createdAt);
-    if (!nullToAbsent || createdBy != null) {
-      map['created_by'] = Variable<String>(createdBy);
-    }
-    if (!nullToAbsent || updatedAt != null) {
-      map['updated_at'] = Variable<DateTime>(updatedAt);
-    }
-    if (!nullToAbsent || updatedBy != null) {
-      map['updated_by'] = Variable<String>(updatedBy);
-    }
-    if (!nullToAbsent || deletedAt != null) {
-      map['deleted_at'] = Variable<DateTime>(deletedAt);
-    }
-    if (!nullToAbsent || deletedBy != null) {
-      map['deleted_by'] = Variable<String>(deletedBy);
-    }
     return map;
   }
 
@@ -990,25 +834,7 @@ class VeiculoTableData extends DataClass
       id: Value(id),
       remoteId: Value(remoteId),
       placa: Value(placa),
-      modelo: Value(modelo),
-      ano: Value(ano),
       tipoVeiculoId: Value(tipoVeiculoId),
-      createdAt: Value(createdAt),
-      createdBy: createdBy == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdBy),
-      updatedAt: updatedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedAt),
-      updatedBy: updatedBy == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedBy),
-      deletedAt: deletedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(deletedAt),
-      deletedBy: deletedBy == null && nullToAbsent
-          ? const Value.absent()
-          : Value(deletedBy),
     );
   }
 
@@ -1019,15 +845,7 @@ class VeiculoTableData extends DataClass
       id: serializer.fromJson<int>(json['id']),
       remoteId: serializer.fromJson<String>(json['remoteId']),
       placa: serializer.fromJson<String>(json['placa']),
-      modelo: serializer.fromJson<String>(json['modelo']),
-      ano: serializer.fromJson<int>(json['ano']),
       tipoVeiculoId: serializer.fromJson<int>(json['tipoVeiculoId']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      createdBy: serializer.fromJson<String?>(json['createdBy']),
-      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
-      updatedBy: serializer.fromJson<String?>(json['updatedBy']),
-      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
-      deletedBy: serializer.fromJson<String?>(json['deletedBy']),
     );
   }
   @override
@@ -1037,61 +855,26 @@ class VeiculoTableData extends DataClass
       'id': serializer.toJson<int>(id),
       'remoteId': serializer.toJson<String>(remoteId),
       'placa': serializer.toJson<String>(placa),
-      'modelo': serializer.toJson<String>(modelo),
-      'ano': serializer.toJson<int>(ano),
       'tipoVeiculoId': serializer.toJson<int>(tipoVeiculoId),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'createdBy': serializer.toJson<String?>(createdBy),
-      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
-      'updatedBy': serializer.toJson<String?>(updatedBy),
-      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
-      'deletedBy': serializer.toJson<String?>(deletedBy),
     };
   }
 
   VeiculoTableData copyWith(
-          {int? id,
-          String? remoteId,
-          String? placa,
-          String? modelo,
-          int? ano,
-          int? tipoVeiculoId,
-          DateTime? createdAt,
-          Value<String?> createdBy = const Value.absent(),
-          Value<DateTime?> updatedAt = const Value.absent(),
-          Value<String?> updatedBy = const Value.absent(),
-          Value<DateTime?> deletedAt = const Value.absent(),
-          Value<String?> deletedBy = const Value.absent()}) =>
+          {int? id, String? remoteId, String? placa, int? tipoVeiculoId}) =>
       VeiculoTableData(
         id: id ?? this.id,
         remoteId: remoteId ?? this.remoteId,
         placa: placa ?? this.placa,
-        modelo: modelo ?? this.modelo,
-        ano: ano ?? this.ano,
         tipoVeiculoId: tipoVeiculoId ?? this.tipoVeiculoId,
-        createdAt: createdAt ?? this.createdAt,
-        createdBy: createdBy.present ? createdBy.value : this.createdBy,
-        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
-        updatedBy: updatedBy.present ? updatedBy.value : this.updatedBy,
-        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
-        deletedBy: deletedBy.present ? deletedBy.value : this.deletedBy,
       );
   VeiculoTableData copyWithCompanion(VeiculoTableCompanion data) {
     return VeiculoTableData(
       id: data.id.present ? data.id.value : this.id,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       placa: data.placa.present ? data.placa.value : this.placa,
-      modelo: data.modelo.present ? data.modelo.value : this.modelo,
-      ano: data.ano.present ? data.ano.value : this.ano,
       tipoVeiculoId: data.tipoVeiculoId.present
           ? data.tipoVeiculoId.value
           : this.tipoVeiculoId,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
-      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
-      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
-      deletedBy: data.deletedBy.present ? data.deletedBy.value : this.deletedBy,
     );
   }
 
@@ -1101,33 +884,13 @@ class VeiculoTableData extends DataClass
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
           ..write('placa: $placa, ')
-          ..write('modelo: $modelo, ')
-          ..write('ano: $ano, ')
-          ..write('tipoVeiculoId: $tipoVeiculoId, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('createdBy: $createdBy, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('updatedBy: $updatedBy, ')
-          ..write('deletedAt: $deletedAt, ')
-          ..write('deletedBy: $deletedBy')
+          ..write('tipoVeiculoId: $tipoVeiculoId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id,
-      remoteId,
-      placa,
-      modelo,
-      ano,
-      tipoVeiculoId,
-      createdAt,
-      createdBy,
-      updatedAt,
-      updatedBy,
-      deletedAt,
-      deletedBy);
+  int get hashCode => Object.hash(id, remoteId, placa, tipoVeiculoId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1135,89 +898,39 @@ class VeiculoTableData extends DataClass
           other.id == this.id &&
           other.remoteId == this.remoteId &&
           other.placa == this.placa &&
-          other.modelo == this.modelo &&
-          other.ano == this.ano &&
-          other.tipoVeiculoId == this.tipoVeiculoId &&
-          other.createdAt == this.createdAt &&
-          other.createdBy == this.createdBy &&
-          other.updatedAt == this.updatedAt &&
-          other.updatedBy == this.updatedBy &&
-          other.deletedAt == this.deletedAt &&
-          other.deletedBy == this.deletedBy);
+          other.tipoVeiculoId == this.tipoVeiculoId);
 }
 
 class VeiculoTableCompanion extends UpdateCompanion<VeiculoTableData> {
   final Value<int> id;
   final Value<String> remoteId;
   final Value<String> placa;
-  final Value<String> modelo;
-  final Value<int> ano;
   final Value<int> tipoVeiculoId;
-  final Value<DateTime> createdAt;
-  final Value<String?> createdBy;
-  final Value<DateTime?> updatedAt;
-  final Value<String?> updatedBy;
-  final Value<DateTime?> deletedAt;
-  final Value<String?> deletedBy;
   const VeiculoTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.placa = const Value.absent(),
-    this.modelo = const Value.absent(),
-    this.ano = const Value.absent(),
     this.tipoVeiculoId = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.createdBy = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.updatedBy = const Value.absent(),
-    this.deletedAt = const Value.absent(),
-    this.deletedBy = const Value.absent(),
   });
   VeiculoTableCompanion.insert({
     this.id = const Value.absent(),
     required String remoteId,
     required String placa,
-    required String modelo,
-    required int ano,
     required int tipoVeiculoId,
-    this.createdAt = const Value.absent(),
-    this.createdBy = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-    this.updatedBy = const Value.absent(),
-    this.deletedAt = const Value.absent(),
-    this.deletedBy = const Value.absent(),
   })  : remoteId = Value(remoteId),
         placa = Value(placa),
-        modelo = Value(modelo),
-        ano = Value(ano),
         tipoVeiculoId = Value(tipoVeiculoId);
   static Insertable<VeiculoTableData> custom({
     Expression<int>? id,
     Expression<String>? remoteId,
     Expression<String>? placa,
-    Expression<String>? modelo,
-    Expression<int>? ano,
     Expression<int>? tipoVeiculoId,
-    Expression<DateTime>? createdAt,
-    Expression<String>? createdBy,
-    Expression<DateTime>? updatedAt,
-    Expression<String>? updatedBy,
-    Expression<DateTime>? deletedAt,
-    Expression<String>? deletedBy,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (remoteId != null) 'remote_id': remoteId,
       if (placa != null) 'placa': placa,
-      if (modelo != null) 'modelo': modelo,
-      if (ano != null) 'ano': ano,
       if (tipoVeiculoId != null) 'tipo_veiculo_id': tipoVeiculoId,
-      if (createdAt != null) 'created_at': createdAt,
-      if (createdBy != null) 'created_by': createdBy,
-      if (updatedAt != null) 'updated_at': updatedAt,
-      if (updatedBy != null) 'updated_by': updatedBy,
-      if (deletedAt != null) 'deleted_at': deletedAt,
-      if (deletedBy != null) 'deleted_by': deletedBy,
     });
   }
 
@@ -1225,28 +938,12 @@ class VeiculoTableCompanion extends UpdateCompanion<VeiculoTableData> {
       {Value<int>? id,
       Value<String>? remoteId,
       Value<String>? placa,
-      Value<String>? modelo,
-      Value<int>? ano,
-      Value<int>? tipoVeiculoId,
-      Value<DateTime>? createdAt,
-      Value<String?>? createdBy,
-      Value<DateTime?>? updatedAt,
-      Value<String?>? updatedBy,
-      Value<DateTime?>? deletedAt,
-      Value<String?>? deletedBy}) {
+      Value<int>? tipoVeiculoId}) {
     return VeiculoTableCompanion(
       id: id ?? this.id,
       remoteId: remoteId ?? this.remoteId,
       placa: placa ?? this.placa,
-      modelo: modelo ?? this.modelo,
-      ano: ano ?? this.ano,
       tipoVeiculoId: tipoVeiculoId ?? this.tipoVeiculoId,
-      createdAt: createdAt ?? this.createdAt,
-      createdBy: createdBy ?? this.createdBy,
-      updatedAt: updatedAt ?? this.updatedAt,
-      updatedBy: updatedBy ?? this.updatedBy,
-      deletedAt: deletedAt ?? this.deletedAt,
-      deletedBy: deletedBy ?? this.deletedBy,
     );
   }
 
@@ -1262,32 +959,8 @@ class VeiculoTableCompanion extends UpdateCompanion<VeiculoTableData> {
     if (placa.present) {
       map['placa'] = Variable<String>(placa.value);
     }
-    if (modelo.present) {
-      map['modelo'] = Variable<String>(modelo.value);
-    }
-    if (ano.present) {
-      map['ano'] = Variable<int>(ano.value);
-    }
     if (tipoVeiculoId.present) {
       map['tipo_veiculo_id'] = Variable<int>(tipoVeiculoId.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    if (createdBy.present) {
-      map['created_by'] = Variable<String>(createdBy.value);
-    }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
-    }
-    if (updatedBy.present) {
-      map['updated_by'] = Variable<String>(updatedBy.value);
-    }
-    if (deletedAt.present) {
-      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
-    }
-    if (deletedBy.present) {
-      map['deleted_by'] = Variable<String>(deletedBy.value);
     }
     return map;
   }
@@ -1298,15 +971,7 @@ class VeiculoTableCompanion extends UpdateCompanion<VeiculoTableData> {
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
           ..write('placa: $placa, ')
-          ..write('modelo: $modelo, ')
-          ..write('ano: $ano, ')
-          ..write('tipoVeiculoId: $tipoVeiculoId, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('createdBy: $createdBy, ')
-          ..write('updatedAt: $updatedAt, ')
-          ..write('updatedBy: $updatedBy, ')
-          ..write('deletedAt: $deletedAt, ')
-          ..write('deletedBy: $deletedBy')
+          ..write('tipoVeiculoId: $tipoVeiculoId')
           ..write(')'))
         .toString();
   }
@@ -1704,30 +1369,14 @@ typedef $$VeiculoTableTableCreateCompanionBuilder = VeiculoTableCompanion
   Value<int> id,
   required String remoteId,
   required String placa,
-  required String modelo,
-  required int ano,
   required int tipoVeiculoId,
-  Value<DateTime> createdAt,
-  Value<String?> createdBy,
-  Value<DateTime?> updatedAt,
-  Value<String?> updatedBy,
-  Value<DateTime?> deletedAt,
-  Value<String?> deletedBy,
 });
 typedef $$VeiculoTableTableUpdateCompanionBuilder = VeiculoTableCompanion
     Function({
   Value<int> id,
   Value<String> remoteId,
   Value<String> placa,
-  Value<String> modelo,
-  Value<int> ano,
   Value<int> tipoVeiculoId,
-  Value<DateTime> createdAt,
-  Value<String?> createdBy,
-  Value<DateTime?> updatedAt,
-  Value<String?> updatedBy,
-  Value<DateTime?> deletedAt,
-  Value<String?> deletedBy,
 });
 
 class $$VeiculoTableTableFilterComposer
@@ -1748,32 +1397,8 @@ class $$VeiculoTableTableFilterComposer
   ColumnFilters<String> get placa => $composableBuilder(
       column: $table.placa, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get modelo => $composableBuilder(
-      column: $table.modelo, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get ano => $composableBuilder(
-      column: $table.ano, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<int> get tipoVeiculoId => $composableBuilder(
       column: $table.tipoVeiculoId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get createdBy => $composableBuilder(
-      column: $table.createdBy, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get updatedBy => $composableBuilder(
-      column: $table.updatedBy, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
-      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get deletedBy => $composableBuilder(
-      column: $table.deletedBy, builder: (column) => ColumnFilters(column));
 }
 
 class $$VeiculoTableTableOrderingComposer
@@ -1794,33 +1419,9 @@ class $$VeiculoTableTableOrderingComposer
   ColumnOrderings<String> get placa => $composableBuilder(
       column: $table.placa, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get modelo => $composableBuilder(
-      column: $table.modelo, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get ano => $composableBuilder(
-      column: $table.ano, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<int> get tipoVeiculoId => $composableBuilder(
       column: $table.tipoVeiculoId,
       builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get createdBy => $composableBuilder(
-      column: $table.createdBy, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get updatedBy => $composableBuilder(
-      column: $table.updatedBy, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
-      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get deletedBy => $composableBuilder(
-      column: $table.deletedBy, builder: (column) => ColumnOrderings(column));
 }
 
 class $$VeiculoTableTableAnnotationComposer
@@ -1841,32 +1442,8 @@ class $$VeiculoTableTableAnnotationComposer
   GeneratedColumn<String> get placa =>
       $composableBuilder(column: $table.placa, builder: (column) => column);
 
-  GeneratedColumn<String> get modelo =>
-      $composableBuilder(column: $table.modelo, builder: (column) => column);
-
-  GeneratedColumn<int> get ano =>
-      $composableBuilder(column: $table.ano, builder: (column) => column);
-
   GeneratedColumn<int> get tipoVeiculoId => $composableBuilder(
       column: $table.tipoVeiculoId, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  GeneratedColumn<String> get createdBy =>
-      $composableBuilder(column: $table.createdBy, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  GeneratedColumn<String> get updatedBy =>
-      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get deletedAt =>
-      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
-
-  GeneratedColumn<String> get deletedBy =>
-      $composableBuilder(column: $table.deletedBy, builder: (column) => column);
 }
 
 class $$VeiculoTableTableTableManager extends RootTableManager<
@@ -1898,57 +1475,25 @@ class $$VeiculoTableTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<String> remoteId = const Value.absent(),
             Value<String> placa = const Value.absent(),
-            Value<String> modelo = const Value.absent(),
-            Value<int> ano = const Value.absent(),
             Value<int> tipoVeiculoId = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<String?> createdBy = const Value.absent(),
-            Value<DateTime?> updatedAt = const Value.absent(),
-            Value<String?> updatedBy = const Value.absent(),
-            Value<DateTime?> deletedAt = const Value.absent(),
-            Value<String?> deletedBy = const Value.absent(),
           }) =>
               VeiculoTableCompanion(
             id: id,
             remoteId: remoteId,
             placa: placa,
-            modelo: modelo,
-            ano: ano,
             tipoVeiculoId: tipoVeiculoId,
-            createdAt: createdAt,
-            createdBy: createdBy,
-            updatedAt: updatedAt,
-            updatedBy: updatedBy,
-            deletedAt: deletedAt,
-            deletedBy: deletedBy,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String remoteId,
             required String placa,
-            required String modelo,
-            required int ano,
             required int tipoVeiculoId,
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<String?> createdBy = const Value.absent(),
-            Value<DateTime?> updatedAt = const Value.absent(),
-            Value<String?> updatedBy = const Value.absent(),
-            Value<DateTime?> deletedAt = const Value.absent(),
-            Value<String?> deletedBy = const Value.absent(),
           }) =>
               VeiculoTableCompanion.insert(
             id: id,
             remoteId: remoteId,
             placa: placa,
-            modelo: modelo,
-            ano: ano,
             tipoVeiculoId: tipoVeiculoId,
-            createdAt: createdAt,
-            createdBy: createdBy,
-            updatedAt: updatedAt,
-            updatedBy: updatedBy,
-            deletedAt: deletedAt,
-            deletedBy: deletedBy,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
