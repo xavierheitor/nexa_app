@@ -1,5 +1,8 @@
 import 'package:nexa_app/core/sync/sync_manager.dart';
+import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
+import 'package:nexa_app/core/domain/repositories/tipo_veiculo_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:get/get.dart';
 
 /// Serviço responsável pela sincronização de dados entre servidor e app local.
 ///
@@ -96,12 +99,12 @@ class SyncService {
   SyncService() {
     _syncManager = SyncManager();
 
-    // TODO: Registrar repositórios sincronizáveis aqui
-    // Exemplo:
-    // _syncManager.registrar(UsuarioSyncRepo(dio: dio, dao: usuarioDao));
+    // Registrar repositórios sincronizáveis
+    _syncManager.registrar(VeiculoRepo(dio: Get.find(), db: Get.find()));
+    _syncManager.registrar(TipoVeiculoRepo(dio: Get.find(), db: Get.find()));
 
     AppLogger.i(
-        'SyncService inicializado com ${_syncManager.modulosDisponiveis.length} módulos',
+        'SyncService inicializado com ${_syncManager.modulosDisponiveis.length} módulos: ${_syncManager.modulosDisponiveis}',
         tag: 'SyncService');
   }
 
