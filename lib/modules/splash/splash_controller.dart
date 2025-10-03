@@ -69,7 +69,7 @@ import 'package:nexa_app/routes/routes.dart';
 /// - `SyncService`: Para sincronização de dados
 class SplashController extends GetxController {
   /// Serviço de sincronização de dados.
-  final SyncService _syncService = SyncService();
+  late final SyncService _syncService;
 
   /// Mensagem de status atual da splash.
   final RxString statusMessage = 'Carregando...'.obs;
@@ -101,6 +101,9 @@ class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    /// Obtém instância do SyncService via GetX.
+    _syncService = Get.find<SyncService>();
 
     /// Registra início da inicialização do splash.
     AppLogger.i('🌀 Splash: Iniciando processo de inicialização',

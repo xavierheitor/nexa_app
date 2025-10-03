@@ -6,7 +6,7 @@ abstract class ApiConstants {
   static const refreshToken = '/auth/refresh';
 
 
-  static const veiculos = '/veiculo';
-  static const tiposVeiculo = '/tipo-veiculo';
+  static const veiculos = '/veiculos/sync';
+  static const tiposVeiculo = '/tipo-veiculo/sync';
 
 }

@@ -417,9 +417,10 @@ class LoginController extends GetxController {
 
     /// Verifica se usuário já está logado.
     if (_sessionManager.estaLogado) {
-      AppLogger.i('Usuário já está logado, redirecionando...',
+      AppLogger.i('Usuário já está logado, redirecionando para splash...',
           tag: 'LoginController');
-      Get.offAllNamed(Routes.home);
+      /// Redireciona para splash para fazer sincronização antes de ir para home.
+      Get.offAllNamed(Routes.splash);
     }
   }
 
