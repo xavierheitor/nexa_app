@@ -46,16 +46,19 @@ class ChecklistPerguntaDao extends DatabaseAccessor<AppDatabase> with _$Checklis
   }
 
   /// Busca perguntas de um modelo de checklist.
-  Future<List<ChecklistPerguntaTableDto>> buscarPorModelo(int checklistModeloId) async {
-    // Implementação com JOIN manual
+  Future<List<ChecklistPerguntaTableDto>> buscarPorModelo(
+      int checklistModeloRemoteId) async {
+    // Implementação com JOIN manual usando remoteId
     final query = select(db.checklistPerguntaTable)
         .join([
           leftOuterJoin(
             db.checklistPerguntaRelacaoTable,
-            db.checklistPerguntaRelacaoTable.checklistPerguntaId.equalsExp(db.checklistPerguntaTable.id),
+        db.checklistPerguntaRelacaoTable.checklistPerguntaId
+            .equalsExp(db.checklistPerguntaTable.remoteId),
           )
         ])
-        ..where(db.checklistPerguntaRelacaoTable.checklistModeloId.equals(checklistModeloId))
+      ..where(db.checklistPerguntaRelacaoTable.checklistModeloId
+          .equals(checklistModeloRemoteId))
         ..orderBy([OrderingTerm.asc(db.checklistPerguntaTable.nome)]);
     
     final results = await query.get();

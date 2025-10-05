@@ -71,13 +71,24 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
             tag: 'ChecklistModeloDao');
       }
     }
-    
-    // Implementação com JOIN manual
+        
+    // Log dos modelos para comparar
+    AppLogger.d('🔍 [DIAGNÓSTICO DAO] Modelos disponíveis:',
+        tag: 'ChecklistModeloDao');
+    for (int i = 0; i < todosModelos.length; i++) {
+      final modelo = todosModelos[i];
+      AppLogger.d(
+          '🔍 [DIAGNÓSTICO DAO] Modelo $i: id=${modelo.id}, remoteId=${modelo.remoteId}, nome=${modelo.nome}',
+          tag: 'ChecklistModeloDao');
+    }
+
+    // Implementação com JOIN manual - CORREÇÃO: buscar pelo remoteId
     final query = select(db.checklistModeloTable)
         .join([
           leftOuterJoin(
             db.checklistTipoVeiculoRelacaoTable,
-            db.checklistTipoVeiculoRelacaoTable.checklistModeloId.equalsExp(db.checklistModeloTable.id),
+        db.checklistTipoVeiculoRelacaoTable.checklistModeloId
+            .equalsExp(db.checklistModeloTable.remoteId),
           )
         ])
         ..where(db.checklistTipoVeiculoRelacaoTable.tipoVeiculoId.equals(tipoVeiculoId))

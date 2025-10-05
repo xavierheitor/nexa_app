@@ -55,16 +55,19 @@ class ChecklistOpcaoRespostaDao extends DatabaseAccessor<AppDatabase> with _$Che
   }
 
   /// Busca opções de resposta de um modelo de checklist.
-  Future<List<ChecklistOpcaoRespostaTableDto>> buscarPorModelo(int checklistModeloId) async {
-    // Implementação com JOIN manual
+  Future<List<ChecklistOpcaoRespostaTableDto>> buscarPorModelo(
+      int checklistModeloRemoteId) async {
+    // Implementação com JOIN manual usando remoteId
     final query = select(db.checklistOpcaoRespostaTable)
         .join([
           leftOuterJoin(
             db.checklistOpcaoRespostaRelacaoTable,
-            db.checklistOpcaoRespostaRelacaoTable.checklistOpcaoRespostaId.equalsExp(db.checklistOpcaoRespostaTable.id),
+        db.checklistOpcaoRespostaRelacaoTable.checklistOpcaoRespostaId
+            .equalsExp(db.checklistOpcaoRespostaTable.remoteId),
           )
         ])
-        ..where(db.checklistOpcaoRespostaRelacaoTable.checklistModeloId.equals(checklistModeloId))
+      ..where(db.checklistOpcaoRespostaRelacaoTable.checklistModeloId
+          .equals(checklistModeloRemoteId))
         ..orderBy([OrderingTerm.asc(db.checklistOpcaoRespostaTable.nome)]);
     
     final results = await query.get();
