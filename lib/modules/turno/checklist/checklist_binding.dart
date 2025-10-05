@@ -1,4 +1,9 @@
 import 'package:get/get.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_modelo_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_opcao_resposta_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_pergunta_repo.dart';
+import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
+import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
 import 'package:nexa_app/modules/turno/checklist/checklist_controller.dart';
 import 'package:nexa_app/modules/turno/checklist/checklist_service.dart';
 
@@ -7,7 +12,16 @@ class ChecklistBinding extends Bindings {
   @override
   void dependencies() {
     // Service (singleton)
-    Get.lazyPut<ChecklistService>(() => ChecklistService(), fenix: true);
+    Get.lazyPut<ChecklistService>(
+      () => ChecklistService(
+        checklistModeloRepo: Get.find<ChecklistModeloRepo>(),
+        checklistPerguntaRepo: Get.find<ChecklistPerguntaRepo>(),
+        checklistOpcaoRespostaRepo: Get.find<ChecklistOpcaoRespostaRepo>(),
+        turnoRepo: Get.find<TurnoRepo>(),
+        veiculoRepo: Get.find<VeiculoRepo>(),
+      ),
+      fenix: true,
+    );
 
     // Controller
     Get.lazyPut<ChecklistController>(() => ChecklistController());

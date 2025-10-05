@@ -1,11 +1,46 @@
 import 'package:get/get.dart';
-import 'package:nexa_app/core/database/app_database.dart';
+import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
 import 'package:nexa_app/core/domain/models/checklist_model.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_modelo_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_opcao_resposta_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_pergunta_repo.dart';
+import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
+import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 
 /// Service responsável por buscar e montar checklists completos.
 class ChecklistService extends GetxService {
-  final AppDatabase _db = Get.find<AppDatabase>();
+  /// Repositório responsável pelos modelos de checklist persistidos localmente.
+  final ChecklistModeloRepo _checklistModeloRepo;
+
+  /// Repositório que expõe as perguntas vinculadas a um modelo de checklist.
+  final ChecklistPerguntaRepo _checklistPerguntaRepo;
+
+  /// Repositório que recupera as opções de resposta disponíveis por modelo.
+  final ChecklistOpcaoRespostaRepo _checklistOpcaoRespostaRepo;
+
+  /// Repositório que oferece operações de consulta para os turnos abertos.
+  final TurnoRepo _turnoRepo;
+
+  /// Repositório que disponibiliza informações detalhadas dos veículos.
+  final VeiculoRepo _veiculoRepo;
+
+  /// Construtor com injeção explícita de dependências utilizadas pelo serviço.
+  ///
+  /// A adoção da injeção por construtor facilita testes unitários (permitindo
+  /// substituir os repositórios por fakes/mocks) e deixa explícito quais
+  /// camadas de dados o serviço consome para montar o checklist completo.
+  ChecklistService({
+    required ChecklistModeloRepo checklistModeloRepo,
+    required ChecklistPerguntaRepo checklistPerguntaRepo,
+    required ChecklistOpcaoRespostaRepo checklistOpcaoRespostaRepo,
+    required TurnoRepo turnoRepo,
+    required VeiculoRepo veiculoRepo,
+  })  : _checklistModeloRepo = checklistModeloRepo,
+        _checklistPerguntaRepo = checklistPerguntaRepo,
+        _checklistOpcaoRespostaRepo = checklistOpcaoRespostaRepo,
+        _turnoRepo = turnoRepo,
+        _veiculoRepo = veiculoRepo;
 
   /// Busca o checklist completo para um tipo de veículo específico.
   ///
@@ -19,11 +54,10 @@ class ChecklistService extends GetxService {
 
       // 1. Buscar o modelo de checklist pelo tipo de veículo
       AppLogger.d(
-          '🔍 [DIAGNÓSTICO] Chamando checklistModeloDao.buscarPorTipoVeiculo($tipoVeiculoId)',
+          '🔍 [DIAGNÓSTICO] Chamando ChecklistModeloRepo.buscarPorTipoVeiculo($tipoVeiculoId)',
           tag: 'ChecklistService');
-      final checklistModeloDao = _db.checklistModeloDao;
       final modelos =
-          await checklistModeloDao.buscarPorTipoVeiculo(tipoVeiculoId);
+          await _checklistModeloRepo.buscarPorTipoVeiculo(tipoVeiculoId);
 
       AppLogger.d(
           '🔍 [DIAGNÓSTICO] Resultado da busca: ${modelos.length} modelos encontrados',
@@ -47,13 +81,24 @@ class ChecklistService extends GetxService {
 
       // Pega o primeiro modelo encontrado
       final modelo = modelos.first;
+      if (modelo.remoteId == null) {
+        AppLogger.w(
+            '⚠️ [DIAGNÓSTICO] Checklist ${modelo.nome} não possui remoteId para buscar relacionamentos',
+            tag: 'ChecklistService');
+        return ChecklistCompletoModel(
+          id: modelo.id,
+          remoteId: modelo.remoteId ?? modelo.id,
+          nome: modelo.nome,
+          tipoChecklistId: modelo.tipoChecklistId,
+          perguntas: const [],
+        );
+      }
       AppLogger.i('✅ Checklist encontrado: ${modelo.nome}',
           tag: 'ChecklistService');
 
       // 2. Buscar as perguntas deste checklist
-      final checklistPerguntaDao = _db.checklistPerguntaDao;
       final perguntas =
-          await checklistPerguntaDao.buscarPorModelo(modelo.remoteId!);
+          await _checklistPerguntaRepo.buscarPorModelo(modelo.remoteId!);
 
       if (perguntas.isEmpty) {
         AppLogger.w('⚠️ Nenhuma pergunta encontrada para o checklist',
@@ -71,26 +116,34 @@ class ChecklistService extends GetxService {
           tag: 'ChecklistService');
 
       // 3. Para cada pergunta, buscar suas opções de resposta
-      final checklistOpcaoRespostaDao = _db.checklistOpcaoRespostaDao;
+      final opcoes =
+          await _checklistOpcaoRespostaRepo.buscarPorModelo(modelo.remoteId!);
+      final opcoesModel = opcoes.map((opcao) {
+        if (opcao.remoteId == null) {
+          AppLogger.w(
+              '⚠️ [DIAGNÓSTICO] Opção ${opcao.nome} sem remoteId vinculada ao checklist ${modelo.nome}',
+              tag: 'ChecklistService');
+        }
+        return ChecklistOpcaoRespostaModel(
+          id: opcao.id,
+          remoteId: opcao.remoteId ?? opcao.id,
+          nome: opcao.nome,
+          geraPendencia: opcao.geraPendencia,
+        );
+      }).toList();
+
       final List<ChecklistPerguntaModel> perguntasCompletas = [];
 
       for (final pergunta in perguntas) {
-        // Buscar opções de resposta desta pergunta através do modelo
-        final opcoes =
-            await checklistOpcaoRespostaDao.buscarPorModelo(modelo.remoteId!);
-
-        final opcoesModel = opcoes.map((opcao) {
-          return ChecklistOpcaoRespostaModel(
-            id: opcao.id,
-            remoteId: opcao.remoteId!,
-            nome: opcao.nome,
-            geraPendencia: opcao.geraPendencia,
-          );
-        }).toList();
+        if (pergunta.remoteId == null) {
+          AppLogger.w(
+              '⚠️ [DIAGNÓSTICO] Pergunta ${pergunta.nome} não possui remoteId; mantendo opções, mas sem associação remota',
+              tag: 'ChecklistService');
+        }
 
         perguntasCompletas.add(ChecklistPerguntaModel(
           id: pergunta.id,
-          remoteId: pergunta.remoteId!,
+          remoteId: pergunta.remoteId ?? pergunta.id,
           nome: pergunta.nome,
           opcoes: opcoesModel,
         ));
@@ -122,8 +175,7 @@ class ChecklistService extends GetxService {
           tag: 'ChecklistService');
 
       // 1. Buscar o turno ativo
-      final turnoDao = _db.turnoDao;
-      final turnoAtivo = await turnoDao.buscarTurnoAtivo();
+      final turnoAtivo = await _turnoRepo.buscarTurnoAtivo();
 
       if (turnoAtivo == null) {
         AppLogger.w('⚠️ Nenhum turno ativo encontrado',
@@ -135,8 +187,19 @@ class ChecklistService extends GetxService {
           tag: 'ChecklistService');
 
       // 2. Buscar o veículo do turno pelo remoteId (correção)
-      final veiculoDao = _db.veiculoDao;
-      final veiculo = await veiculoDao.buscarPorIdOuNull(turnoAtivo.veiculoId);
+      VeiculoTableDto? veiculoDto;
+      try {
+        veiculoDto = await _veiculoRepo.buscarPorId(turnoAtivo.veiculoId);
+      } catch (error, stackTrace) {
+        AppLogger.e(
+          '❌ Erro ao buscar veículo ${turnoAtivo.veiculoId} via VeiculoRepo',
+          tag: 'ChecklistService',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      final veiculo = veiculoDto;
 
       if (veiculo == null) {
         AppLogger.w(
