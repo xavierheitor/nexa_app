@@ -44,8 +44,6 @@ class AbrirTurnoController extends GetxController {
   late final SearchableDropdownController<VeiculoTableDto>
       veiculoDropdownController;
 
-  /// Controlador do dropdown de prefixos.
-  late final SearchableDropdownController<String> prefixoDropdownController;
 
   /// Controlador do dropdown de equipes.
   late final SearchableDropdownController<EquipeTableDto>
@@ -78,13 +76,6 @@ class AbrirTurnoController extends GetxController {
     return null;
   }
 
-  /// Valida seleção de prefixo.
-  String? validatePrefixo() {
-    if (prefixoDropdownController.selected.value == null) {
-      return 'Prefixo é obrigatório';
-    }
-    return null;
-  }
 
   /// Valida seleção de equipe.
   String? validateEquipe() {
@@ -121,17 +112,17 @@ class AbrirTurnoController extends GetxController {
     if (eletricistasSelecionados.isEmpty) {
       return 'Pelo menos 2 eletricistas são obrigatórios';
     }
-    
+
     if (eletricistasSelecionados.length < 2) {
       return 'Mínimo de 2 eletricistas necessários';
     }
-    
+
     // Verifica se há pelo menos um motorista selecionado
     final temMotorista = eletricistasSelecionados.any((e) => e.isMotorista);
     if (!temMotorista) {
       return 'É obrigatório marcar um motorista';
     }
-    
+
     return null;
   }
 
@@ -220,12 +211,12 @@ class AbrirTurnoController extends GetxController {
       AppLogger.i('Abrindo novo turno...', tag: 'AbrirTurnoController');
 
       final veiculoSelecionado = veiculoDropdownController.selected.value!;
-      final prefixoSelecionado = prefixoDropdownController.selected.value!;
+      // Nota: prefixo foi removido da interface, usando valor padrão
       // Nota: equipe selecionada é validada mas não enviada para o TurnoController
       // pois o método abrirTurno não aceita esse parâmetro ainda
 
       final sucesso = await _turnoController.abrirTurno(
-        prefixo: prefixoSelecionado,
+        prefixo: 'A-001', // Prefixo padrão temporário
         veiculo:
             'Veículo ${veiculoSelecionado.placa}', // Usando placa como identificador
         placa: veiculoSelecionado.placa,
@@ -233,9 +224,9 @@ class AbrirTurnoController extends GetxController {
 
       if (sucesso) {
         AppLogger.i('Turno aberto com sucesso', tag: 'AbrirTurnoController');
-        
+
         Get.back(); // Volta para home
-        
+
         Get.snackbar(
           'Sucesso',
           'Turno aberto com sucesso!',
@@ -253,7 +244,7 @@ class AbrirTurnoController extends GetxController {
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao abrir turno',
           tag: 'AbrirTurnoController', error: e, stackTrace: stackTrace);
-      
+
       Get.snackbar(
         'Erro',
         'Erro inesperado ao abrir turno.',
@@ -272,17 +263,13 @@ class AbrirTurnoController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    
+
     // Inicializa controladores dos dropdowns
     veiculoDropdownController = SearchableDropdownController<VeiculoTableDto>(
       itemLabel: (veiculo) => veiculo.placa,
       remoteSearch: _buscarVeiculos,
     );
 
-    prefixoDropdownController = SearchableDropdownController<String>(
-      initialItems: _getPrefixosIniciais(),
-      itemLabel: (prefixo) => prefixo,
-    );
 
     equipeDropdownController = SearchableDropdownController<EquipeTableDto>(
       itemLabel: (equipe) => equipe.nome,
@@ -298,7 +285,7 @@ class AbrirTurnoController extends GetxController {
 
     // Carrega dados iniciais
     _carregarDadosIniciais();
-    
+
     AppLogger.d('AbrirTurnoController inicializado',
         tag: 'AbrirTurnoController');
   }
@@ -307,8 +294,7 @@ class AbrirTurnoController extends GetxController {
   void onClose() {
     prefixoController.dispose();
     kmInicialController.dispose();
-    AppLogger.d('AbrirTurnoController finalizado',
-        tag: 'AbrirTurnoController');
+    AppLogger.d('AbrirTurnoController finalizado', tag: 'AbrirTurnoController');
     super.onClose();
   }
 
@@ -316,23 +302,6 @@ class AbrirTurnoController extends GetxController {
   // MÉTODOS AUXILIARES
   // ============================================================================
 
-  /// Lista de prefixos disponíveis.
-  List<String> _getPrefixosIniciais() {
-    return [
-      'A-001',
-      'A-002',
-      'A-003',
-      'B-001',
-      'B-002',
-      'B-003',
-      'C-001',
-      'C-002',
-      'C-003',
-      'D-001',
-      'D-002',
-      'D-003',
-    ];
-  }
 
   /// Carrega dados iniciais usando o serviço.
   Future<void> _carregarDadosIniciais() async {
@@ -344,7 +313,7 @@ class AbrirTurnoController extends GetxController {
       // Carrega equipes
       final equipes = await _abrirTurnoService.buscarEquipes();
       equipeDropdownController.setItems(equipes);
-      
+
       // Carrega eletricistas
       final eletricistas = await _abrirTurnoService.buscarEletricistas();
       eletricistaDropdownController.setItems(eletricistas);
@@ -353,7 +322,7 @@ class AbrirTurnoController extends GetxController {
           'Dados iniciais carregados: ${veiculos.length} veículos, ${equipes.length} equipes, ${eletricistas.length} eletricistas',
           tag: 'AbrirTurnoController');
     } catch (e) {
-      AppLogger.e('Erro ao carregar dados iniciais', 
+      AppLogger.e('Erro ao carregar dados iniciais',
           tag: 'AbrirTurnoController', error: e);
     }
   }
@@ -364,15 +333,15 @@ class AbrirTurnoController extends GetxController {
       if (query.isEmpty) {
         return veiculoDropdownController.items;
       }
-      
+
       final veiculos = await _abrirTurnoService.buscarVeiculos();
       final veiculoDtos = veiculos
           .where((v) => v.placa.toLowerCase().contains(query.toLowerCase()))
           .toList();
-      
+
       return veiculoDtos;
     } catch (e) {
-      AppLogger.e('Erro ao buscar veículos', 
+      AppLogger.e('Erro ao buscar veículos',
           tag: 'AbrirTurnoController', error: e);
       return [];
     }
@@ -441,4 +410,3 @@ class EletricistaSelecionado {
     );
   }
 }
-

@@ -66,6 +66,7 @@ class AbrirTurnoPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 32),
+
               /// Dropdown de Veículo.
               SearchableDropdown(
                 controller: controller.veiculoDropdownController,
@@ -139,7 +140,7 @@ class AbrirTurnoPage extends StatelessWidget {
                 }
 
                 return Card(
-                  color: colorScheme.surfaceVariant.withOpacity(0.3),
+                  color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -264,7 +265,7 @@ class AbrirTurnoPage extends StatelessWidget {
                               ),
                             ),
                           );
-                        }).toList(),
+                        }),
                         if (controller.eletricistasSelecionados.length < 2)
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
@@ -326,14 +327,12 @@ class AbrirTurnoPage extends StatelessWidget {
               Obx(() {
                 final veiculoSelecionado =
                     controller.veiculoDropdownController.selected.value;
-                final prefixoSelecionado =
-                    controller.prefixoDropdownController.selected.value;
+
                 final equipeSelecionada =
                     controller.equipeDropdownController.selected.value;
                 final kmInicial = controller.kmInicialController.text.trim();
 
                 if (veiculoSelecionado == null ||
-                    prefixoSelecionado == null ||
                     equipeSelecionada == null ||
                     kmInicial.isEmpty ||
                     controller.eletricistasSelecionados.length < 2) {
@@ -368,8 +367,6 @@ class AbrirTurnoPage extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        _buildInfoRow('Prefixo', prefixoSelecionado, Icons.tag),
-                        const SizedBox(height: 8),
                         _buildInfoRow(
                             'Veículo',
                             'Veículo ${veiculoSelecionado.placa}',
@@ -382,7 +379,7 @@ class AbrirTurnoPage extends StatelessWidget {
                             'Equipe', equipeSelecionada.nome, Icons.group),
                         const SizedBox(height: 8),
                         _buildInfoRow(
-                            'KM Inicial', '${kmInicial} km', Icons.speed),
+                            'KM Inicial', '$kmInicial km', Icons.speed),
                         const SizedBox(height: 8),
                         _buildInfoRow(
                           'Eletricistas',
@@ -511,4 +508,3 @@ class AbrirTurnoPage extends StatelessWidget {
     );
   }
 }
-
