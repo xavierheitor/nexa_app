@@ -83,4 +83,10 @@ abstract class Routes {
   /// Tela para realizar o checklist do veículo antes de iniciar o turno.
   /// Exibe perguntas e opções de resposta baseadas no tipo de veículo.
   static const String turnoChecklist = '/turno/checklist';
+
+  /// Rota da tela de checklist EPC.
+  ///
+  /// Tela para realizar o checklist de EPC (Equipamento de Proteção Coletiva).
+  /// Exibe perguntas e opções de resposta baseadas no tipo de equipe.
+  static const String turnoChecklistEPC = '/turno/checklist/epc';
 }

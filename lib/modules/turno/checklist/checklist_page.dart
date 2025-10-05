@@ -10,7 +10,9 @@ class ChecklistPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Checklist Veicular'),
+        title: Text(Get.currentRoute == '/turno/checklist/epc'
+            ? 'Checklist EPC'
+            : 'Checklist Veicular'),
         backgroundColor: Colors.blue.shade700,
         foregroundColor: Colors.white,
         elevation: 0,

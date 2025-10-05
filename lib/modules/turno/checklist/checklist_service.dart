@@ -1,10 +1,6 @@
 import 'package:nexa_app/core/database/app_database.dart';
+import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart';
 import 'package:nexa_app/core/domain/dto/checklist_modelo_table_dto.dart';
-import 'package:nexa_app/core/domain/dto/checklist_pergunta_table_dto.dart';
-import 'package:nexa_app/core/domain/dto/checklist_opcao_resposta_table_dto.dart';
-import 'package:nexa_app/core/domain/dto/checklist_preenchido_table_dto.dart';
-import 'package:nexa_app/core/domain/dto/checklist_resposta_table_dto.dart';
-import 'package:nexa_app/core/domain/dto/turno_table_dto.dart';
 import 'package:nexa_app/core/domain/repositories/checklist_preenchido_repo.dart';
 import 'package:nexa_app/core/domain/repositories/checklist_resposta_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
@@ -57,7 +53,7 @@ class ChecklistService {
   ChecklistService(
       this._db, this._checklistPreenchidoRepo, this._checklistRespostaRepo);
 
-  /// Busca o checklist do turno ativo
+  /// Busca o checklist do turno ativo (veicular)
   Future<ChecklistCompletoModel?> buscarChecklistDoTurnoAtivo() async {
     AppLogger.d(
         '🔍 [DIAGNÓSTICO] Iniciando busca de checklist para turno ativo',
@@ -96,8 +92,52 @@ class ChecklistService {
     AppLogger.d(
         '🔍 [SIMPLIFICADO] Buscando checklist para tipoVeiculoId: ${veiculo.tipoVeiculoId}',
         tag: 'ChecklistService');
-    
+
     return await buscarChecklistPorTipoVeiculo(veiculo.tipoVeiculoId);
+  }
+
+  /// Busca o checklist de EPC do turno ativo
+  Future<ChecklistCompletoModel?> buscarChecklistEPCDoTurnoAtivo() async {
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO] Iniciando busca de checklist EPC para turno ativo',
+        tag: 'ChecklistService');
+
+    // 1. Buscar o turno ativo
+    final turnoDao = _db.turnoDao;
+    final turnos = await turnoDao.listar();
+    final turnoAtivo = turnos
+        .where((t) => t.situacaoTurno == SituacaoTurno.emAbertura)
+        .firstOrNull;
+
+    if (turnoAtivo == null) {
+      AppLogger.w('⚠️ Nenhum turno em abertura encontrado',
+          tag: 'ChecklistService');
+      return null;
+    }
+
+    AppLogger.d('✅ Turno ativo encontrado: ${turnoAtivo.id}',
+        tag: 'ChecklistService');
+
+    // 2. Buscar a equipe do turno
+    final equipeDao = _db.equipeDao;
+    final equipe = await equipeDao.buscarPorIdOuNull(turnoAtivo.equipeId);
+
+    if (equipe == null) {
+      AppLogger.w(
+          '⚠️ Equipe do turno não encontrada (ID: ${turnoAtivo.equipeId})',
+          tag: 'ChecklistService');
+      return null;
+    }
+    AppLogger.d(
+        '✅ Equipe encontrada: ${equipe.nome} (Tipo: ${equipe.tipoEquipeId})',
+        tag: 'ChecklistService');
+
+    // 3. Buscar checklist EPC diretamente pelo tipoEquipeId da equipe
+    AppLogger.d(
+        '🔍 [SIMPLIFICADO] Buscando checklist EPC para tipoEquipeId: ${equipe.tipoEquipeId}',
+        tag: 'ChecklistService');
+
+    return await buscarChecklistPorTipoEquipe(equipe.tipoEquipeId);
   }
 
   /// Busca checklist por tipo de veículo
@@ -149,9 +189,8 @@ class ChecklistService {
     for (final pergunta in perguntas) {
       final opcoes =
           await checklistOpcaoRespostaDao.buscarPorModelo(modelo.remoteId!);
-      final opcoesFiltradas = opcoes
-          .where((opcao) => opcao.perguntaId == pergunta.remoteId)
-          .toList();
+      final opcoesFiltradas =
+          opcoes.where((opcao) => opcao.remoteId == pergunta.remoteId).toList();
 
       final opcoesModel = opcoesFiltradas
           .map((opcao) => ChecklistOpcaoRespostaModel(
@@ -177,6 +216,81 @@ class ChecklistService {
     );
   }
 
+  /// Busca checklist por tipo de equipe
+  Future<ChecklistCompletoModel?> buscarChecklistPorTipoEquipe(
+      int tipoEquipeId) async {
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO] Iniciando busca de checklist EPC para tipoEquipeId: $tipoEquipeId',
+        tag: 'ChecklistService');
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO] Chamando checklistModeloDao.buscarPorTipoEquipe($tipoEquipeId)',
+        tag: 'ChecklistService');
+
+    final checklistModeloDao = _db.checklistModeloDao;
+    final modelos = await checklistModeloDao.buscarPorTipoEquipe(tipoEquipeId);
+
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO] Resultado da busca: ${modelos.length} modelos encontrados',
+        tag: 'ChecklistService');
+    for (int i = 0; i < modelos.length; i++) {
+      final modelo = modelos[i];
+      AppLogger.d(
+          '🔍 [DIAGNÓSTICO] Modelo $i: id=${modelo.id}, remoteId=${modelo.remoteId}, nome=${modelo.nome}',
+          tag: 'ChecklistService');
+    }
+
+    if (modelos.isEmpty) {
+      AppLogger.w(
+          '⚠️ Nenhum modelo de checklist EPC encontrado para tipoEquipeId: $tipoEquipeId',
+          tag: 'ChecklistService');
+      return null;
+    }
+
+    final modelo = modelos.first;
+    AppLogger.i('✅ Checklist EPC encontrado: ${modelo.nome}',
+        tag: 'ChecklistService');
+
+    // Buscar perguntas e opções
+    final checklistPerguntaDao = _db.checklistPerguntaDao;
+    final checklistOpcaoRespostaDao = _db.checklistOpcaoRespostaDao;
+
+    final perguntas =
+        await checklistPerguntaDao.buscarPorModelo(modelo.remoteId!);
+    AppLogger.d('📋 ${perguntas.length} perguntas encontradas',
+        tag: 'ChecklistService');
+
+    final perguntasComOpcoes = <ChecklistPerguntaModel>[];
+
+    for (final pergunta in perguntas) {
+      final opcoes =
+          await checklistOpcaoRespostaDao.buscarPorModelo(modelo.remoteId!);
+      final opcoesFiltradas =
+          opcoes.where((opcao) => opcao.remoteId == pergunta.remoteId).toList();
+
+      final opcoesModel = opcoesFiltradas
+          .map((opcao) => ChecklistOpcaoRespostaModel(
+                id: opcao.remoteId!,
+                nome: opcao.nome,
+                geraPendencia: opcao.geraPendencia,
+              ))
+          .toList();
+
+      perguntasComOpcoes.add(ChecklistPerguntaModel(
+        id: pergunta.remoteId!,
+        nome: pergunta.nome,
+        opcoes: opcoesModel,
+      ));
+    }
+
+    AppLogger.i('✅ Checklist EPC completo montado com sucesso',
+        tag: 'ChecklistService');
+
+    return ChecklistCompletoModel(
+      modelo: modelo,
+      perguntas: perguntasComOpcoes,
+    );
+  }
+
   /// Salva o checklist preenchido
   Future<bool> salvarChecklistPreenchido({
     required ChecklistCompletoModel checklist,
@@ -190,8 +304,9 @@ class ChecklistService {
       // 1. Buscar o turno ativo
       final turnoDao = _db.turnoDao;
       final turnos = await turnoDao.listar();
-      final turnoAtivo =
-          turnos.where((t) => t.situacaoTurno == 'em_abertura').firstOrNull;
+      final turnoAtivo = turnos
+          .where((t) => t.situacaoTurno == SituacaoTurno.emAbertura)
+          .firstOrNull;
 
       if (turnoAtivo == null) {
         AppLogger.e('❌ Nenhum turno em abertura encontrado',
@@ -252,8 +367,9 @@ class ChecklistService {
       // 1. Buscar o turno ativo
       final turnoDao = _db.turnoDao;
       final turnos = await turnoDao.listar();
-      final turnoAtivo =
-          turnos.where((t) => t.situacaoTurno == 'em_abertura').firstOrNull;
+      final turnoAtivo = turnos
+          .where((t) => t.situacaoTurno == SituacaoTurno.emAbertura)
+          .firstOrNull;
 
       if (turnoAtivo == null) {
         AppLogger.w('⚠️ Nenhum turno em abertura encontrado',
@@ -264,11 +380,10 @@ class ChecklistService {
       // 2. Verificar se existe checklist preenchido para este turno
       final existe =
           await _checklistPreenchidoRepo.existeParaTurno(turnoAtivo.id);
-      
+
       AppLogger.d('🔍 Checklist já preenchido: $existe',
           tag: 'ChecklistService');
       return existe;
-
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao verificar se checklist foi preenchido: $e',
           tag: 'ChecklistService', error: e, stackTrace: stackTrace);

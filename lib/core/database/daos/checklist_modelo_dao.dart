@@ -46,6 +46,50 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
         .get();
   }
 
+  /// Busca modelos por tipo de equipe.
+  Future<List<ChecklistModeloTableDto>> buscarPorTipoEquipe(
+      int tipoEquipeId) async {
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Buscando checklist para tipoEquipeId: $tipoEquipeId',
+        tag: 'ChecklistModeloDao');
+
+    // Verificar se existem dados nas tabelas
+    final todasRelacoes = await db.checklistTipoEquipeRelacaoDao.listar();
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Total de relações tipo-equipe: ${todasRelacoes.length}',
+        tag: 'ChecklistModeloDao');
+
+    // Implementação com JOIN manual - CORREÇÃO: buscar pelo remoteId
+    final query = select(db.checklistModeloTable).join([
+      leftOuterJoin(
+        db.checklistTipoEquipeRelacaoTable,
+        db.checklistTipoEquipeRelacaoTable.checklistModeloId
+            .equalsExp(db.checklistModeloTable.remoteId),
+      )
+    ])
+      ..where(
+          db.checklistTipoEquipeRelacaoTable.tipoEquipeId.equals(tipoEquipeId))
+      ..orderBy([OrderingTerm.asc(db.checklistModeloTable.nome)]);
+
+    AppLogger.d('🔍 [DIAGNÓSTICO DAO] Executando query com JOIN...',
+        tag: 'ChecklistModeloDao');
+
+    final results = await query.get();
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Query executada. ${results.length} resultados encontrados',
+        tag: 'ChecklistModeloDao');
+
+    final dtos = results
+        .map((row) => ChecklistModeloTableDto.fromTable(
+            row.readTable(db.checklistModeloTable)))
+        .toList();
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Convertidos para DTOs: ${dtos.length} modelos',
+        tag: 'ChecklistModeloDao');
+
+    return dtos;
+  }
+
   /// Busca modelos por tipo de veículo.
   Future<List<ChecklistModeloTableDto>> buscarPorTipoVeiculo(int tipoVeiculoId) async {
     AppLogger.d(
@@ -127,22 +171,6 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
     return dtos;
   }
 
-  /// Busca modelos por tipo de equipe.
-  Future<List<ChecklistModeloTableDto>> buscarPorTipoEquipe(int tipoEquipeId) async {
-    // Implementação com JOIN manual
-    final query = select(db.checklistModeloTable)
-        .join([
-          leftOuterJoin(
-            db.checklistTipoEquipeRelacaoTable,
-            db.checklistTipoEquipeRelacaoTable.checklistModeloId.equalsExp(db.checklistModeloTable.id),
-          )
-        ])
-        ..where(db.checklistTipoEquipeRelacaoTable.tipoEquipeId.equals(tipoEquipeId))
-        ..orderBy([OrderingTerm.asc(db.checklistModeloTable.nome)]);
-    
-    final results = await query.get();
-    return results.map((row) => ChecklistModeloTableDto.fromTable(row.readTable(db.checklistModeloTable))).toList();
-  }
 
   /// Busca modelos por nome (busca parcial).
   Future<List<ChecklistModeloTableDto>> buscarPorNome(String nome) async {

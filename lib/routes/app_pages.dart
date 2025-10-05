@@ -169,6 +169,21 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
 
+    /// Configuração da página de checklist EPC.
+    ///
+    /// Tela para realizar o checklist de EPC (Equipamento de Proteção Coletiva).
+    ///
+    /// **Características:**
+    /// - Protegida por `AuthMiddleware`
+    /// - Perguntas baseadas no tipo de equipe
+    /// - Opções de resposta com indicação de pendências
+    GetPage(
+      name: Routes.turnoChecklistEPC,
+      page: () => const ChecklistPage(),
+      binding: ChecklistBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
     /// Configuração da página de serviços do turno.
     ///
     /// Tela que lista serviços executados e permite adicionar novos.

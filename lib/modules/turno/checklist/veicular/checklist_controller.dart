@@ -8,6 +8,8 @@ import 'package:nexa_app/routes/routes.dart';
 class ChecklistController extends GetxController {
   final ChecklistService _checklistService = Get.find<ChecklistService>();
 
+  bool get _isChecklistEPC => Get.currentRoute == Routes.turnoChecklistEPC;
+
   /// Checklist completo carregado.
   final Rxn<ChecklistCompletoModel> checklist = Rxn<ChecklistCompletoModel>();
 
@@ -28,21 +30,35 @@ class ChecklistController extends GetxController {
   Future<void> _carregarChecklist() async {
     try {
       isLoading.value = true;
-      AppLogger.d('📋 Carregando checklist...', tag: 'ChecklistController');
+      checklist.value = null;
+      perguntas.clear();
 
-      final checklistCarregado =
-          await _checklistService.buscarChecklistDoTurnoAtivo();
+      final tipoChecklistDescricao = _isChecklistEPC ? 'EPC' : 'veicular';
+      AppLogger.d('📋 Carregando checklist $tipoChecklistDescricao...',
+          tag: 'ChecklistController');
+
+      final checklistCarregado = _isChecklistEPC
+          ? await _checklistService.buscarChecklistEPCDoTurnoAtivo()
+          : await _checklistService.buscarChecklistDoTurnoAtivo();
 
       if (checklistCarregado == null) {
         AppLogger.w('⚠️ Nenhum checklist encontrado',
             tag: 'ChecklistController');
+        final mensagem = _isChecklistEPC
+            ? 'Nenhum checklist de EPC encontrado para esta equipe'
+            : 'Nenhum checklist encontrado para este veículo';
         Get.snackbar(
           'Atenção',
-          'Nenhum checklist encontrado para este veículo',
+          mensagem,
           snackPosition: SnackPosition.BOTTOM,
         );
-        // Volta para a home se não encontrar checklist
-        Get.offAllNamed(Routes.home);
+
+        if (_isChecklistEPC) {
+          Get.offAllNamed(Routes.turnoServicos);
+        } else {
+          // Volta para a home se não encontrar checklist veicular
+          Get.offAllNamed(Routes.home);
+        }
         return;
       }
 
@@ -54,7 +70,8 @@ class ChecklistController extends GetxController {
       AppLogger.d('📊 ${perguntas.length} perguntas no checklist',
           tag: 'ChecklistController');
     } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao carregar checklist', tag: 'ChecklistController', error: e, stackTrace: stackTrace);
+      AppLogger.e('❌ Erro ao carregar checklist',
+          tag: 'ChecklistController', error: e, stackTrace: stackTrace);
       Get.snackbar(
         'Erro',
         'Erro ao carregar checklist',
@@ -68,7 +85,8 @@ class ChecklistController extends GetxController {
   /// Seleciona uma resposta para uma pergunta.
   void selecionarResposta(int perguntaId, int opcaoId) {
     try {
-      AppLogger.d('📝 Selecionando resposta: pergunta=$perguntaId, opção=$opcaoId',
+      AppLogger.d(
+          '📝 Selecionando resposta: pergunta=$perguntaId, opção=$opcaoId',
           tag: 'ChecklistController');
 
       // Encontrar a pergunta e atualizar
@@ -91,18 +109,17 @@ class ChecklistController extends GetxController {
             tag: 'ChecklistController');
       }
     } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao selecionar resposta', tag: 'ChecklistController', error: e, stackTrace: stackTrace);
+      AppLogger.e('❌ Erro ao selecionar resposta',
+          tag: 'ChecklistController', error: e, stackTrace: stackTrace);
     }
   }
 
   /// Valida se todas as perguntas foram respondidas.
   bool validarRespostas() {
-    final naoRespondidas =
-        perguntas.where((p) => !p.foiRespondida).toList();
+    final naoRespondidas = perguntas.where((p) => !p.foiRespondida).toList();
 
     if (naoRespondidas.isNotEmpty) {
-      AppLogger.w(
-          '⚠️ ${naoRespondidas.length} perguntas não respondidas',
+      AppLogger.w('⚠️ ${naoRespondidas.length} perguntas não respondidas',
           tag: 'ChecklistController');
       Get.snackbar(
         'Atenção',
@@ -117,8 +134,8 @@ class ChecklistController extends GetxController {
 
   /// Verifica se há pendências nas respostas.
   bool hasPendencias() {
-    return perguntas.any((p) =>
-        p.opcaoSelecionada != null && p.opcaoSelecionada!.geraPendencia);
+    return perguntas.any(
+        (p) => p.opcaoSelecionada != null && p.opcaoSelecionada!.geraPendencia);
   }
 
   /// Finaliza o checklist e avança para a próxima etapa.
@@ -150,8 +167,11 @@ class ChecklistController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      // Navegar para a próxima tela (serviços do turno)
-      Get.offAllNamed(Routes.turnoServicos);
+      if (_isChecklistEPC) {
+        Get.offAllNamed(Routes.turnoServicos);
+      } else {
+        Get.offAllNamed(Routes.turnoChecklistEPC);
+      }
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao finalizar checklist',
           tag: 'ChecklistController', error: e, stackTrace: stackTrace);
@@ -176,4 +196,3 @@ class ChecklistController extends GetxController {
     return '$respondidas/${perguntas.length}';
   }
 }
-

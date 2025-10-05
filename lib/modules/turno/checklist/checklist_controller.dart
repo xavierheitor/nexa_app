@@ -22,17 +22,23 @@ class ChecklistController extends GetxController {
     _carregarChecklist();
   }
 
+  /// Detecta o tipo de checklist baseado na rota atual
+  bool get _isChecklistEPC {
+    return Get.currentRoute == '/turno/checklist/epc';
+  }
+
   /// Carrega o checklist do turno ativo
   Future<void> _carregarChecklist() async {
     try {
       isLoading.value = true;
       AppLogger.d('🔄 Carregando checklist...', tag: 'ChecklistController');
 
-      final checklistCompleto =
-          await _checklistService.buscarChecklistDoTurnoAtivo();
-      
+      final checklistCompleto = _isChecklistEPC
+          ? await _checklistService.buscarChecklistEPCDoTurnoAtivo()
+          : await _checklistService.buscarChecklistDoTurnoAtivo();
+
       if (checklistCompleto != null) {
-        this.checklist.value = checklistCompleto;
+        checklist.value = checklistCompleto;
         AppLogger.i('✅ Checklist carregado: ${checklistCompleto.modelo.nome}',
             tag: 'ChecklistController');
         AppLogger.d(
@@ -159,8 +165,14 @@ class ChecklistController extends GetxController {
             tag: 'ChecklistController');
         Get.snackbar('Sucesso', 'Checklist salvo com sucesso!');
 
-        // Navegar para a próxima tela ou voltar
-        Get.back();
+        // Navegar para a próxima tela baseada no tipo de checklist
+        if (_isChecklistEPC) {
+          // Se é EPC, vai para serviços
+          Get.offAllNamed('/turno/servicos');
+        } else {
+          // Se é veicular, vai para EPC
+          Get.offAllNamed('/turno/checklist/epc');
+        }
       } else {
         AppLogger.e('❌ Erro ao salvar checklist', tag: 'ChecklistController');
         Get.snackbar('Erro', 'Erro ao salvar checklist');
