@@ -21,7 +21,9 @@ import 'package:nexa_app/core/database/daos/tipo_veiculo_dao.dart';
 import 'package:nexa_app/core/database/daos/veiculo_dao.dart';
 import 'package:nexa_app/core/database/daos/tipo_equipe_dao.dart';
 import 'package:nexa_app/core/database/daos/equipe_dao.dart';
+import 'package:nexa_app/core/database/daos/eletricista_dao.dart';
 import 'package:nexa_app/core/database/logging_executor.dart';
+import 'package:nexa_app/core/database/models/eletricista_table.dart';
 import 'package:nexa_app/core/database/models/equipe_table.dart';
 import 'package:nexa_app/core/database/models/tipo_equipe_table.dart';
 import 'package:nexa_app/core/database/models/usuario_table.dart';
@@ -53,9 +55,17 @@ LazyDatabase _openConnection() {
     TipoVeiculoTable,
     VeiculoTable,
     TipoEquipeTable,
-    EquipeTable
+    EquipeTable,
+    EletricistaTable
   ],
-  daos: [UsuarioDao, TipoVeiculoDao, VeiculoDao, TipoEquipeDao, EquipeDao],
+  daos: [
+    UsuarioDao,
+    TipoVeiculoDao,
+    VeiculoDao,
+    TipoEquipeDao,
+    EquipeDao,
+    EletricistaDao
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection()) {

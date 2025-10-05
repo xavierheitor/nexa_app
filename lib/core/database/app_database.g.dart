@@ -1756,6 +1756,391 @@ class EquipeTableCompanion extends UpdateCompanion<EquipeTableData> {
   }
 }
 
+class $EletricistaTableTable extends EletricistaTable
+    with TableInfo<$EletricistaTableTable, EletricistaTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EletricistaTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  @override
+  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
+      'nome', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 2, maxTextLength: 100),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _matriculaMeta =
+      const VerificationMeta('matricula');
+  @override
+  late final GeneratedColumn<String> matricula = GeneratedColumn<String>(
+      'matricula', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, remoteId, createdAt, updatedAt, sincronizado, nome, matricula];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'eletricista_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<EletricistaTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
+    }
+    if (data.containsKey('nome')) {
+      context.handle(
+          _nomeMeta, nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta));
+    } else if (isInserting) {
+      context.missing(_nomeMeta);
+    }
+    if (data.containsKey('matricula')) {
+      context.handle(_matriculaMeta,
+          matricula.isAcceptableOrUnknown(data['matricula']!, _matriculaMeta));
+    } else if (isInserting) {
+      context.missing(_matriculaMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EletricistaTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EletricistaTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
+      nome: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}nome'])!,
+      matricula: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}matricula'])!,
+    );
+  }
+
+  @override
+  $EletricistaTableTable createAlias(String alias) {
+    return $EletricistaTableTable(attachedDatabase, alias);
+  }
+}
+
+class EletricistaTableData extends DataClass
+    implements Insertable<EletricistaTableData> {
+  final int id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
+  final String nome;
+  final String matricula;
+  const EletricistaTableData(
+      {required this.id,
+      required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
+      required this.nome,
+      required this.matricula});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    map['nome'] = Variable<String>(nome);
+    map['matricula'] = Variable<String>(matricula);
+    return map;
+  }
+
+  EletricistaTableCompanion toCompanion(bool nullToAbsent) {
+    return EletricistaTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
+      nome: Value(nome),
+      matricula: Value(matricula),
+    );
+  }
+
+  factory EletricistaTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EletricistaTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+      nome: serializer.fromJson<String>(json['nome']),
+      matricula: serializer.fromJson<String>(json['matricula']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+      'nome': serializer.toJson<String>(nome),
+      'matricula': serializer.toJson<String>(matricula),
+    };
+  }
+
+  EletricistaTableData copyWith(
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          String? nome,
+          String? matricula}) =>
+      EletricistaTableData(
+        id: id ?? this.id,
+        remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
+        nome: nome ?? this.nome,
+        matricula: matricula ?? this.matricula,
+      );
+  EletricistaTableData copyWithCompanion(EletricistaTableCompanion data) {
+    return EletricistaTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+      nome: data.nome.present ? data.nome.value : this.nome,
+      matricula: data.matricula.present ? data.matricula.value : this.matricula,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EletricistaTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('nome: $nome, ')
+          ..write('matricula: $matricula')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, remoteId, createdAt, updatedAt, sincronizado, nome, matricula);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EletricistaTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
+          other.nome == this.nome &&
+          other.matricula == this.matricula);
+}
+
+class EletricistaTableCompanion extends UpdateCompanion<EletricistaTableData> {
+  final Value<int> id;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
+  final Value<String> nome;
+  final Value<String> matricula;
+  const EletricistaTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.nome = const Value.absent(),
+    this.matricula = const Value.absent(),
+  });
+  EletricistaTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
+    required String nome,
+    required String matricula,
+  })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        nome = Value(nome),
+        matricula = Value(matricula);
+  static Insertable<EletricistaTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
+    Expression<String>? nome,
+    Expression<String>? matricula,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (nome != null) 'nome': nome,
+      if (matricula != null) 'matricula': matricula,
+    });
+  }
+
+  EletricistaTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
+      Value<String>? nome,
+      Value<String>? matricula}) {
+    return EletricistaTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
+      nome: nome ?? this.nome,
+      matricula: matricula ?? this.matricula,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (nome.present) {
+      map['nome'] = Variable<String>(nome.value);
+    }
+    if (matricula.present) {
+      map['matricula'] = Variable<String>(matricula.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EletricistaTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('nome: $nome, ')
+          ..write('matricula: $matricula')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1766,12 +2151,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TipoEquipeTableTable tipoEquipeTable =
       $TipoEquipeTableTable(this);
   late final $EquipeTableTable equipeTable = $EquipeTableTable(this);
+  late final $EletricistaTableTable eletricistaTable =
+      $EletricistaTableTable(this);
   late final UsuarioDao usuarioDao = UsuarioDao(this as AppDatabase);
   late final TipoVeiculoDao tipoVeiculoDao =
       TipoVeiculoDao(this as AppDatabase);
   late final VeiculoDao veiculoDao = VeiculoDao(this as AppDatabase);
   late final TipoEquipeDao tipoEquipeDao = TipoEquipeDao(this as AppDatabase);
   late final EquipeDao equipeDao = EquipeDao(this as AppDatabase);
+  late final EletricistaDao eletricistaDao =
+      EletricistaDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1781,7 +2170,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         tipoVeiculoTable,
         veiculoTable,
         tipoEquipeTable,
-        equipeTable
+        equipeTable,
+        eletricistaTable
       ];
 }
 
@@ -2704,6 +3094,207 @@ typedef $$EquipeTableTableProcessedTableManager = ProcessedTableManager<
     ),
     EquipeTableData,
     PrefetchHooks Function()>;
+typedef $$EletricistaTableTableCreateCompanionBuilder
+    = EletricistaTableCompanion Function({
+  Value<int> id,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
+  required String nome,
+  required String matricula,
+});
+typedef $$EletricistaTableTableUpdateCompanionBuilder
+    = EletricistaTableCompanion Function({
+  Value<int> id,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
+  Value<String> nome,
+  Value<String> matricula,
+});
+
+class $$EletricistaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $EletricistaTableTable> {
+  $$EletricistaTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nome => $composableBuilder(
+      column: $table.nome, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get matricula => $composableBuilder(
+      column: $table.matricula, builder: (column) => ColumnFilters(column));
+}
+
+class $$EletricistaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $EletricistaTableTable> {
+  $$EletricistaTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nome => $composableBuilder(
+      column: $table.nome, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get matricula => $composableBuilder(
+      column: $table.matricula, builder: (column) => ColumnOrderings(column));
+}
+
+class $$EletricistaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EletricistaTableTable> {
+  $$EletricistaTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
+
+  GeneratedColumn<String> get nome =>
+      $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  GeneratedColumn<String> get matricula =>
+      $composableBuilder(column: $table.matricula, builder: (column) => column);
+}
+
+class $$EletricistaTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $EletricistaTableTable,
+    EletricistaTableData,
+    $$EletricistaTableTableFilterComposer,
+    $$EletricistaTableTableOrderingComposer,
+    $$EletricistaTableTableAnnotationComposer,
+    $$EletricistaTableTableCreateCompanionBuilder,
+    $$EletricistaTableTableUpdateCompanionBuilder,
+    (
+      EletricistaTableData,
+      BaseReferences<_$AppDatabase, $EletricistaTableTable,
+          EletricistaTableData>
+    ),
+    EletricistaTableData,
+    PrefetchHooks Function()> {
+  $$EletricistaTableTableTableManager(
+      _$AppDatabase db, $EletricistaTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EletricistaTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EletricistaTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EletricistaTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
+            Value<String> nome = const Value.absent(),
+            Value<String> matricula = const Value.absent(),
+          }) =>
+              EletricistaTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            nome: nome,
+            matricula: matricula,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
+            required String nome,
+            required String matricula,
+          }) =>
+              EletricistaTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            nome: nome,
+            matricula: matricula,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$EletricistaTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $EletricistaTableTable,
+    EletricistaTableData,
+    $$EletricistaTableTableFilterComposer,
+    $$EletricistaTableTableOrderingComposer,
+    $$EletricistaTableTableAnnotationComposer,
+    $$EletricistaTableTableCreateCompanionBuilder,
+    $$EletricistaTableTableUpdateCompanionBuilder,
+    (
+      EletricistaTableData,
+      BaseReferences<_$AppDatabase, $EletricistaTableTable,
+          EletricistaTableData>
+    ),
+    EletricistaTableData,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2718,4 +3309,6 @@ class $AppDatabaseManager {
       $$TipoEquipeTableTableTableManager(_db, _db.tipoEquipeTable);
   $$EquipeTableTableTableManager get equipeTable =>
       $$EquipeTableTableTableManager(_db, _db.equipeTable);
+  $$EletricistaTableTableTableManager get eletricistaTable =>
+      $$EletricistaTableTableTableManager(_db, _db.eletricistaTable);
 }
