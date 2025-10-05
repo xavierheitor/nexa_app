@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/routes/routes.dart';
 import 'package:nexa_app/widgets/custom_searcheable_dropdown.dart';
 import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/equipe_table_dto.dart';
@@ -228,7 +229,11 @@ class AbrirTurnoController extends GetxController {
       // Atualiza o TurnoController global
       await _turnoController.carregarTurnoAtivo();
 
-      Get.back(); // Volta para home
+      // Fecha a tela de abertura
+      Get.back();
+
+      // Navega diretamente para o checklist
+      Get.toNamed(Routes.turnoChecklist);
 
       Get.snackbar(
         'Sucesso',

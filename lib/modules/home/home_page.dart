@@ -90,11 +90,158 @@ class HomePage extends StatelessWidget {
   Widget _buildTurnoCard(HomeController controller, ColorScheme colorScheme) {
     final turno = controller.turnoController.turnoAtivo.value;
 
-    if (turno == null || turno.situacaoTurno != SituacaoTurno.aberto) {
+    if (turno == null) {
       return _buildSemTurnoCard(controller, colorScheme);
     }
 
-    return _buildTurnoAtivoCard(controller, turno, colorScheme);
+    // Se turno está em abertura, mostra card especial
+    if (turno.situacaoTurno == SituacaoTurno.emAbertura) {
+      return _buildTurnoEmAberturaCard(controller, turno, colorScheme);
+    }
+
+    // Se turno está aberto, mostra card normal
+    if (turno.situacaoTurno == SituacaoTurno.aberto) {
+      return _buildTurnoAtivoCard(controller, turno, colorScheme);
+    }
+
+    // Se turno está fechado, mostra card para abrir novo
+    return _buildSemTurnoCard(controller, colorScheme);
+  }
+
+  /// Constrói o card quando turno está em abertura.
+  Widget _buildTurnoEmAberturaCard(
+      HomeController controller, dynamic turno, ColorScheme colorScheme) {
+    final horaInicio = DateFormat('HH:mm').format(turno.horaInicio);
+
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: () => Get.toNamed(Routes.turnoChecklist),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.orange.shade100,
+                Colors.amber.shade50,
+              ],
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.hourglass_empty,
+                    size: 32,
+                    color: Colors.orange.shade700,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Turno em Abertura',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange.shade800,
+                          ),
+                        ),
+                        Text(
+                          'Aguardando checklists',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.orange.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade200,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'EM ABERTURA',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: Colors.orange.shade600,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Iniciado às $horaInicio',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.orange.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    Icons.directions_car,
+                    size: 16,
+                    color: Colors.orange.shade600,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Veículo ${turno.veiculoId}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.orange.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade200,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Toque para continuar com os checklists',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   /// Constrói o card quando não há turno aberto.
@@ -453,6 +600,7 @@ class HomePage extends StatelessWidget {
           ),
           FilledButton(
             onPressed: () {
+              // Fecha o dialog primeiro
               Get.back();
               // Navega para tela de abrir turno
               Get.toNamed(Routes.turnoAbrir);
@@ -461,6 +609,7 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+      barrierDismissible: true, // Permite fechar tocando fora
     );
   }
 
