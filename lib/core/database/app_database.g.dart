@@ -2141,6 +2141,803 @@ class EletricistaTableCompanion extends UpdateCompanion<EletricistaTableData> {
   }
 }
 
+class $TurnoTableTable extends TurnoTable
+    with TableInfo<$TurnoTableTable, TurnoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TurnoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _veiculoIdMeta =
+      const VerificationMeta('veiculoId');
+  @override
+  late final GeneratedColumn<int> veiculoId = GeneratedColumn<int>(
+      'veiculo_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _equipeIdMeta =
+      const VerificationMeta('equipeId');
+  @override
+  late final GeneratedColumn<int> equipeId = GeneratedColumn<int>(
+      'equipe_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _kmInicialMeta =
+      const VerificationMeta('kmInicial');
+  @override
+  late final GeneratedColumn<int> kmInicial = GeneratedColumn<int>(
+      'km_inicial', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _kmFinalMeta =
+      const VerificationMeta('kmFinal');
+  @override
+  late final GeneratedColumn<int> kmFinal = GeneratedColumn<int>(
+      'km_final', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _horaInicioMeta =
+      const VerificationMeta('horaInicio');
+  @override
+  late final GeneratedColumn<DateTime> horaInicio = GeneratedColumn<DateTime>(
+      'hora_inicio', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _horaFimMeta =
+      const VerificationMeta('horaFim');
+  @override
+  late final GeneratedColumn<DateTime> horaFim = GeneratedColumn<DateTime>(
+      'hora_fim', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _latitudeMeta =
+      const VerificationMeta('latitude');
+  @override
+  late final GeneratedColumn<String> latitude = GeneratedColumn<String>(
+      'latitude', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _longitudeMeta =
+      const VerificationMeta('longitude');
+  @override
+  late final GeneratedColumn<String> longitude = GeneratedColumn<String>(
+      'longitude', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _situacaoTurnoMeta =
+      const VerificationMeta('situacaoTurno');
+  @override
+  late final GeneratedColumnWithTypeConverter<SituacaoTurno, String>
+      situacaoTurno = GeneratedColumn<String>(
+              'situacao_turno', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<SituacaoTurno>(
+              $TurnoTableTable.$convertersituacaoTurno);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        remoteId,
+        veiculoId,
+        equipeId,
+        kmInicial,
+        kmFinal,
+        horaInicio,
+        horaFim,
+        latitude,
+        longitude,
+        situacaoTurno
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'turno_table';
+  @override
+  VerificationContext validateIntegrity(Insertable<TurnoTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    }
+    if (data.containsKey('veiculo_id')) {
+      context.handle(_veiculoIdMeta,
+          veiculoId.isAcceptableOrUnknown(data['veiculo_id']!, _veiculoIdMeta));
+    } else if (isInserting) {
+      context.missing(_veiculoIdMeta);
+    }
+    if (data.containsKey('equipe_id')) {
+      context.handle(_equipeIdMeta,
+          equipeId.isAcceptableOrUnknown(data['equipe_id']!, _equipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_equipeIdMeta);
+    }
+    if (data.containsKey('km_inicial')) {
+      context.handle(_kmInicialMeta,
+          kmInicial.isAcceptableOrUnknown(data['km_inicial']!, _kmInicialMeta));
+    } else if (isInserting) {
+      context.missing(_kmInicialMeta);
+    }
+    if (data.containsKey('km_final')) {
+      context.handle(_kmFinalMeta,
+          kmFinal.isAcceptableOrUnknown(data['km_final']!, _kmFinalMeta));
+    }
+    if (data.containsKey('hora_inicio')) {
+      context.handle(
+          _horaInicioMeta,
+          horaInicio.isAcceptableOrUnknown(
+              data['hora_inicio']!, _horaInicioMeta));
+    } else if (isInserting) {
+      context.missing(_horaInicioMeta);
+    }
+    if (data.containsKey('hora_fim')) {
+      context.handle(_horaFimMeta,
+          horaFim.isAcceptableOrUnknown(data['hora_fim']!, _horaFimMeta));
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(_latitudeMeta,
+          latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta));
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(_longitudeMeta,
+          longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta));
+    }
+    context.handle(_situacaoTurnoMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TurnoTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TurnoTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id']),
+      veiculoId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}veiculo_id'])!,
+      equipeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}equipe_id'])!,
+      kmInicial: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}km_inicial'])!,
+      kmFinal: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}km_final']),
+      horaInicio: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}hora_inicio'])!,
+      horaFim: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}hora_fim']),
+      latitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}latitude']),
+      longitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}longitude']),
+      situacaoTurno: $TurnoTableTable.$convertersituacaoTurno.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}situacao_turno'])!),
+    );
+  }
+
+  @override
+  $TurnoTableTable createAlias(String alias) {
+    return $TurnoTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<SituacaoTurno, String> $convertersituacaoTurno =
+      const SituacaoTurnoConverter();
+}
+
+class TurnoTableData extends DataClass implements Insertable<TurnoTableData> {
+  /// ID único local (chave primária).
+  final int id;
+
+  /// ID remoto do servidor (pode ser nulo se ainda não sincronizado).
+  final int? remoteId;
+
+  /// ID do veículo utilizado no turno.
+  final int veiculoId;
+
+  /// ID da equipe responsável pelo turno.
+  final int equipeId;
+
+  /// Quilometragem inicial do veículo.
+  final int kmInicial;
+
+  /// Quilometragem final do veículo (nula até o fechamento do turno).
+  final int? kmFinal;
+
+  /// Data e hora de início do turno.
+  final DateTime horaInicio;
+
+  /// Data e hora de fim do turno (nula até o fechamento).
+  final DateTime? horaFim;
+
+  /// Latitude da localização de início do turno.
+  final String? latitude;
+
+  /// Longitude da localização de início do turno.
+  final String? longitude;
+
+  /// Situação atual do turno (usando converter personalizado).
+  final SituacaoTurno situacaoTurno;
+  const TurnoTableData(
+      {required this.id,
+      this.remoteId,
+      required this.veiculoId,
+      required this.equipeId,
+      required this.kmInicial,
+      this.kmFinal,
+      required this.horaInicio,
+      this.horaFim,
+      this.latitude,
+      this.longitude,
+      required this.situacaoTurno});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<int>(remoteId);
+    }
+    map['veiculo_id'] = Variable<int>(veiculoId);
+    map['equipe_id'] = Variable<int>(equipeId);
+    map['km_inicial'] = Variable<int>(kmInicial);
+    if (!nullToAbsent || kmFinal != null) {
+      map['km_final'] = Variable<int>(kmFinal);
+    }
+    map['hora_inicio'] = Variable<DateTime>(horaInicio);
+    if (!nullToAbsent || horaFim != null) {
+      map['hora_fim'] = Variable<DateTime>(horaFim);
+    }
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<String>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<String>(longitude);
+    }
+    {
+      map['situacao_turno'] = Variable<String>(
+          $TurnoTableTable.$convertersituacaoTurno.toSql(situacaoTurno));
+    }
+    return map;
+  }
+
+  TurnoTableCompanion toCompanion(bool nullToAbsent) {
+    return TurnoTableCompanion(
+      id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      veiculoId: Value(veiculoId),
+      equipeId: Value(equipeId),
+      kmInicial: Value(kmInicial),
+      kmFinal: kmFinal == null && nullToAbsent
+          ? const Value.absent()
+          : Value(kmFinal),
+      horaInicio: Value(horaInicio),
+      horaFim: horaFim == null && nullToAbsent
+          ? const Value.absent()
+          : Value(horaFim),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
+      situacaoTurno: Value(situacaoTurno),
+    );
+  }
+
+  factory TurnoTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TurnoTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int?>(json['remoteId']),
+      veiculoId: serializer.fromJson<int>(json['veiculoId']),
+      equipeId: serializer.fromJson<int>(json['equipeId']),
+      kmInicial: serializer.fromJson<int>(json['kmInicial']),
+      kmFinal: serializer.fromJson<int?>(json['kmFinal']),
+      horaInicio: serializer.fromJson<DateTime>(json['horaInicio']),
+      horaFim: serializer.fromJson<DateTime?>(json['horaFim']),
+      latitude: serializer.fromJson<String?>(json['latitude']),
+      longitude: serializer.fromJson<String?>(json['longitude']),
+      situacaoTurno: serializer.fromJson<SituacaoTurno>(json['situacaoTurno']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int?>(remoteId),
+      'veiculoId': serializer.toJson<int>(veiculoId),
+      'equipeId': serializer.toJson<int>(equipeId),
+      'kmInicial': serializer.toJson<int>(kmInicial),
+      'kmFinal': serializer.toJson<int?>(kmFinal),
+      'horaInicio': serializer.toJson<DateTime>(horaInicio),
+      'horaFim': serializer.toJson<DateTime?>(horaFim),
+      'latitude': serializer.toJson<String?>(latitude),
+      'longitude': serializer.toJson<String?>(longitude),
+      'situacaoTurno': serializer.toJson<SituacaoTurno>(situacaoTurno),
+    };
+  }
+
+  TurnoTableData copyWith(
+          {int? id,
+          Value<int?> remoteId = const Value.absent(),
+          int? veiculoId,
+          int? equipeId,
+          int? kmInicial,
+          Value<int?> kmFinal = const Value.absent(),
+          DateTime? horaInicio,
+          Value<DateTime?> horaFim = const Value.absent(),
+          Value<String?> latitude = const Value.absent(),
+          Value<String?> longitude = const Value.absent(),
+          SituacaoTurno? situacaoTurno}) =>
+      TurnoTableData(
+        id: id ?? this.id,
+        remoteId: remoteId.present ? remoteId.value : this.remoteId,
+        veiculoId: veiculoId ?? this.veiculoId,
+        equipeId: equipeId ?? this.equipeId,
+        kmInicial: kmInicial ?? this.kmInicial,
+        kmFinal: kmFinal.present ? kmFinal.value : this.kmFinal,
+        horaInicio: horaInicio ?? this.horaInicio,
+        horaFim: horaFim.present ? horaFim.value : this.horaFim,
+        latitude: latitude.present ? latitude.value : this.latitude,
+        longitude: longitude.present ? longitude.value : this.longitude,
+        situacaoTurno: situacaoTurno ?? this.situacaoTurno,
+      );
+  TurnoTableData copyWithCompanion(TurnoTableCompanion data) {
+    return TurnoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      veiculoId: data.veiculoId.present ? data.veiculoId.value : this.veiculoId,
+      equipeId: data.equipeId.present ? data.equipeId.value : this.equipeId,
+      kmInicial: data.kmInicial.present ? data.kmInicial.value : this.kmInicial,
+      kmFinal: data.kmFinal.present ? data.kmFinal.value : this.kmFinal,
+      horaInicio:
+          data.horaInicio.present ? data.horaInicio.value : this.horaInicio,
+      horaFim: data.horaFim.present ? data.horaFim.value : this.horaFim,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      situacaoTurno: data.situacaoTurno.present
+          ? data.situacaoTurno.value
+          : this.situacaoTurno,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TurnoTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('veiculoId: $veiculoId, ')
+          ..write('equipeId: $equipeId, ')
+          ..write('kmInicial: $kmInicial, ')
+          ..write('kmFinal: $kmFinal, ')
+          ..write('horaInicio: $horaInicio, ')
+          ..write('horaFim: $horaFim, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('situacaoTurno: $situacaoTurno')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, remoteId, veiculoId, equipeId, kmInicial,
+      kmFinal, horaInicio, horaFim, latitude, longitude, situacaoTurno);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TurnoTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.veiculoId == this.veiculoId &&
+          other.equipeId == this.equipeId &&
+          other.kmInicial == this.kmInicial &&
+          other.kmFinal == this.kmFinal &&
+          other.horaInicio == this.horaInicio &&
+          other.horaFim == this.horaFim &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.situacaoTurno == this.situacaoTurno);
+}
+
+class TurnoTableCompanion extends UpdateCompanion<TurnoTableData> {
+  final Value<int> id;
+  final Value<int?> remoteId;
+  final Value<int> veiculoId;
+  final Value<int> equipeId;
+  final Value<int> kmInicial;
+  final Value<int?> kmFinal;
+  final Value<DateTime> horaInicio;
+  final Value<DateTime?> horaFim;
+  final Value<String?> latitude;
+  final Value<String?> longitude;
+  final Value<SituacaoTurno> situacaoTurno;
+  const TurnoTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.veiculoId = const Value.absent(),
+    this.equipeId = const Value.absent(),
+    this.kmInicial = const Value.absent(),
+    this.kmFinal = const Value.absent(),
+    this.horaInicio = const Value.absent(),
+    this.horaFim = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.situacaoTurno = const Value.absent(),
+  });
+  TurnoTableCompanion.insert({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    required int veiculoId,
+    required int equipeId,
+    required int kmInicial,
+    this.kmFinal = const Value.absent(),
+    required DateTime horaInicio,
+    this.horaFim = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    required SituacaoTurno situacaoTurno,
+  })  : veiculoId = Value(veiculoId),
+        equipeId = Value(equipeId),
+        kmInicial = Value(kmInicial),
+        horaInicio = Value(horaInicio),
+        situacaoTurno = Value(situacaoTurno);
+  static Insertable<TurnoTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<int>? veiculoId,
+    Expression<int>? equipeId,
+    Expression<int>? kmInicial,
+    Expression<int>? kmFinal,
+    Expression<DateTime>? horaInicio,
+    Expression<DateTime>? horaFim,
+    Expression<String>? latitude,
+    Expression<String>? longitude,
+    Expression<String>? situacaoTurno,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (veiculoId != null) 'veiculo_id': veiculoId,
+      if (equipeId != null) 'equipe_id': equipeId,
+      if (kmInicial != null) 'km_inicial': kmInicial,
+      if (kmFinal != null) 'km_final': kmFinal,
+      if (horaInicio != null) 'hora_inicio': horaInicio,
+      if (horaFim != null) 'hora_fim': horaFim,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (situacaoTurno != null) 'situacao_turno': situacaoTurno,
+    });
+  }
+
+  TurnoTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int?>? remoteId,
+      Value<int>? veiculoId,
+      Value<int>? equipeId,
+      Value<int>? kmInicial,
+      Value<int?>? kmFinal,
+      Value<DateTime>? horaInicio,
+      Value<DateTime?>? horaFim,
+      Value<String?>? latitude,
+      Value<String?>? longitude,
+      Value<SituacaoTurno>? situacaoTurno}) {
+    return TurnoTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      veiculoId: veiculoId ?? this.veiculoId,
+      equipeId: equipeId ?? this.equipeId,
+      kmInicial: kmInicial ?? this.kmInicial,
+      kmFinal: kmFinal ?? this.kmFinal,
+      horaInicio: horaInicio ?? this.horaInicio,
+      horaFim: horaFim ?? this.horaFim,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      situacaoTurno: situacaoTurno ?? this.situacaoTurno,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (veiculoId.present) {
+      map['veiculo_id'] = Variable<int>(veiculoId.value);
+    }
+    if (equipeId.present) {
+      map['equipe_id'] = Variable<int>(equipeId.value);
+    }
+    if (kmInicial.present) {
+      map['km_inicial'] = Variable<int>(kmInicial.value);
+    }
+    if (kmFinal.present) {
+      map['km_final'] = Variable<int>(kmFinal.value);
+    }
+    if (horaInicio.present) {
+      map['hora_inicio'] = Variable<DateTime>(horaInicio.value);
+    }
+    if (horaFim.present) {
+      map['hora_fim'] = Variable<DateTime>(horaFim.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<String>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<String>(longitude.value);
+    }
+    if (situacaoTurno.present) {
+      map['situacao_turno'] = Variable<String>(
+          $TurnoTableTable.$convertersituacaoTurno.toSql(situacaoTurno.value));
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TurnoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('veiculoId: $veiculoId, ')
+          ..write('equipeId: $equipeId, ')
+          ..write('kmInicial: $kmInicial, ')
+          ..write('kmFinal: $kmFinal, ')
+          ..write('horaInicio: $horaInicio, ')
+          ..write('horaFim: $horaFim, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('situacaoTurno: $situacaoTurno')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TurnoEletricistasTableTable extends TurnoEletricistasTable
+    with TableInfo<$TurnoEletricistasTableTable, TurnoEletricistasTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TurnoEletricistasTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _turnoIdMeta =
+      const VerificationMeta('turnoId');
+  @override
+  late final GeneratedColumn<int> turnoId = GeneratedColumn<int>(
+      'turno_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _eletricistaIdMeta =
+      const VerificationMeta('eletricistaId');
+  @override
+  late final GeneratedColumn<int> eletricistaId = GeneratedColumn<int>(
+      'eletricista_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, turnoId, eletricistaId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'turno_eletricistas_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<TurnoEletricistasTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('turno_id')) {
+      context.handle(_turnoIdMeta,
+          turnoId.isAcceptableOrUnknown(data['turno_id']!, _turnoIdMeta));
+    } else if (isInserting) {
+      context.missing(_turnoIdMeta);
+    }
+    if (data.containsKey('eletricista_id')) {
+      context.handle(
+          _eletricistaIdMeta,
+          eletricistaId.isAcceptableOrUnknown(
+              data['eletricista_id']!, _eletricistaIdMeta));
+    } else if (isInserting) {
+      context.missing(_eletricistaIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TurnoEletricistasTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TurnoEletricistasTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      turnoId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}turno_id'])!,
+      eletricistaId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}eletricista_id'])!,
+    );
+  }
+
+  @override
+  $TurnoEletricistasTableTable createAlias(String alias) {
+    return $TurnoEletricistasTableTable(attachedDatabase, alias);
+  }
+}
+
+class TurnoEletricistasTableData extends DataClass
+    implements Insertable<TurnoEletricistasTableData> {
+  final int id;
+  final int turnoId;
+  final int eletricistaId;
+  const TurnoEletricistasTableData(
+      {required this.id, required this.turnoId, required this.eletricistaId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['turno_id'] = Variable<int>(turnoId);
+    map['eletricista_id'] = Variable<int>(eletricistaId);
+    return map;
+  }
+
+  TurnoEletricistasTableCompanion toCompanion(bool nullToAbsent) {
+    return TurnoEletricistasTableCompanion(
+      id: Value(id),
+      turnoId: Value(turnoId),
+      eletricistaId: Value(eletricistaId),
+    );
+  }
+
+  factory TurnoEletricistasTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TurnoEletricistasTableData(
+      id: serializer.fromJson<int>(json['id']),
+      turnoId: serializer.fromJson<int>(json['turnoId']),
+      eletricistaId: serializer.fromJson<int>(json['eletricistaId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'turnoId': serializer.toJson<int>(turnoId),
+      'eletricistaId': serializer.toJson<int>(eletricistaId),
+    };
+  }
+
+  TurnoEletricistasTableData copyWith(
+          {int? id, int? turnoId, int? eletricistaId}) =>
+      TurnoEletricistasTableData(
+        id: id ?? this.id,
+        turnoId: turnoId ?? this.turnoId,
+        eletricistaId: eletricistaId ?? this.eletricistaId,
+      );
+  TurnoEletricistasTableData copyWithCompanion(
+      TurnoEletricistasTableCompanion data) {
+    return TurnoEletricistasTableData(
+      id: data.id.present ? data.id.value : this.id,
+      turnoId: data.turnoId.present ? data.turnoId.value : this.turnoId,
+      eletricistaId: data.eletricistaId.present
+          ? data.eletricistaId.value
+          : this.eletricistaId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TurnoEletricistasTableData(')
+          ..write('id: $id, ')
+          ..write('turnoId: $turnoId, ')
+          ..write('eletricistaId: $eletricistaId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, turnoId, eletricistaId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TurnoEletricistasTableData &&
+          other.id == this.id &&
+          other.turnoId == this.turnoId &&
+          other.eletricistaId == this.eletricistaId);
+}
+
+class TurnoEletricistasTableCompanion
+    extends UpdateCompanion<TurnoEletricistasTableData> {
+  final Value<int> id;
+  final Value<int> turnoId;
+  final Value<int> eletricistaId;
+  const TurnoEletricistasTableCompanion({
+    this.id = const Value.absent(),
+    this.turnoId = const Value.absent(),
+    this.eletricistaId = const Value.absent(),
+  });
+  TurnoEletricistasTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int turnoId,
+    required int eletricistaId,
+  })  : turnoId = Value(turnoId),
+        eletricistaId = Value(eletricistaId);
+  static Insertable<TurnoEletricistasTableData> custom({
+    Expression<int>? id,
+    Expression<int>? turnoId,
+    Expression<int>? eletricistaId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (turnoId != null) 'turno_id': turnoId,
+      if (eletricistaId != null) 'eletricista_id': eletricistaId,
+    });
+  }
+
+  TurnoEletricistasTableCompanion copyWith(
+      {Value<int>? id, Value<int>? turnoId, Value<int>? eletricistaId}) {
+    return TurnoEletricistasTableCompanion(
+      id: id ?? this.id,
+      turnoId: turnoId ?? this.turnoId,
+      eletricistaId: eletricistaId ?? this.eletricistaId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (turnoId.present) {
+      map['turno_id'] = Variable<int>(turnoId.value);
+    }
+    if (eletricistaId.present) {
+      map['eletricista_id'] = Variable<int>(eletricistaId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TurnoEletricistasTableCompanion(')
+          ..write('id: $id, ')
+          ..write('turnoId: $turnoId, ')
+          ..write('eletricistaId: $eletricistaId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2153,6 +2950,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $EquipeTableTable equipeTable = $EquipeTableTable(this);
   late final $EletricistaTableTable eletricistaTable =
       $EletricistaTableTable(this);
+  late final $TurnoTableTable turnoTable = $TurnoTableTable(this);
+  late final $TurnoEletricistasTableTable turnoEletricistasTable =
+      $TurnoEletricistasTableTable(this);
   late final UsuarioDao usuarioDao = UsuarioDao(this as AppDatabase);
   late final TipoVeiculoDao tipoVeiculoDao =
       TipoVeiculoDao(this as AppDatabase);
@@ -2161,6 +2961,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final EquipeDao equipeDao = EquipeDao(this as AppDatabase);
   late final EletricistaDao eletricistaDao =
       EletricistaDao(this as AppDatabase);
+  late final TurnoDao turnoDao = TurnoDao(this as AppDatabase);
+  late final TurnoEletricistasDao turnoEletricistasDao =
+      TurnoEletricistasDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2171,7 +2974,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         veiculoTable,
         tipoEquipeTable,
         equipeTable,
-        eletricistaTable
+        eletricistaTable,
+        turnoTable,
+        turnoEletricistasTable
       ];
 }
 
@@ -3295,6 +4100,410 @@ typedef $$EletricistaTableTableProcessedTableManager = ProcessedTableManager<
     ),
     EletricistaTableData,
     PrefetchHooks Function()>;
+typedef $$TurnoTableTableCreateCompanionBuilder = TurnoTableCompanion Function({
+  Value<int> id,
+  Value<int?> remoteId,
+  required int veiculoId,
+  required int equipeId,
+  required int kmInicial,
+  Value<int?> kmFinal,
+  required DateTime horaInicio,
+  Value<DateTime?> horaFim,
+  Value<String?> latitude,
+  Value<String?> longitude,
+  required SituacaoTurno situacaoTurno,
+});
+typedef $$TurnoTableTableUpdateCompanionBuilder = TurnoTableCompanion Function({
+  Value<int> id,
+  Value<int?> remoteId,
+  Value<int> veiculoId,
+  Value<int> equipeId,
+  Value<int> kmInicial,
+  Value<int?> kmFinal,
+  Value<DateTime> horaInicio,
+  Value<DateTime?> horaFim,
+  Value<String?> latitude,
+  Value<String?> longitude,
+  Value<SituacaoTurno> situacaoTurno,
+});
+
+class $$TurnoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $TurnoTableTable> {
+  $$TurnoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get veiculoId => $composableBuilder(
+      column: $table.veiculoId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get equipeId => $composableBuilder(
+      column: $table.equipeId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get kmInicial => $composableBuilder(
+      column: $table.kmInicial, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get kmFinal => $composableBuilder(
+      column: $table.kmFinal, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get horaInicio => $composableBuilder(
+      column: $table.horaInicio, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get horaFim => $composableBuilder(
+      column: $table.horaFim, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<SituacaoTurno, SituacaoTurno, String>
+      get situacaoTurno => $composableBuilder(
+          column: $table.situacaoTurno,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+}
+
+class $$TurnoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $TurnoTableTable> {
+  $$TurnoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get veiculoId => $composableBuilder(
+      column: $table.veiculoId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get equipeId => $composableBuilder(
+      column: $table.equipeId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get kmInicial => $composableBuilder(
+      column: $table.kmInicial, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get kmFinal => $composableBuilder(
+      column: $table.kmFinal, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get horaInicio => $composableBuilder(
+      column: $table.horaInicio, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get horaFim => $composableBuilder(
+      column: $table.horaFim, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get situacaoTurno => $composableBuilder(
+      column: $table.situacaoTurno,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$TurnoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TurnoTableTable> {
+  $$TurnoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<int> get veiculoId =>
+      $composableBuilder(column: $table.veiculoId, builder: (column) => column);
+
+  GeneratedColumn<int> get equipeId =>
+      $composableBuilder(column: $table.equipeId, builder: (column) => column);
+
+  GeneratedColumn<int> get kmInicial =>
+      $composableBuilder(column: $table.kmInicial, builder: (column) => column);
+
+  GeneratedColumn<int> get kmFinal =>
+      $composableBuilder(column: $table.kmFinal, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get horaInicio => $composableBuilder(
+      column: $table.horaInicio, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get horaFim =>
+      $composableBuilder(column: $table.horaFim, builder: (column) => column);
+
+  GeneratedColumn<String> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<String> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SituacaoTurno, String> get situacaoTurno =>
+      $composableBuilder(
+          column: $table.situacaoTurno, builder: (column) => column);
+}
+
+class $$TurnoTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $TurnoTableTable,
+    TurnoTableData,
+    $$TurnoTableTableFilterComposer,
+    $$TurnoTableTableOrderingComposer,
+    $$TurnoTableTableAnnotationComposer,
+    $$TurnoTableTableCreateCompanionBuilder,
+    $$TurnoTableTableUpdateCompanionBuilder,
+    (
+      TurnoTableData,
+      BaseReferences<_$AppDatabase, $TurnoTableTable, TurnoTableData>
+    ),
+    TurnoTableData,
+    PrefetchHooks Function()> {
+  $$TurnoTableTableTableManager(_$AppDatabase db, $TurnoTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TurnoTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TurnoTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TurnoTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int?> remoteId = const Value.absent(),
+            Value<int> veiculoId = const Value.absent(),
+            Value<int> equipeId = const Value.absent(),
+            Value<int> kmInicial = const Value.absent(),
+            Value<int?> kmFinal = const Value.absent(),
+            Value<DateTime> horaInicio = const Value.absent(),
+            Value<DateTime?> horaFim = const Value.absent(),
+            Value<String?> latitude = const Value.absent(),
+            Value<String?> longitude = const Value.absent(),
+            Value<SituacaoTurno> situacaoTurno = const Value.absent(),
+          }) =>
+              TurnoTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            veiculoId: veiculoId,
+            equipeId: equipeId,
+            kmInicial: kmInicial,
+            kmFinal: kmFinal,
+            horaInicio: horaInicio,
+            horaFim: horaFim,
+            latitude: latitude,
+            longitude: longitude,
+            situacaoTurno: situacaoTurno,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int?> remoteId = const Value.absent(),
+            required int veiculoId,
+            required int equipeId,
+            required int kmInicial,
+            Value<int?> kmFinal = const Value.absent(),
+            required DateTime horaInicio,
+            Value<DateTime?> horaFim = const Value.absent(),
+            Value<String?> latitude = const Value.absent(),
+            Value<String?> longitude = const Value.absent(),
+            required SituacaoTurno situacaoTurno,
+          }) =>
+              TurnoTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            veiculoId: veiculoId,
+            equipeId: equipeId,
+            kmInicial: kmInicial,
+            kmFinal: kmFinal,
+            horaInicio: horaInicio,
+            horaFim: horaFim,
+            latitude: latitude,
+            longitude: longitude,
+            situacaoTurno: situacaoTurno,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$TurnoTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $TurnoTableTable,
+    TurnoTableData,
+    $$TurnoTableTableFilterComposer,
+    $$TurnoTableTableOrderingComposer,
+    $$TurnoTableTableAnnotationComposer,
+    $$TurnoTableTableCreateCompanionBuilder,
+    $$TurnoTableTableUpdateCompanionBuilder,
+    (
+      TurnoTableData,
+      BaseReferences<_$AppDatabase, $TurnoTableTable, TurnoTableData>
+    ),
+    TurnoTableData,
+    PrefetchHooks Function()>;
+typedef $$TurnoEletricistasTableTableCreateCompanionBuilder
+    = TurnoEletricistasTableCompanion Function({
+  Value<int> id,
+  required int turnoId,
+  required int eletricistaId,
+});
+typedef $$TurnoEletricistasTableTableUpdateCompanionBuilder
+    = TurnoEletricistasTableCompanion Function({
+  Value<int> id,
+  Value<int> turnoId,
+  Value<int> eletricistaId,
+});
+
+class $$TurnoEletricistasTableTableFilterComposer
+    extends Composer<_$AppDatabase, $TurnoEletricistasTableTable> {
+  $$TurnoEletricistasTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get turnoId => $composableBuilder(
+      column: $table.turnoId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get eletricistaId => $composableBuilder(
+      column: $table.eletricistaId, builder: (column) => ColumnFilters(column));
+}
+
+class $$TurnoEletricistasTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $TurnoEletricistasTableTable> {
+  $$TurnoEletricistasTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get turnoId => $composableBuilder(
+      column: $table.turnoId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get eletricistaId => $composableBuilder(
+      column: $table.eletricistaId,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$TurnoEletricistasTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TurnoEletricistasTableTable> {
+  $$TurnoEletricistasTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get turnoId =>
+      $composableBuilder(column: $table.turnoId, builder: (column) => column);
+
+  GeneratedColumn<int> get eletricistaId => $composableBuilder(
+      column: $table.eletricistaId, builder: (column) => column);
+}
+
+class $$TurnoEletricistasTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $TurnoEletricistasTableTable,
+    TurnoEletricistasTableData,
+    $$TurnoEletricistasTableTableFilterComposer,
+    $$TurnoEletricistasTableTableOrderingComposer,
+    $$TurnoEletricistasTableTableAnnotationComposer,
+    $$TurnoEletricistasTableTableCreateCompanionBuilder,
+    $$TurnoEletricistasTableTableUpdateCompanionBuilder,
+    (
+      TurnoEletricistasTableData,
+      BaseReferences<_$AppDatabase, $TurnoEletricistasTableTable,
+          TurnoEletricistasTableData>
+    ),
+    TurnoEletricistasTableData,
+    PrefetchHooks Function()> {
+  $$TurnoEletricistasTableTableTableManager(
+      _$AppDatabase db, $TurnoEletricistasTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TurnoEletricistasTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TurnoEletricistasTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TurnoEletricistasTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> turnoId = const Value.absent(),
+            Value<int> eletricistaId = const Value.absent(),
+          }) =>
+              TurnoEletricistasTableCompanion(
+            id: id,
+            turnoId: turnoId,
+            eletricistaId: eletricistaId,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int turnoId,
+            required int eletricistaId,
+          }) =>
+              TurnoEletricistasTableCompanion.insert(
+            id: id,
+            turnoId: turnoId,
+            eletricistaId: eletricistaId,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$TurnoEletricistasTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $TurnoEletricistasTableTable,
+        TurnoEletricistasTableData,
+        $$TurnoEletricistasTableTableFilterComposer,
+        $$TurnoEletricistasTableTableOrderingComposer,
+        $$TurnoEletricistasTableTableAnnotationComposer,
+        $$TurnoEletricistasTableTableCreateCompanionBuilder,
+        $$TurnoEletricistasTableTableUpdateCompanionBuilder,
+        (
+          TurnoEletricistasTableData,
+          BaseReferences<_$AppDatabase, $TurnoEletricistasTableTable,
+              TurnoEletricistasTableData>
+        ),
+        TurnoEletricistasTableData,
+        PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3311,4 +4520,9 @@ class $AppDatabaseManager {
       $$EquipeTableTableTableManager(_db, _db.equipeTable);
   $$EletricistaTableTableTableManager get eletricistaTable =>
       $$EletricistaTableTableTableManager(_db, _db.eletricistaTable);
+  $$TurnoTableTableTableManager get turnoTable =>
+      $$TurnoTableTableTableManager(_db, _db.turnoTable);
+  $$TurnoEletricistasTableTableTableManager get turnoEletricistasTable =>
+      $$TurnoEletricistasTableTableTableManager(
+          _db, _db.turnoEletricistasTable);
 }

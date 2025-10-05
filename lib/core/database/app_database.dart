@@ -16,16 +16,21 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart';
 import 'package:nexa_app/core/database/daos/usuario_dao.dart';
 import 'package:nexa_app/core/database/daos/tipo_veiculo_dao.dart';
 import 'package:nexa_app/core/database/daos/veiculo_dao.dart';
 import 'package:nexa_app/core/database/daos/tipo_equipe_dao.dart';
 import 'package:nexa_app/core/database/daos/equipe_dao.dart';
 import 'package:nexa_app/core/database/daos/eletricista_dao.dart';
+import 'package:nexa_app/core/database/daos/turno_dao.dart';
+import 'package:nexa_app/core/database/daos/turno_eletricistas_dao.dart';
 import 'package:nexa_app/core/database/logging_executor.dart';
 import 'package:nexa_app/core/database/models/eletricista_table.dart';
 import 'package:nexa_app/core/database/models/equipe_table.dart';
 import 'package:nexa_app/core/database/models/tipo_equipe_table.dart';
+import 'package:nexa_app/core/database/models/turno_eletricistas_table.dart';
+import 'package:nexa_app/core/database/models/turno_table.dart';
 import 'package:nexa_app/core/database/models/usuario_table.dart';
 import 'package:nexa_app/core/database/models/tipo_veiculo_table.dart';
 import 'package:nexa_app/core/database/models/veiculo_table.dart';
@@ -56,7 +61,9 @@ LazyDatabase _openConnection() {
     VeiculoTable,
     TipoEquipeTable,
     EquipeTable,
-    EletricistaTable
+    EletricistaTable,
+    TurnoTable,
+    TurnoEletricistasTable
   ],
   daos: [
     UsuarioDao,
@@ -64,7 +71,9 @@ LazyDatabase _openConnection() {
     VeiculoDao,
     TipoEquipeDao,
     EquipeDao,
-    EletricistaDao
+    EletricistaDao,
+    TurnoDao,
+    TurnoEletricistasDao
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -73,7 +82,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -81,24 +90,10 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
         },
         onUpgrade: (m, from, to) async {
-          if (from == 1 && to == 2) {
+          if (from == 4 && to == 5) {
             // Migration: renomear coluna uuid para remote_id
-            await m.renameColumn(usuarioTable, 'uuid', usuarioTable.remoteId);
+            await m.createAll();
           }
-
-          if (from == 2 && to == 3) {
-            // Migration: adicionar tabelas de veículos e tipos de veículos
-            await m.createTable(tipoVeiculoTable);
-            await m.createTable(veiculoTable);
-          }
-
-          if (from == 3 && to == 4) {
-            // Migration: adicionar tabelas de equipes e eletricistas
-            await m.createTable(tipoEquipeTable);
-            await m.createTable(equipeTable);
-            await m.createTable(eletricistaTable);
-          }
-
           // versões futuras aqui
         },
         beforeOpen: (details) async {
