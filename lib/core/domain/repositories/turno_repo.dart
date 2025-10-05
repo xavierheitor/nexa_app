@@ -199,6 +199,26 @@ class TurnoRepo {
     }
   }
 
+  /// Valida junto ao backend se é permitido liberar o turno para execução.
+  Future<bool> validarAberturaTurnoOnline({
+    required int turnoId,
+    int? turnoRemoteId,
+  }) async {
+    try {
+      AppLogger.d(
+        'Validando abertura do turno (id=$turnoId, remoteId=$turnoRemoteId)',
+        tag: 'TurnoRepo',
+      );
+
+      // TODO: Integrar com API real. Enquanto não disponível, assume sucesso.
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao validar abertura do turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
   /// Adiciona um eletricista a um turno.
   Future<int> adicionarEletricistaAoTurno(int turnoId, int eletricistaId) async {
     try {

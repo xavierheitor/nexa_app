@@ -10,6 +10,7 @@ class ChecklistPreenchidoTableDto extends BaseDto
     with DriftDtoMixin, TableValidationMixin {
   final int turnoId;
   final int checklistModeloId;
+  final int? eletricistaRemoteId;
   final double? latitude;
   final double? longitude;
   final DateTime dataPreenchimento;
@@ -20,6 +21,7 @@ class ChecklistPreenchidoTableDto extends BaseDto
     required this.id,
     required this.turnoId,
     required this.checklistModeloId,
+    this.eletricistaRemoteId,
     this.latitude,
     this.longitude,
     required this.dataPreenchimento,
@@ -31,6 +33,7 @@ class ChecklistPreenchidoTableDto extends BaseDto
       id: entity.id.toString(),
       turnoId: entity.turnoId,
       checklistModeloId: entity.checklistModeloId,
+      eletricistaRemoteId: entity.eletricistaRemoteId,
       latitude: entity.latitude,
       longitude: entity.longitude,
       dataPreenchimento: entity.dataPreenchimento,
@@ -42,6 +45,7 @@ class ChecklistPreenchidoTableDto extends BaseDto
     return ChecklistPreenchidoTableCompanion(
       turnoId: Value(turnoId),
       checklistModeloId: Value(checklistModeloId),
+      eletricistaRemoteId: Value(eletricistaRemoteId),
       latitude: Value(latitude),
       longitude: Value(longitude),
       dataPreenchimento: Value(dataPreenchimento),
@@ -54,6 +58,7 @@ class ChecklistPreenchidoTableDto extends BaseDto
       id: int.parse(id),
       turnoId: turnoId,
       checklistModeloId: checklistModeloId,
+      eletricistaRemoteId: eletricistaRemoteId,
       latitude: latitude,
       longitude: longitude,
       dataPreenchimento: dataPreenchimento,
@@ -66,6 +71,9 @@ class ChecklistPreenchidoTableDto extends BaseDto
       final turnoId = BaseDto.parseRequiredInt(json['turnoId'], 'turnoId');
       final checklistModeloId = BaseDto.parseRequiredInt(
           json['checklistModeloId'], 'checklistModeloId');
+      final eletricistaRemoteId = json['eletricistaRemoteId'] == null
+          ? null
+          : int.tryParse(json['eletricistaRemoteId'].toString());
       final latitude = json['latitude']?.toDouble();
       final longitude = json['longitude']?.toDouble();
       final dataPreenchimento = DateTime.parse(json['dataPreenchimento']);
@@ -74,6 +82,7 @@ class ChecklistPreenchidoTableDto extends BaseDto
         id: id,
         turnoId: turnoId,
         checklistModeloId: checklistModeloId,
+        eletricistaRemoteId: eletricistaRemoteId,
         latitude: latitude,
         longitude: longitude,
         dataPreenchimento: dataPreenchimento,
@@ -109,6 +118,7 @@ class ChecklistPreenchidoTableDto extends BaseDto
     return {
       'turnoId': turnoId,
       'checklistModeloId': checklistModeloId,
+      'eletricistaRemoteId': eletricistaRemoteId,
       'latitude': latitude,
       'longitude': longitude,
       'dataPreenchimento': dataPreenchimento.toIso8601String(),

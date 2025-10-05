@@ -8,6 +8,8 @@ import 'package:nexa_app/modules/splash/splash_binding.dart';
 import 'package:nexa_app/modules/splash/splash_page.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_binding.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_page.dart';
+import 'package:nexa_app/modules/turno/checklist/epi/checklist_eletricistas_binding.dart';
+import 'package:nexa_app/modules/turno/checklist/epi/checklist_eletricistas_page.dart';
 import 'package:nexa_app/modules/turno/checklist/veicular/checklist_binding.dart';
 import 'package:nexa_app/modules/turno/checklist/veicular/checklist_page.dart';
 import 'package:nexa_app/modules/turno/servicos/turno_servicos_binding.dart';
@@ -179,6 +181,22 @@ class AppPages {
     /// - Opções de resposta com indicação de pendências
     GetPage(
       name: Routes.turnoChecklistEPC,
+      page: () => const ChecklistPage(),
+      binding: ChecklistBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    /// Lista de eletricistas para o checklist de EPI.
+    GetPage(
+      name: Routes.turnoChecklistEletricistas,
+      page: () => const ChecklistEletricistasPage(),
+      binding: ChecklistEletricistasBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    /// Rota para o checklist de EPI individual.
+    GetPage(
+      name: Routes.turnoChecklistEPI,
       page: () => const ChecklistPage(),
       binding: ChecklistBinding(),
       middlewares: [AuthMiddleware()],

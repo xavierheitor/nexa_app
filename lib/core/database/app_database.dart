@@ -118,7 +118,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -160,6 +160,11 @@ class AppDatabase extends _$AppDatabase {
             // Migração: adicionar tabelas de checklist preenchido
             await m.createTable(checklistPreenchidoTable);
             await m.createTable(checklistRespostaTable);
+          }
+          if (from == 11 && to == 12) {
+            // Migração: adicionar coluna eletricistaRemoteId em checklistPreenchidoTable
+            await m.addColumn(checklistPreenchidoTable,
+                checklistPreenchidoTable.eletricistaRemoteId);
           }
           // versões futuras aqui
         },

@@ -297,6 +297,7 @@ class ChecklistService {
     required List<ChecklistPerguntaModel> perguntasRespondidas,
     double? latitude,
     double? longitude,
+    int? eletricistaRemoteId,
   }) async {
     AppLogger.d('💾 Salvando checklist preenchido', tag: 'ChecklistService');
 
@@ -322,6 +323,7 @@ class ChecklistService {
         respostas: [], // Será preenchido abaixo
         latitude: latitude,
         longitude: longitude,
+        eletricistaRemoteId: eletricistaRemoteId,
       );
 
       AppLogger.d('✅ Checklist preenchido salvo com ID: $checklistPreenchidoId',

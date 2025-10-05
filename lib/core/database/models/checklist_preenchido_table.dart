@@ -11,6 +11,9 @@ class ChecklistPreenchidoTable extends Table {
   /// ID remoto do modelo de checklist
   IntColumn get checklistModeloId => integer()();
 
+  /// ID remoto do eletricista (opcional) - usado para checklists por eletricista (EPI)
+  IntColumn get eletricistaRemoteId => integer().nullable()();
+
   /// Latitude do preenchimento (opcional)
   RealColumn get latitude => real().nullable()();
 
@@ -28,6 +31,7 @@ class ChecklistPreenchidoTable extends Table {
   List<Set<Column>> get indexes => [
         {turnoId},
         {checklistModeloId},
+        {eletricistaRemoteId},
         {dataPreenchimento},
       ];
 }

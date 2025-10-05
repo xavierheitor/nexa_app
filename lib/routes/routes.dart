@@ -89,4 +89,11 @@ abstract class Routes {
   /// Tela para realizar o checklist de EPC (Equipamento de Proteção Coletiva).
   /// Exibe perguntas e opções de resposta baseadas no tipo de equipe.
   static const String turnoChecklistEPC = '/turno/checklist/epc';
+
+  /// Rota da lista de eletricistas para checklist de EPI.
+  static const String turnoChecklistEletricistas =
+      '/turno/checklist/eletricistas';
+
+  /// Rota da tela de checklist EPI (por eletricista).
+  static const String turnoChecklistEPI = '/turno/checklist/epi';
 }

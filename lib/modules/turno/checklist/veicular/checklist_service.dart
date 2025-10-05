@@ -147,6 +147,29 @@ class ChecklistService extends GetxService {
     }
   }
 
+  /// Busca o checklist EPI aplicado individualmente por eletricista.
+  Future<ChecklistCompletoModel?> buscarChecklistEPIParaEletricista(
+      int eletricistaRemoteId) async {
+    AppLogger.d(
+      '🔍 Carregando checklist EPI para eletricista remoto $eletricistaRemoteId',
+      tag: 'ChecklistService',
+    );
+
+    final checklist =
+        await _buscarChecklistPorRemoteId(_fallbackChecklistEpiRemoteId);
+
+    if (checklist == null) {
+      AppLogger.w(
+        '⚠️ Checklist EPI (remoteId=$_fallbackChecklistEpiRemoteId) não encontrado',
+        tag: 'ChecklistService',
+      );
+    }
+
+    return checklist;
+  }
+
+  int get checklistEpiModeloRemoteId => _fallbackChecklistEpiRemoteId;
+
   Future<ChecklistCompletoModel?> _montarChecklistCompleto(
       ChecklistModeloTableDto modelo) async {
     if (modelo.remoteId == null) {
@@ -259,6 +282,7 @@ class ChecklistService extends GetxService {
     required List<ChecklistPerguntaModel> perguntasRespondidas,
     double? latitude,
     double? longitude,
+    int? eletricistaRemoteId,
   }) async {
     AppLogger.d(
         '💾 Salvando checklist preenchido (remoteId=${checklist.remoteId})',
@@ -280,6 +304,7 @@ class ChecklistService extends GetxService {
         respostas: const [],
         latitude: latitude,
         longitude: longitude,
+        eletricistaRemoteId: eletricistaRemoteId,
       );
 
       AppLogger.d(
@@ -333,7 +358,8 @@ class ChecklistService extends GetxService {
   }
 
   /// Verifica se um modelo de checklist já foi preenchido no turno atual.
-  Future<bool> checklistJaPreenchido(int checklistModeloRemoteId) async {
+  Future<bool> checklistJaPreenchido(int checklistModeloRemoteId,
+      {int? eletricistaRemoteId}) async {
     AppLogger.d(
       '🔎 Verificando preenchimento prévio do checklist $checklistModeloRemoteId',
       tag: 'ChecklistService',
@@ -350,8 +376,17 @@ class ChecklistService extends GetxService {
       final preenchidos =
           await _checklistPreenchidoRepo.buscarPorTurno(turnoAtivo.id);
 
-      final encontrado = preenchidos
-          .any((item) => item.checklistModeloId == checklistModeloRemoteId);
+      final encontrado = preenchidos.any((item) {
+        if (item.checklistModeloId != checklistModeloRemoteId) {
+          return false;
+        }
+
+        if (eletricistaRemoteId == null) {
+          return item.eletricistaRemoteId == null;
+        }
+
+        return item.eletricistaRemoteId == eletricistaRemoteId;
+      });
 
       AppLogger.d(
         '📌 Checklist $checklistModeloRemoteId já preenchido: $encontrado',

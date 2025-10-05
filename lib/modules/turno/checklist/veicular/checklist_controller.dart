@@ -9,6 +9,12 @@ class ChecklistController extends GetxController {
   final ChecklistService _checklistService = Get.find<ChecklistService>();
 
   bool get _isChecklistEPC => Get.currentRoute == Routes.turnoChecklistEPC;
+  bool get _isChecklistEPI => Get.currentRoute == Routes.turnoChecklistEPI;
+  int? get _eletricistaRemoteIdOrNull =>
+      _isChecklistEPI ? _eletricistaRemoteId : null;
+
+  int? _eletricistaRemoteId;
+  String? _eletricistaNome;
 
   /// Checklist completo carregado.
   final Rxn<ChecklistCompletoModel> checklist = Rxn<ChecklistCompletoModel>();
@@ -23,6 +29,13 @@ class ChecklistController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    if (_isChecklistEPI) {
+      final args = Get.arguments as Map<String, dynamic>?;
+      _eletricistaRemoteId = args?['eletricistaRemoteId'] as int?;
+      _eletricistaNome = args?['eletricistaNome'] as String?;
+    }
+
     _carregarChecklist();
   }
 
@@ -33,27 +46,56 @@ class ChecklistController extends GetxController {
       checklist.value = null;
       perguntas.clear();
 
-      final tipoChecklistDescricao = _isChecklistEPC ? 'EPC' : 'veicular';
+      final tipoChecklistDescricao =
+          _isChecklistEPI ? 'EPI' : (_isChecklistEPC ? 'EPC' : 'veicular');
       AppLogger.d('📋 Carregando checklist $tipoChecklistDescricao...',
           tag: 'ChecklistController');
 
-      final checklistCarregado = _isChecklistEPC
-          ? await _checklistService.buscarChecklistEPCDoTurnoAtivo()
-          : await _checklistService.buscarChecklistDoTurnoAtivo();
+      ChecklistCompletoModel? checklistCarregado;
+
+      if (_isChecklistEPI) {
+        final eletricistaRemoteId = _eletricistaRemoteId;
+        if (eletricistaRemoteId == null) {
+          AppLogger.e(
+            '❌ Eletricista remoto não informado para checklist EPI',
+            tag: 'ChecklistController',
+          );
+          Get.snackbar(
+            'Erro',
+            'Eletricista não encontrado para o checklist de EPI',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          Get.back();
+          return;
+        }
+
+        checklistCarregado = await _checklistService
+            .buscarChecklistEPIParaEletricista(eletricistaRemoteId);
+      } else if (_isChecklistEPC) {
+        checklistCarregado =
+            await _checklistService.buscarChecklistEPCDoTurnoAtivo();
+      } else {
+        checklistCarregado =
+            await _checklistService.buscarChecklistDoTurnoAtivo();
+      }
 
       if (checklistCarregado == null) {
         AppLogger.w('⚠️ Nenhum checklist encontrado',
             tag: 'ChecklistController');
-        final mensagem = _isChecklistEPC
-            ? 'Nenhum checklist de EPC encontrado para esta equipe'
-            : 'Nenhum checklist encontrado para este veículo';
+        final mensagem = _isChecklistEPI
+            ? 'Nenhum checklist de EPI encontrado para este eletricista'
+            : _isChecklistEPC
+                ? 'Nenhum checklist de EPC encontrado para esta equipe'
+                : 'Nenhum checklist encontrado para este veículo';
         Get.snackbar(
           'Atenção',
           mensagem,
           snackPosition: SnackPosition.BOTTOM,
         );
 
-        if (_isChecklistEPC) {
+        if (_isChecklistEPI) {
+          Get.back();
+        } else if (_isChecklistEPC) {
           Get.offAllNamed(Routes.turnoServicos);
         } else {
           // Volta para a home se não encontrar checklist veicular
@@ -62,8 +104,10 @@ class ChecklistController extends GetxController {
         return;
       }
 
-      final jaPreenchido = await _checklistService
-          .checklistJaPreenchido(checklistCarregado.remoteId);
+      final jaPreenchido = await _checklistService.checklistJaPreenchido(
+        checklistCarregado.remoteId,
+        eletricistaRemoteId: _eletricistaRemoteIdOrNull,
+      );
 
       if (jaPreenchido) {
         AppLogger.i(
@@ -73,9 +117,11 @@ class ChecklistController extends GetxController {
 
         Get.snackbar(
           'Checklist já realizado',
-          _isChecklistEPC
-              ? 'Checklist de EPC já registrado para este turno'
-              : 'Checklist veicular já registrado para este turno',
+          _isChecklistEPI
+              ? 'Checklist de EPI já registrado para ${_eletricistaNome ?? 'este eletricista'}'
+              : _isChecklistEPC
+                  ? 'Checklist de EPC já registrado para este turno'
+                  : 'Checklist veicular já registrado para este turno',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 3),
         );
@@ -193,6 +239,7 @@ class ChecklistController extends GetxController {
       final sucesso = await _checklistService.salvarChecklistPreenchido(
         checklist: checklistAtual,
         perguntasRespondidas: perguntasRespondidas,
+        eletricistaRemoteId: _eletricistaRemoteIdOrNull,
       );
 
       if (!sucesso) {
@@ -207,11 +254,16 @@ class ChecklistController extends GetxController {
       AppLogger.i('✅ Checklist finalizado e salvo com sucesso',
           tag: 'ChecklistController');
 
+      final tituloSnack = _isChecklistEPI ? 'Checklist EPI' : 'Sucesso';
+      final mensagemSnack = _isChecklistEPI
+          ? 'Checklist de EPI concluído para ${_eletricistaNome ?? 'este eletricista'}.'
+          : temPendencias
+              ? 'Checklist concluído com pendências'
+              : 'Checklist concluído com sucesso';
+
       Get.snackbar(
-        'Sucesso',
-        temPendencias
-            ? 'Checklist concluído com pendências'
-            : 'Checklist concluído com sucesso',
+        tituloSnack,
+        mensagemSnack,
         snackPosition: SnackPosition.BOTTOM,
       );
 
@@ -241,8 +293,10 @@ class ChecklistController extends GetxController {
   }
 
   void _navegarParaProximaEtapa() {
-    if (_isChecklistEPC) {
-      Get.offAllNamed(Routes.turnoServicos);
+    if (_isChecklistEPI) {
+      Get.back(result: true);
+    } else if (_isChecklistEPC) {
+      Get.offAllNamed(Routes.turnoChecklistEletricistas);
     } else {
       Get.offAllNamed(Routes.turnoChecklistEPC);
     }

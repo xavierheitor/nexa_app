@@ -259,6 +259,18 @@ class EletricistaRepo implements SyncableRepository<EletricistaTableDto> {
     return EletricistaTableDto.fromEntity(eletricista);
   }
 
+  /// Busca um eletricista pelo identificador remoto.
+  Future<EletricistaTableDto?> buscarPorRemoteIdOuNull(int remoteId) async {
+    final entidade = await eletricistaDao.buscarPorRemoteIdOuNull(remoteId);
+    return entidade != null ? EletricistaTableDto.fromEntity(entidade) : null;
+  }
+
+  /// Busca um eletricista pelo identificador remoto (lançando se não encontrar).
+  Future<EletricistaTableDto> buscarPorRemoteId(int remoteId) async {
+    final entidade = await eletricistaDao.buscarPorRemoteId(remoteId);
+    return EletricistaTableDto.fromEntity(entidade);
+  }
+
   /// Busca um eletricista por matrícula.
   ///
   /// Localiza um eletricista no banco de dados através da matrícula
@@ -369,7 +381,8 @@ class EletricistaRepo implements SyncableRepository<EletricistaTableDto> {
   Future<EletricistaTableDto> inserir(EletricistaTableDto eletricista) async {
     /// Converte DTO para Companion (formato de inserção do Drift).
     /// O ID é omitido para permitir geração automática pelo banco.
-    final id = await eletricistaDao.inserirOuAtualizar(eletricista.toCompanion());
+    final id =
+        await eletricistaDao.inserirOuAtualizar(eletricista.toCompanion());
 
     /// Busca o registro recém-inserido para obter dados completos
     /// incluindo o ID gerado automaticamente.

@@ -5997,6 +5997,12 @@ class $ChecklistPreenchidoTableTable extends ChecklistPreenchidoTable
   late final GeneratedColumn<int> checklistModeloId = GeneratedColumn<int>(
       'checklist_modelo_id', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _eletricistaRemoteIdMeta =
+      const VerificationMeta('eletricistaRemoteId');
+  @override
+  late final GeneratedColumn<int> eletricistaRemoteId = GeneratedColumn<int>(
+      'eletricista_remote_id', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _latitudeMeta =
       const VerificationMeta('latitude');
   @override
@@ -6018,8 +6024,15 @@ class $ChecklistPreenchidoTableTable extends ChecklistPreenchidoTable
           requiredDuringInsert: false,
           defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, turnoId, checklistModeloId, latitude, longitude, dataPreenchimento];
+  List<GeneratedColumn> get $columns => [
+        id,
+        turnoId,
+        checklistModeloId,
+        eletricistaRemoteId,
+        latitude,
+        longitude,
+        dataPreenchimento
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -6047,6 +6060,12 @@ class $ChecklistPreenchidoTableTable extends ChecklistPreenchidoTable
               data['checklist_modelo_id']!, _checklistModeloIdMeta));
     } else if (isInserting) {
       context.missing(_checklistModeloIdMeta);
+    }
+    if (data.containsKey('eletricista_remote_id')) {
+      context.handle(
+          _eletricistaRemoteIdMeta,
+          eletricistaRemoteId.isAcceptableOrUnknown(
+              data['eletricista_remote_id']!, _eletricistaRemoteIdMeta));
     }
     if (data.containsKey('latitude')) {
       context.handle(_latitudeMeta,
@@ -6078,6 +6097,8 @@ class $ChecklistPreenchidoTableTable extends ChecklistPreenchidoTable
           .read(DriftSqlType.int, data['${effectivePrefix}turno_id'])!,
       checklistModeloId: attachedDatabase.typeMapping.read(
           DriftSqlType.int, data['${effectivePrefix}checklist_modelo_id'])!,
+      eletricistaRemoteId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}eletricista_remote_id']),
       latitude: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}latitude']),
       longitude: attachedDatabase.typeMapping
@@ -6104,6 +6125,9 @@ class ChecklistPreenchidoTableData extends DataClass
   /// ID remoto do modelo de checklist
   final int checklistModeloId;
 
+  /// ID remoto do eletricista (opcional) - usado para checklists por eletricista (EPI)
+  final int? eletricistaRemoteId;
+
   /// Latitude do preenchimento (opcional)
   final double? latitude;
 
@@ -6116,6 +6140,7 @@ class ChecklistPreenchidoTableData extends DataClass
       {required this.id,
       required this.turnoId,
       required this.checklistModeloId,
+      this.eletricistaRemoteId,
       this.latitude,
       this.longitude,
       required this.dataPreenchimento});
@@ -6125,6 +6150,9 @@ class ChecklistPreenchidoTableData extends DataClass
     map['id'] = Variable<int>(id);
     map['turno_id'] = Variable<int>(turnoId);
     map['checklist_modelo_id'] = Variable<int>(checklistModeloId);
+    if (!nullToAbsent || eletricistaRemoteId != null) {
+      map['eletricista_remote_id'] = Variable<int>(eletricistaRemoteId);
+    }
     if (!nullToAbsent || latitude != null) {
       map['latitude'] = Variable<double>(latitude);
     }
@@ -6140,6 +6168,9 @@ class ChecklistPreenchidoTableData extends DataClass
       id: Value(id),
       turnoId: Value(turnoId),
       checklistModeloId: Value(checklistModeloId),
+      eletricistaRemoteId: eletricistaRemoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eletricistaRemoteId),
       latitude: latitude == null && nullToAbsent
           ? const Value.absent()
           : Value(latitude),
@@ -6157,6 +6188,8 @@ class ChecklistPreenchidoTableData extends DataClass
       id: serializer.fromJson<int>(json['id']),
       turnoId: serializer.fromJson<int>(json['turnoId']),
       checklistModeloId: serializer.fromJson<int>(json['checklistModeloId']),
+      eletricistaRemoteId:
+          serializer.fromJson<int?>(json['eletricistaRemoteId']),
       latitude: serializer.fromJson<double?>(json['latitude']),
       longitude: serializer.fromJson<double?>(json['longitude']),
       dataPreenchimento:
@@ -6170,6 +6203,7 @@ class ChecklistPreenchidoTableData extends DataClass
       'id': serializer.toJson<int>(id),
       'turnoId': serializer.toJson<int>(turnoId),
       'checklistModeloId': serializer.toJson<int>(checklistModeloId),
+      'eletricistaRemoteId': serializer.toJson<int?>(eletricistaRemoteId),
       'latitude': serializer.toJson<double?>(latitude),
       'longitude': serializer.toJson<double?>(longitude),
       'dataPreenchimento': serializer.toJson<DateTime>(dataPreenchimento),
@@ -6180,6 +6214,7 @@ class ChecklistPreenchidoTableData extends DataClass
           {int? id,
           int? turnoId,
           int? checklistModeloId,
+          Value<int?> eletricistaRemoteId = const Value.absent(),
           Value<double?> latitude = const Value.absent(),
           Value<double?> longitude = const Value.absent(),
           DateTime? dataPreenchimento}) =>
@@ -6187,6 +6222,9 @@ class ChecklistPreenchidoTableData extends DataClass
         id: id ?? this.id,
         turnoId: turnoId ?? this.turnoId,
         checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+        eletricistaRemoteId: eletricistaRemoteId.present
+            ? eletricistaRemoteId.value
+            : this.eletricistaRemoteId,
         latitude: latitude.present ? latitude.value : this.latitude,
         longitude: longitude.present ? longitude.value : this.longitude,
         dataPreenchimento: dataPreenchimento ?? this.dataPreenchimento,
@@ -6199,6 +6237,9 @@ class ChecklistPreenchidoTableData extends DataClass
       checklistModeloId: data.checklistModeloId.present
           ? data.checklistModeloId.value
           : this.checklistModeloId,
+      eletricistaRemoteId: data.eletricistaRemoteId.present
+          ? data.eletricistaRemoteId.value
+          : this.eletricistaRemoteId,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
       dataPreenchimento: data.dataPreenchimento.present
@@ -6213,6 +6254,7 @@ class ChecklistPreenchidoTableData extends DataClass
           ..write('id: $id, ')
           ..write('turnoId: $turnoId, ')
           ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('eletricistaRemoteId: $eletricistaRemoteId, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('dataPreenchimento: $dataPreenchimento')
@@ -6221,8 +6263,8 @@ class ChecklistPreenchidoTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, turnoId, checklistModeloId, latitude, longitude, dataPreenchimento);
+  int get hashCode => Object.hash(id, turnoId, checklistModeloId,
+      eletricistaRemoteId, latitude, longitude, dataPreenchimento);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6230,6 +6272,7 @@ class ChecklistPreenchidoTableData extends DataClass
           other.id == this.id &&
           other.turnoId == this.turnoId &&
           other.checklistModeloId == this.checklistModeloId &&
+          other.eletricistaRemoteId == this.eletricistaRemoteId &&
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
           other.dataPreenchimento == this.dataPreenchimento);
@@ -6240,6 +6283,7 @@ class ChecklistPreenchidoTableCompanion
   final Value<int> id;
   final Value<int> turnoId;
   final Value<int> checklistModeloId;
+  final Value<int?> eletricistaRemoteId;
   final Value<double?> latitude;
   final Value<double?> longitude;
   final Value<DateTime> dataPreenchimento;
@@ -6247,6 +6291,7 @@ class ChecklistPreenchidoTableCompanion
     this.id = const Value.absent(),
     this.turnoId = const Value.absent(),
     this.checklistModeloId = const Value.absent(),
+    this.eletricistaRemoteId = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.dataPreenchimento = const Value.absent(),
@@ -6255,6 +6300,7 @@ class ChecklistPreenchidoTableCompanion
     this.id = const Value.absent(),
     required int turnoId,
     required int checklistModeloId,
+    this.eletricistaRemoteId = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.dataPreenchimento = const Value.absent(),
@@ -6264,6 +6310,7 @@ class ChecklistPreenchidoTableCompanion
     Expression<int>? id,
     Expression<int>? turnoId,
     Expression<int>? checklistModeloId,
+    Expression<int>? eletricistaRemoteId,
     Expression<double>? latitude,
     Expression<double>? longitude,
     Expression<DateTime>? dataPreenchimento,
@@ -6272,6 +6319,8 @@ class ChecklistPreenchidoTableCompanion
       if (id != null) 'id': id,
       if (turnoId != null) 'turno_id': turnoId,
       if (checklistModeloId != null) 'checklist_modelo_id': checklistModeloId,
+      if (eletricistaRemoteId != null)
+        'eletricista_remote_id': eletricistaRemoteId,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
       if (dataPreenchimento != null) 'data_preenchimento': dataPreenchimento,
@@ -6282,6 +6331,7 @@ class ChecklistPreenchidoTableCompanion
       {Value<int>? id,
       Value<int>? turnoId,
       Value<int>? checklistModeloId,
+      Value<int?>? eletricistaRemoteId,
       Value<double?>? latitude,
       Value<double?>? longitude,
       Value<DateTime>? dataPreenchimento}) {
@@ -6289,6 +6339,7 @@ class ChecklistPreenchidoTableCompanion
       id: id ?? this.id,
       turnoId: turnoId ?? this.turnoId,
       checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+      eletricistaRemoteId: eletricistaRemoteId ?? this.eletricistaRemoteId,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       dataPreenchimento: dataPreenchimento ?? this.dataPreenchimento,
@@ -6306,6 +6357,9 @@ class ChecklistPreenchidoTableCompanion
     }
     if (checklistModeloId.present) {
       map['checklist_modelo_id'] = Variable<int>(checklistModeloId.value);
+    }
+    if (eletricistaRemoteId.present) {
+      map['eletricista_remote_id'] = Variable<int>(eletricistaRemoteId.value);
     }
     if (latitude.present) {
       map['latitude'] = Variable<double>(latitude.value);
@@ -6325,6 +6379,7 @@ class ChecklistPreenchidoTableCompanion
           ..write('id: $id, ')
           ..write('turnoId: $turnoId, ')
           ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('eletricistaRemoteId: $eletricistaRemoteId, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('dataPreenchimento: $dataPreenchimento')
@@ -9835,6 +9890,7 @@ typedef $$ChecklistPreenchidoTableTableCreateCompanionBuilder
   Value<int> id,
   required int turnoId,
   required int checklistModeloId,
+  Value<int?> eletricistaRemoteId,
   Value<double?> latitude,
   Value<double?> longitude,
   Value<DateTime> dataPreenchimento,
@@ -9844,6 +9900,7 @@ typedef $$ChecklistPreenchidoTableTableUpdateCompanionBuilder
   Value<int> id,
   Value<int> turnoId,
   Value<int> checklistModeloId,
+  Value<int?> eletricistaRemoteId,
   Value<double?> latitude,
   Value<double?> longitude,
   Value<DateTime> dataPreenchimento,
@@ -9866,6 +9923,10 @@ class $$ChecklistPreenchidoTableTableFilterComposer
 
   ColumnFilters<int> get checklistModeloId => $composableBuilder(
       column: $table.checklistModeloId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get eletricistaRemoteId => $composableBuilder(
+      column: $table.eletricistaRemoteId,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get latitude => $composableBuilder(
@@ -9898,6 +9959,10 @@ class $$ChecklistPreenchidoTableTableOrderingComposer
       column: $table.checklistModeloId,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get eletricistaRemoteId => $composableBuilder(
+      column: $table.eletricistaRemoteId,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<double> get latitude => $composableBuilder(
       column: $table.latitude, builder: (column) => ColumnOrderings(column));
 
@@ -9926,6 +9991,9 @@ class $$ChecklistPreenchidoTableTableAnnotationComposer
 
   GeneratedColumn<int> get checklistModeloId => $composableBuilder(
       column: $table.checklistModeloId, builder: (column) => column);
+
+  GeneratedColumn<int> get eletricistaRemoteId => $composableBuilder(
+      column: $table.eletricistaRemoteId, builder: (column) => column);
 
   GeneratedColumn<double> get latitude =>
       $composableBuilder(column: $table.latitude, builder: (column) => column);
@@ -9971,6 +10039,7 @@ class $$ChecklistPreenchidoTableTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<int> turnoId = const Value.absent(),
             Value<int> checklistModeloId = const Value.absent(),
+            Value<int?> eletricistaRemoteId = const Value.absent(),
             Value<double?> latitude = const Value.absent(),
             Value<double?> longitude = const Value.absent(),
             Value<DateTime> dataPreenchimento = const Value.absent(),
@@ -9979,6 +10048,7 @@ class $$ChecklistPreenchidoTableTableTableManager extends RootTableManager<
             id: id,
             turnoId: turnoId,
             checklistModeloId: checklistModeloId,
+            eletricistaRemoteId: eletricistaRemoteId,
             latitude: latitude,
             longitude: longitude,
             dataPreenchimento: dataPreenchimento,
@@ -9987,6 +10057,7 @@ class $$ChecklistPreenchidoTableTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             required int turnoId,
             required int checklistModeloId,
+            Value<int?> eletricistaRemoteId = const Value.absent(),
             Value<double?> latitude = const Value.absent(),
             Value<double?> longitude = const Value.absent(),
             Value<DateTime> dataPreenchimento = const Value.absent(),
@@ -9995,6 +10066,7 @@ class $$ChecklistPreenchidoTableTableTableManager extends RootTableManager<
             id: id,
             turnoId: turnoId,
             checklistModeloId: checklistModeloId,
+            eletricistaRemoteId: eletricistaRemoteId,
             latitude: latitude,
             longitude: longitude,
             dataPreenchimento: dataPreenchimento,

@@ -32,6 +32,15 @@ class ChecklistPreenchidoRepo {
     return await _dao.buscarPorModelo(checklistModeloId);
   }
 
+  /// Busca checklists preenchidos por eletricista (remoteId)
+  Future<List<ChecklistPreenchidoTableDto>> buscarPorEletricistaRemoteId(
+      int eletricistaRemoteId) async {
+    AppLogger.d(
+        'Buscando checklists preenchidos por eletricistaRemoteId: $eletricistaRemoteId',
+        tag: 'ChecklistPreenchidoRepo');
+    return await _dao.buscarPorEletricistaRemoteId(eletricistaRemoteId);
+  }
+
   /// Insere um novo checklist preenchido
   Future<int> inserir(ChecklistPreenchidoTableDto dto) async {
     AppLogger.d('Inserindo checklist preenchido para turno: ${dto.turnoId}', tag: 'ChecklistPreenchidoRepo');
@@ -69,6 +78,7 @@ class ChecklistPreenchidoRepo {
     required List<Map<String, dynamic>> respostas,
     double? latitude,
     double? longitude,
+    int? eletricistaRemoteId,
   }) async {
     AppLogger.d('Salvando checklist completo para turno: $turnoId', tag: 'ChecklistPreenchidoRepo');
     
@@ -78,6 +88,7 @@ class ChecklistPreenchidoRepo {
         id: '0', // Será autoincrementado
         turnoId: turnoId,
         checklistModeloId: checklistModeloId,
+        eletricistaRemoteId: eletricistaRemoteId,
         latitude: latitude,
         longitude: longitude,
         dataPreenchimento: DateTime.now(),

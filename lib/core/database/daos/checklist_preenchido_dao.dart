@@ -78,6 +78,23 @@ class ChecklistPreenchidoDao extends DatabaseAccessor<AppDatabase>
         .toList();
   }
 
+  /// Busca checklists preenchidos por eletricista (remoteId)
+  Future<List<ChecklistPreenchidoTableDto>> buscarPorEletricistaRemoteId(
+      int eletricistaRemoteId) async {
+    AppLogger.d(
+        'Buscando checklists preenchidos por eletricistaRemoteId: $eletricistaRemoteId',
+        tag: 'ChecklistPreenchidoDao');
+
+    final results = await (select(checklistPreenchidoTable)
+          ..where((c) => c.eletricistaRemoteId.equals(eletricistaRemoteId))
+          ..orderBy([(c) => OrderingTerm.desc(c.dataPreenchimento)]))
+        .get();
+
+    return results
+        .map((row) => ChecklistPreenchidoTableDto.fromEntity(row))
+        .toList();
+  }
+
   /// Insere um novo checklist preenchido
   Future<int> inserir(ChecklistPreenchidoTableDto dto) async {
     AppLogger.d('Inserindo checklist preenchido para turno: ${dto.turnoId}',
