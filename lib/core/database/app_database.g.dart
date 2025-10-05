@@ -5968,6 +5968,704 @@ class ChecklistTipoVeiculoRelacaoTableCompanion
   }
 }
 
+class $ChecklistPreenchidoTableTable extends ChecklistPreenchidoTable
+    with
+        TableInfo<$ChecklistPreenchidoTableTable,
+            ChecklistPreenchidoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistPreenchidoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _turnoIdMeta =
+      const VerificationMeta('turnoId');
+  @override
+  late final GeneratedColumn<int> turnoId = GeneratedColumn<int>(
+      'turno_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _checklistModeloIdMeta =
+      const VerificationMeta('checklistModeloId');
+  @override
+  late final GeneratedColumn<int> checklistModeloId = GeneratedColumn<int>(
+      'checklist_modelo_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _latitudeMeta =
+      const VerificationMeta('latitude');
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+      'latitude', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _longitudeMeta =
+      const VerificationMeta('longitude');
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+      'longitude', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _dataPreenchimentoMeta =
+      const VerificationMeta('dataPreenchimento');
+  @override
+  late final GeneratedColumn<DateTime> dataPreenchimento =
+      GeneratedColumn<DateTime>('data_preenchimento', aliasedName, false,
+          type: DriftSqlType.dateTime,
+          requiredDuringInsert: false,
+          defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, turnoId, checklistModeloId, latitude, longitude, dataPreenchimento];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_preenchido_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistPreenchidoTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('turno_id')) {
+      context.handle(_turnoIdMeta,
+          turnoId.isAcceptableOrUnknown(data['turno_id']!, _turnoIdMeta));
+    } else if (isInserting) {
+      context.missing(_turnoIdMeta);
+    }
+    if (data.containsKey('checklist_modelo_id')) {
+      context.handle(
+          _checklistModeloIdMeta,
+          checklistModeloId.isAcceptableOrUnknown(
+              data['checklist_modelo_id']!, _checklistModeloIdMeta));
+    } else if (isInserting) {
+      context.missing(_checklistModeloIdMeta);
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(_latitudeMeta,
+          latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta));
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(_longitudeMeta,
+          longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta));
+    }
+    if (data.containsKey('data_preenchimento')) {
+      context.handle(
+          _dataPreenchimentoMeta,
+          dataPreenchimento.isAcceptableOrUnknown(
+              data['data_preenchimento']!, _dataPreenchimentoMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistPreenchidoTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistPreenchidoTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      turnoId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}turno_id'])!,
+      checklistModeloId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}checklist_modelo_id'])!,
+      latitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}latitude']),
+      longitude: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}longitude']),
+      dataPreenchimento: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}data_preenchimento'])!,
+    );
+  }
+
+  @override
+  $ChecklistPreenchidoTableTable createAlias(String alias) {
+    return $ChecklistPreenchidoTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistPreenchidoTableData extends DataClass
+    implements Insertable<ChecklistPreenchidoTableData> {
+  /// ID local (autoincrement)
+  final int id;
+
+  /// ID local do turno
+  final int turnoId;
+
+  /// ID remoto do modelo de checklist
+  final int checklistModeloId;
+
+  /// Latitude do preenchimento (opcional)
+  final double? latitude;
+
+  /// Longitude do preenchimento (opcional)
+  final double? longitude;
+
+  /// Data e hora do preenchimento
+  final DateTime dataPreenchimento;
+  const ChecklistPreenchidoTableData(
+      {required this.id,
+      required this.turnoId,
+      required this.checklistModeloId,
+      this.latitude,
+      this.longitude,
+      required this.dataPreenchimento});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['turno_id'] = Variable<int>(turnoId);
+    map['checklist_modelo_id'] = Variable<int>(checklistModeloId);
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
+    }
+    map['data_preenchimento'] = Variable<DateTime>(dataPreenchimento);
+    return map;
+  }
+
+  ChecklistPreenchidoTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistPreenchidoTableCompanion(
+      id: Value(id),
+      turnoId: Value(turnoId),
+      checklistModeloId: Value(checklistModeloId),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
+      dataPreenchimento: Value(dataPreenchimento),
+    );
+  }
+
+  factory ChecklistPreenchidoTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistPreenchidoTableData(
+      id: serializer.fromJson<int>(json['id']),
+      turnoId: serializer.fromJson<int>(json['turnoId']),
+      checklistModeloId: serializer.fromJson<int>(json['checklistModeloId']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
+      dataPreenchimento:
+          serializer.fromJson<DateTime>(json['dataPreenchimento']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'turnoId': serializer.toJson<int>(turnoId),
+      'checklistModeloId': serializer.toJson<int>(checklistModeloId),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
+      'dataPreenchimento': serializer.toJson<DateTime>(dataPreenchimento),
+    };
+  }
+
+  ChecklistPreenchidoTableData copyWith(
+          {int? id,
+          int? turnoId,
+          int? checklistModeloId,
+          Value<double?> latitude = const Value.absent(),
+          Value<double?> longitude = const Value.absent(),
+          DateTime? dataPreenchimento}) =>
+      ChecklistPreenchidoTableData(
+        id: id ?? this.id,
+        turnoId: turnoId ?? this.turnoId,
+        checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+        latitude: latitude.present ? latitude.value : this.latitude,
+        longitude: longitude.present ? longitude.value : this.longitude,
+        dataPreenchimento: dataPreenchimento ?? this.dataPreenchimento,
+      );
+  ChecklistPreenchidoTableData copyWithCompanion(
+      ChecklistPreenchidoTableCompanion data) {
+    return ChecklistPreenchidoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      turnoId: data.turnoId.present ? data.turnoId.value : this.turnoId,
+      checklistModeloId: data.checklistModeloId.present
+          ? data.checklistModeloId.value
+          : this.checklistModeloId,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      dataPreenchimento: data.dataPreenchimento.present
+          ? data.dataPreenchimento.value
+          : this.dataPreenchimento,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistPreenchidoTableData(')
+          ..write('id: $id, ')
+          ..write('turnoId: $turnoId, ')
+          ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('dataPreenchimento: $dataPreenchimento')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, turnoId, checklistModeloId, latitude, longitude, dataPreenchimento);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistPreenchidoTableData &&
+          other.id == this.id &&
+          other.turnoId == this.turnoId &&
+          other.checklistModeloId == this.checklistModeloId &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.dataPreenchimento == this.dataPreenchimento);
+}
+
+class ChecklistPreenchidoTableCompanion
+    extends UpdateCompanion<ChecklistPreenchidoTableData> {
+  final Value<int> id;
+  final Value<int> turnoId;
+  final Value<int> checklistModeloId;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
+  final Value<DateTime> dataPreenchimento;
+  const ChecklistPreenchidoTableCompanion({
+    this.id = const Value.absent(),
+    this.turnoId = const Value.absent(),
+    this.checklistModeloId = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.dataPreenchimento = const Value.absent(),
+  });
+  ChecklistPreenchidoTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int turnoId,
+    required int checklistModeloId,
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.dataPreenchimento = const Value.absent(),
+  })  : turnoId = Value(turnoId),
+        checklistModeloId = Value(checklistModeloId);
+  static Insertable<ChecklistPreenchidoTableData> custom({
+    Expression<int>? id,
+    Expression<int>? turnoId,
+    Expression<int>? checklistModeloId,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<DateTime>? dataPreenchimento,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (turnoId != null) 'turno_id': turnoId,
+      if (checklistModeloId != null) 'checklist_modelo_id': checklistModeloId,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (dataPreenchimento != null) 'data_preenchimento': dataPreenchimento,
+    });
+  }
+
+  ChecklistPreenchidoTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? turnoId,
+      Value<int>? checklistModeloId,
+      Value<double?>? latitude,
+      Value<double?>? longitude,
+      Value<DateTime>? dataPreenchimento}) {
+    return ChecklistPreenchidoTableCompanion(
+      id: id ?? this.id,
+      turnoId: turnoId ?? this.turnoId,
+      checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      dataPreenchimento: dataPreenchimento ?? this.dataPreenchimento,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (turnoId.present) {
+      map['turno_id'] = Variable<int>(turnoId.value);
+    }
+    if (checklistModeloId.present) {
+      map['checklist_modelo_id'] = Variable<int>(checklistModeloId.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (dataPreenchimento.present) {
+      map['data_preenchimento'] = Variable<DateTime>(dataPreenchimento.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistPreenchidoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('turnoId: $turnoId, ')
+          ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('dataPreenchimento: $dataPreenchimento')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistRespostaTableTable extends ChecklistRespostaTable
+    with TableInfo<$ChecklistRespostaTableTable, ChecklistRespostaTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistRespostaTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _checklistPreenchidoIdMeta =
+      const VerificationMeta('checklistPreenchidoId');
+  @override
+  late final GeneratedColumn<int> checklistPreenchidoId = GeneratedColumn<int>(
+      'checklist_preenchido_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _perguntaIdMeta =
+      const VerificationMeta('perguntaId');
+  @override
+  late final GeneratedColumn<int> perguntaId = GeneratedColumn<int>(
+      'pergunta_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _opcaoRespostaIdMeta =
+      const VerificationMeta('opcaoRespostaId');
+  @override
+  late final GeneratedColumn<int> opcaoRespostaId = GeneratedColumn<int>(
+      'opcao_resposta_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _dataRespostaMeta =
+      const VerificationMeta('dataResposta');
+  @override
+  late final GeneratedColumn<DateTime> dataResposta = GeneratedColumn<DateTime>(
+      'data_resposta', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, checklistPreenchidoId, perguntaId, opcaoRespostaId, dataResposta];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_resposta_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistRespostaTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('checklist_preenchido_id')) {
+      context.handle(
+          _checklistPreenchidoIdMeta,
+          checklistPreenchidoId.isAcceptableOrUnknown(
+              data['checklist_preenchido_id']!, _checklistPreenchidoIdMeta));
+    } else if (isInserting) {
+      context.missing(_checklistPreenchidoIdMeta);
+    }
+    if (data.containsKey('pergunta_id')) {
+      context.handle(
+          _perguntaIdMeta,
+          perguntaId.isAcceptableOrUnknown(
+              data['pergunta_id']!, _perguntaIdMeta));
+    } else if (isInserting) {
+      context.missing(_perguntaIdMeta);
+    }
+    if (data.containsKey('opcao_resposta_id')) {
+      context.handle(
+          _opcaoRespostaIdMeta,
+          opcaoRespostaId.isAcceptableOrUnknown(
+              data['opcao_resposta_id']!, _opcaoRespostaIdMeta));
+    } else if (isInserting) {
+      context.missing(_opcaoRespostaIdMeta);
+    }
+    if (data.containsKey('data_resposta')) {
+      context.handle(
+          _dataRespostaMeta,
+          dataResposta.isAcceptableOrUnknown(
+              data['data_resposta']!, _dataRespostaMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistRespostaTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistRespostaTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      checklistPreenchidoId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}checklist_preenchido_id'])!,
+      perguntaId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pergunta_id'])!,
+      opcaoRespostaId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}opcao_resposta_id'])!,
+      dataResposta: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}data_resposta'])!,
+    );
+  }
+
+  @override
+  $ChecklistRespostaTableTable createAlias(String alias) {
+    return $ChecklistRespostaTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistRespostaTableData extends DataClass
+    implements Insertable<ChecklistRespostaTableData> {
+  /// ID local (autoincrement)
+  final int id;
+
+  /// ID do checklist preenchido (FK)
+  final int checklistPreenchidoId;
+
+  /// ID remoto da pergunta
+  final int perguntaId;
+
+  /// ID remoto da opção de resposta escolhida
+  final int opcaoRespostaId;
+
+  /// Data e hora da resposta
+  final DateTime dataResposta;
+  const ChecklistRespostaTableData(
+      {required this.id,
+      required this.checklistPreenchidoId,
+      required this.perguntaId,
+      required this.opcaoRespostaId,
+      required this.dataResposta});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['checklist_preenchido_id'] = Variable<int>(checklistPreenchidoId);
+    map['pergunta_id'] = Variable<int>(perguntaId);
+    map['opcao_resposta_id'] = Variable<int>(opcaoRespostaId);
+    map['data_resposta'] = Variable<DateTime>(dataResposta);
+    return map;
+  }
+
+  ChecklistRespostaTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistRespostaTableCompanion(
+      id: Value(id),
+      checklistPreenchidoId: Value(checklistPreenchidoId),
+      perguntaId: Value(perguntaId),
+      opcaoRespostaId: Value(opcaoRespostaId),
+      dataResposta: Value(dataResposta),
+    );
+  }
+
+  factory ChecklistRespostaTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistRespostaTableData(
+      id: serializer.fromJson<int>(json['id']),
+      checklistPreenchidoId:
+          serializer.fromJson<int>(json['checklistPreenchidoId']),
+      perguntaId: serializer.fromJson<int>(json['perguntaId']),
+      opcaoRespostaId: serializer.fromJson<int>(json['opcaoRespostaId']),
+      dataResposta: serializer.fromJson<DateTime>(json['dataResposta']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'checklistPreenchidoId': serializer.toJson<int>(checklistPreenchidoId),
+      'perguntaId': serializer.toJson<int>(perguntaId),
+      'opcaoRespostaId': serializer.toJson<int>(opcaoRespostaId),
+      'dataResposta': serializer.toJson<DateTime>(dataResposta),
+    };
+  }
+
+  ChecklistRespostaTableData copyWith(
+          {int? id,
+          int? checklistPreenchidoId,
+          int? perguntaId,
+          int? opcaoRespostaId,
+          DateTime? dataResposta}) =>
+      ChecklistRespostaTableData(
+        id: id ?? this.id,
+        checklistPreenchidoId:
+            checklistPreenchidoId ?? this.checklistPreenchidoId,
+        perguntaId: perguntaId ?? this.perguntaId,
+        opcaoRespostaId: opcaoRespostaId ?? this.opcaoRespostaId,
+        dataResposta: dataResposta ?? this.dataResposta,
+      );
+  ChecklistRespostaTableData copyWithCompanion(
+      ChecklistRespostaTableCompanion data) {
+    return ChecklistRespostaTableData(
+      id: data.id.present ? data.id.value : this.id,
+      checklistPreenchidoId: data.checklistPreenchidoId.present
+          ? data.checklistPreenchidoId.value
+          : this.checklistPreenchidoId,
+      perguntaId:
+          data.perguntaId.present ? data.perguntaId.value : this.perguntaId,
+      opcaoRespostaId: data.opcaoRespostaId.present
+          ? data.opcaoRespostaId.value
+          : this.opcaoRespostaId,
+      dataResposta: data.dataResposta.present
+          ? data.dataResposta.value
+          : this.dataResposta,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistRespostaTableData(')
+          ..write('id: $id, ')
+          ..write('checklistPreenchidoId: $checklistPreenchidoId, ')
+          ..write('perguntaId: $perguntaId, ')
+          ..write('opcaoRespostaId: $opcaoRespostaId, ')
+          ..write('dataResposta: $dataResposta')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, checklistPreenchidoId, perguntaId, opcaoRespostaId, dataResposta);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistRespostaTableData &&
+          other.id == this.id &&
+          other.checklistPreenchidoId == this.checklistPreenchidoId &&
+          other.perguntaId == this.perguntaId &&
+          other.opcaoRespostaId == this.opcaoRespostaId &&
+          other.dataResposta == this.dataResposta);
+}
+
+class ChecklistRespostaTableCompanion
+    extends UpdateCompanion<ChecklistRespostaTableData> {
+  final Value<int> id;
+  final Value<int> checklistPreenchidoId;
+  final Value<int> perguntaId;
+  final Value<int> opcaoRespostaId;
+  final Value<DateTime> dataResposta;
+  const ChecklistRespostaTableCompanion({
+    this.id = const Value.absent(),
+    this.checklistPreenchidoId = const Value.absent(),
+    this.perguntaId = const Value.absent(),
+    this.opcaoRespostaId = const Value.absent(),
+    this.dataResposta = const Value.absent(),
+  });
+  ChecklistRespostaTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int checklistPreenchidoId,
+    required int perguntaId,
+    required int opcaoRespostaId,
+    this.dataResposta = const Value.absent(),
+  })  : checklistPreenchidoId = Value(checklistPreenchidoId),
+        perguntaId = Value(perguntaId),
+        opcaoRespostaId = Value(opcaoRespostaId);
+  static Insertable<ChecklistRespostaTableData> custom({
+    Expression<int>? id,
+    Expression<int>? checklistPreenchidoId,
+    Expression<int>? perguntaId,
+    Expression<int>? opcaoRespostaId,
+    Expression<DateTime>? dataResposta,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (checklistPreenchidoId != null)
+        'checklist_preenchido_id': checklistPreenchidoId,
+      if (perguntaId != null) 'pergunta_id': perguntaId,
+      if (opcaoRespostaId != null) 'opcao_resposta_id': opcaoRespostaId,
+      if (dataResposta != null) 'data_resposta': dataResposta,
+    });
+  }
+
+  ChecklistRespostaTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? checklistPreenchidoId,
+      Value<int>? perguntaId,
+      Value<int>? opcaoRespostaId,
+      Value<DateTime>? dataResposta}) {
+    return ChecklistRespostaTableCompanion(
+      id: id ?? this.id,
+      checklistPreenchidoId:
+          checklistPreenchidoId ?? this.checklistPreenchidoId,
+      perguntaId: perguntaId ?? this.perguntaId,
+      opcaoRespostaId: opcaoRespostaId ?? this.opcaoRespostaId,
+      dataResposta: dataResposta ?? this.dataResposta,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (checklistPreenchidoId.present) {
+      map['checklist_preenchido_id'] =
+          Variable<int>(checklistPreenchidoId.value);
+    }
+    if (perguntaId.present) {
+      map['pergunta_id'] = Variable<int>(perguntaId.value);
+    }
+    if (opcaoRespostaId.present) {
+      map['opcao_resposta_id'] = Variable<int>(opcaoRespostaId.value);
+    }
+    if (dataResposta.present) {
+      map['data_resposta'] = Variable<DateTime>(dataResposta.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistRespostaTableCompanion(')
+          ..write('id: $id, ')
+          ..write('checklistPreenchidoId: $checklistPreenchidoId, ')
+          ..write('perguntaId: $perguntaId, ')
+          ..write('opcaoRespostaId: $opcaoRespostaId, ')
+          ..write('dataResposta: $dataResposta')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6000,6 +6698,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ChecklistTipoVeiculoRelacaoTableTable
       checklistTipoVeiculoRelacaoTable =
       $ChecklistTipoVeiculoRelacaoTableTable(this);
+  late final $ChecklistPreenchidoTableTable checklistPreenchidoTable =
+      $ChecklistPreenchidoTableTable(this);
+  late final $ChecklistRespostaTableTable checklistRespostaTable =
+      $ChecklistRespostaTableTable(this);
   late final UsuarioDao usuarioDao = UsuarioDao(this as AppDatabase);
   late final TipoVeiculoDao tipoVeiculoDao =
       TipoVeiculoDao(this as AppDatabase);
@@ -6025,6 +6727,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       ChecklistTipoEquipeRelacaoDao(this as AppDatabase);
   late final ChecklistTipoVeiculoRelacaoDao checklistTipoVeiculoRelacaoDao =
       ChecklistTipoVeiculoRelacaoDao(this as AppDatabase);
+  late final ChecklistPreenchidoDao checklistPreenchidoDao =
+      ChecklistPreenchidoDao(this as AppDatabase);
+  late final ChecklistRespostaDao checklistRespostaDao =
+      ChecklistRespostaDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6044,7 +6750,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         checklistOpcaoRespostaRelacaoTable,
         checklistPerguntaRelacaoTable,
         checklistTipoEquipeRelacaoTable,
-        checklistTipoVeiculoRelacaoTable
+        checklistTipoVeiculoRelacaoTable,
+        checklistPreenchidoTable,
+        checklistRespostaTable
       ];
 }
 
@@ -9122,6 +9830,378 @@ typedef $$ChecklistTipoVeiculoRelacaoTableTableProcessedTableManager
         ),
         ChecklistTipoVeiculoRelacaoTableData,
         PrefetchHooks Function()>;
+typedef $$ChecklistPreenchidoTableTableCreateCompanionBuilder
+    = ChecklistPreenchidoTableCompanion Function({
+  Value<int> id,
+  required int turnoId,
+  required int checklistModeloId,
+  Value<double?> latitude,
+  Value<double?> longitude,
+  Value<DateTime> dataPreenchimento,
+});
+typedef $$ChecklistPreenchidoTableTableUpdateCompanionBuilder
+    = ChecklistPreenchidoTableCompanion Function({
+  Value<int> id,
+  Value<int> turnoId,
+  Value<int> checklistModeloId,
+  Value<double?> latitude,
+  Value<double?> longitude,
+  Value<DateTime> dataPreenchimento,
+});
+
+class $$ChecklistPreenchidoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistPreenchidoTableTable> {
+  $$ChecklistPreenchidoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get turnoId => $composableBuilder(
+      column: $table.turnoId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get dataPreenchimento => $composableBuilder(
+      column: $table.dataPreenchimento,
+      builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistPreenchidoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistPreenchidoTableTable> {
+  $$ChecklistPreenchidoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get turnoId => $composableBuilder(
+      column: $table.turnoId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+      column: $table.latitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+      column: $table.longitude, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get dataPreenchimento => $composableBuilder(
+      column: $table.dataPreenchimento,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistPreenchidoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistPreenchidoTableTable> {
+  $$ChecklistPreenchidoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get turnoId =>
+      $composableBuilder(column: $table.turnoId, builder: (column) => column);
+
+  GeneratedColumn<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dataPreenchimento => $composableBuilder(
+      column: $table.dataPreenchimento, builder: (column) => column);
+}
+
+class $$ChecklistPreenchidoTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ChecklistPreenchidoTableTable,
+    ChecklistPreenchidoTableData,
+    $$ChecklistPreenchidoTableTableFilterComposer,
+    $$ChecklistPreenchidoTableTableOrderingComposer,
+    $$ChecklistPreenchidoTableTableAnnotationComposer,
+    $$ChecklistPreenchidoTableTableCreateCompanionBuilder,
+    $$ChecklistPreenchidoTableTableUpdateCompanionBuilder,
+    (
+      ChecklistPreenchidoTableData,
+      BaseReferences<_$AppDatabase, $ChecklistPreenchidoTableTable,
+          ChecklistPreenchidoTableData>
+    ),
+    ChecklistPreenchidoTableData,
+    PrefetchHooks Function()> {
+  $$ChecklistPreenchidoTableTableTableManager(
+      _$AppDatabase db, $ChecklistPreenchidoTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistPreenchidoTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistPreenchidoTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistPreenchidoTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> turnoId = const Value.absent(),
+            Value<int> checklistModeloId = const Value.absent(),
+            Value<double?> latitude = const Value.absent(),
+            Value<double?> longitude = const Value.absent(),
+            Value<DateTime> dataPreenchimento = const Value.absent(),
+          }) =>
+              ChecklistPreenchidoTableCompanion(
+            id: id,
+            turnoId: turnoId,
+            checklistModeloId: checklistModeloId,
+            latitude: latitude,
+            longitude: longitude,
+            dataPreenchimento: dataPreenchimento,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int turnoId,
+            required int checklistModeloId,
+            Value<double?> latitude = const Value.absent(),
+            Value<double?> longitude = const Value.absent(),
+            Value<DateTime> dataPreenchimento = const Value.absent(),
+          }) =>
+              ChecklistPreenchidoTableCompanion.insert(
+            id: id,
+            turnoId: turnoId,
+            checklistModeloId: checklistModeloId,
+            latitude: latitude,
+            longitude: longitude,
+            dataPreenchimento: dataPreenchimento,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistPreenchidoTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistPreenchidoTableTable,
+        ChecklistPreenchidoTableData,
+        $$ChecklistPreenchidoTableTableFilterComposer,
+        $$ChecklistPreenchidoTableTableOrderingComposer,
+        $$ChecklistPreenchidoTableTableAnnotationComposer,
+        $$ChecklistPreenchidoTableTableCreateCompanionBuilder,
+        $$ChecklistPreenchidoTableTableUpdateCompanionBuilder,
+        (
+          ChecklistPreenchidoTableData,
+          BaseReferences<_$AppDatabase, $ChecklistPreenchidoTableTable,
+              ChecklistPreenchidoTableData>
+        ),
+        ChecklistPreenchidoTableData,
+        PrefetchHooks Function()>;
+typedef $$ChecklistRespostaTableTableCreateCompanionBuilder
+    = ChecklistRespostaTableCompanion Function({
+  Value<int> id,
+  required int checklistPreenchidoId,
+  required int perguntaId,
+  required int opcaoRespostaId,
+  Value<DateTime> dataResposta,
+});
+typedef $$ChecklistRespostaTableTableUpdateCompanionBuilder
+    = ChecklistRespostaTableCompanion Function({
+  Value<int> id,
+  Value<int> checklistPreenchidoId,
+  Value<int> perguntaId,
+  Value<int> opcaoRespostaId,
+  Value<DateTime> dataResposta,
+});
+
+class $$ChecklistRespostaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistRespostaTableTable> {
+  $$ChecklistRespostaTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checklistPreenchidoId => $composableBuilder(
+      column: $table.checklistPreenchidoId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get perguntaId => $composableBuilder(
+      column: $table.perguntaId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get opcaoRespostaId => $composableBuilder(
+      column: $table.opcaoRespostaId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get dataResposta => $composableBuilder(
+      column: $table.dataResposta, builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistRespostaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistRespostaTableTable> {
+  $$ChecklistRespostaTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checklistPreenchidoId => $composableBuilder(
+      column: $table.checklistPreenchidoId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get perguntaId => $composableBuilder(
+      column: $table.perguntaId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get opcaoRespostaId => $composableBuilder(
+      column: $table.opcaoRespostaId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get dataResposta => $composableBuilder(
+      column: $table.dataResposta,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistRespostaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistRespostaTableTable> {
+  $$ChecklistRespostaTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get checklistPreenchidoId => $composableBuilder(
+      column: $table.checklistPreenchidoId, builder: (column) => column);
+
+  GeneratedColumn<int> get perguntaId => $composableBuilder(
+      column: $table.perguntaId, builder: (column) => column);
+
+  GeneratedColumn<int> get opcaoRespostaId => $composableBuilder(
+      column: $table.opcaoRespostaId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dataResposta => $composableBuilder(
+      column: $table.dataResposta, builder: (column) => column);
+}
+
+class $$ChecklistRespostaTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ChecklistRespostaTableTable,
+    ChecklistRespostaTableData,
+    $$ChecklistRespostaTableTableFilterComposer,
+    $$ChecklistRespostaTableTableOrderingComposer,
+    $$ChecklistRespostaTableTableAnnotationComposer,
+    $$ChecklistRespostaTableTableCreateCompanionBuilder,
+    $$ChecklistRespostaTableTableUpdateCompanionBuilder,
+    (
+      ChecklistRespostaTableData,
+      BaseReferences<_$AppDatabase, $ChecklistRespostaTableTable,
+          ChecklistRespostaTableData>
+    ),
+    ChecklistRespostaTableData,
+    PrefetchHooks Function()> {
+  $$ChecklistRespostaTableTableTableManager(
+      _$AppDatabase db, $ChecklistRespostaTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistRespostaTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistRespostaTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistRespostaTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> checklistPreenchidoId = const Value.absent(),
+            Value<int> perguntaId = const Value.absent(),
+            Value<int> opcaoRespostaId = const Value.absent(),
+            Value<DateTime> dataResposta = const Value.absent(),
+          }) =>
+              ChecklistRespostaTableCompanion(
+            id: id,
+            checklistPreenchidoId: checklistPreenchidoId,
+            perguntaId: perguntaId,
+            opcaoRespostaId: opcaoRespostaId,
+            dataResposta: dataResposta,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int checklistPreenchidoId,
+            required int perguntaId,
+            required int opcaoRespostaId,
+            Value<DateTime> dataResposta = const Value.absent(),
+          }) =>
+              ChecklistRespostaTableCompanion.insert(
+            id: id,
+            checklistPreenchidoId: checklistPreenchidoId,
+            perguntaId: perguntaId,
+            opcaoRespostaId: opcaoRespostaId,
+            dataResposta: dataResposta,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistRespostaTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistRespostaTableTable,
+        ChecklistRespostaTableData,
+        $$ChecklistRespostaTableTableFilterComposer,
+        $$ChecklistRespostaTableTableOrderingComposer,
+        $$ChecklistRespostaTableTableAnnotationComposer,
+        $$ChecklistRespostaTableTableCreateCompanionBuilder,
+        $$ChecklistRespostaTableTableUpdateCompanionBuilder,
+        (
+          ChecklistRespostaTableData,
+          BaseReferences<_$AppDatabase, $ChecklistRespostaTableTable,
+              ChecklistRespostaTableData>
+        ),
+        ChecklistRespostaTableData,
+        PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9168,4 +10248,10 @@ class $AppDatabaseManager {
       get checklistTipoVeiculoRelacaoTable =>
           $$ChecklistTipoVeiculoRelacaoTableTableTableManager(
               _db, _db.checklistTipoVeiculoRelacaoTable);
+  $$ChecklistPreenchidoTableTableTableManager get checklistPreenchidoTable =>
+      $$ChecklistPreenchidoTableTableTableManager(
+          _db, _db.checklistPreenchidoTable);
+  $$ChecklistRespostaTableTableTableManager get checklistRespostaTable =>
+      $$ChecklistRespostaTableTableTableManager(
+          _db, _db.checklistRespostaTable);
 }

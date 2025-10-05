@@ -1,22 +1,20 @@
 import 'package:get/get.dart';
-import 'package:nexa_app/core/domain/models/checklist_model.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/modules/turno/checklist/checklist_service.dart';
-import 'package:nexa_app/routes/routes.dart';
 
-/// Controller do checklist veicular.
+/// Controller para gerenciar o checklist
 class ChecklistController extends GetxController {
-  final ChecklistService _checklistService = Get.find<ChecklistService>();
+  final ChecklistService _checklistService;
 
-  /// Checklist completo carregado.
-  final Rxn<ChecklistCompletoModel> checklist = Rxn<ChecklistCompletoModel>();
+  ChecklistController(this._checklistService);
 
-  /// Estado de carregamento.
+  // Estado reativo
+  final Rx<ChecklistCompletoModel?> checklist =
+      Rx<ChecklistCompletoModel?>(null);
   final RxBool isLoading = false.obs;
-
-  /// Lista de perguntas (para facilitar o acesso reativo).
-  final RxList<ChecklistPerguntaModel> perguntas =
-      <ChecklistPerguntaModel>[].obs;
+  final RxBool isSaving = false.obs;
+  final RxInt perguntaAtual = 0.obs;
+  final RxBool checklistCompleto = false.obs;
 
   @override
   void onInit() {
@@ -24,156 +22,179 @@ class ChecklistController extends GetxController {
     _carregarChecklist();
   }
 
-  /// Carrega o checklist do turno ativo.
+  /// Carrega o checklist do turno ativo
   Future<void> _carregarChecklist() async {
     try {
       isLoading.value = true;
-      AppLogger.d('📋 Carregando checklist...', tag: 'ChecklistController');
+      AppLogger.d('🔄 Carregando checklist...', tag: 'ChecklistController');
 
-      final checklistCarregado =
+      final checklistCompleto =
           await _checklistService.buscarChecklistDoTurnoAtivo();
-
-      if (checklistCarregado == null) {
+      
+      if (checklistCompleto != null) {
+        this.checklist.value = checklistCompleto;
+        AppLogger.i('✅ Checklist carregado: ${checklistCompleto.modelo.nome}',
+            tag: 'ChecklistController');
+        AppLogger.d(
+            '📊 ${checklistCompleto.perguntas.length} perguntas no checklist',
+            tag: 'ChecklistController');
+      } else {
         AppLogger.w('⚠️ Nenhum checklist encontrado',
             tag: 'ChecklistController');
-        Get.snackbar(
-          'Atenção',
-          'Nenhum checklist encontrado para este veículo',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        // Volta para a home se não encontrar checklist
-        Get.offAllNamed(Routes.home);
-        return;
+        Get.snackbar('Erro', 'Nenhum checklist encontrado para este veículo');
       }
-
-      checklist.value = checklistCarregado;
-      perguntas.value = checklistCarregado.perguntas;
-
-      AppLogger.i('✅ Checklist carregado: ${checklistCarregado.nome}',
-          tag: 'ChecklistController');
-      AppLogger.d('📊 ${perguntas.length} perguntas no checklist',
-          tag: 'ChecklistController');
     } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao carregar checklist', tag: 'ChecklistController', error: e, stackTrace: stackTrace);
-      Get.snackbar(
-        'Erro',
-        'Erro ao carregar checklist',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppLogger.e('❌ Erro ao carregar checklist: $e',
+          tag: 'ChecklistController', error: e, stackTrace: stackTrace);
+      Get.snackbar('Erro', 'Erro ao carregar checklist: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Seleciona uma resposta para uma pergunta.
+  /// Seleciona uma resposta para uma pergunta
   void selecionarResposta(int perguntaId, int opcaoId) {
-    try {
-      AppLogger.d('📝 Selecionando resposta: pergunta=$perguntaId, opção=$opcaoId',
-          tag: 'ChecklistController');
+    AppLogger.d(
+        '🎯 Selecionando resposta: pergunta=$perguntaId, opcao=$opcaoId',
+        tag: 'ChecklistController');
 
-      // Encontrar a pergunta e atualizar
-      final index = perguntas.indexWhere((p) => p.id == perguntaId);
-      if (index != -1) {
-        final perguntaAtualizada = perguntas[index].copyWith(
-          respostaSelecionada: opcaoId,
-        );
-        perguntas[index] = perguntaAtualizada;
+    final checklistAtual = checklist.value;
+    if (checklistAtual == null) return;
 
-        // Verificar se a resposta gera pendência
-        final opcaoSelecionada = perguntaAtualizada.opcaoSelecionada;
-        if (opcaoSelecionada != null && opcaoSelecionada.geraPendencia) {
-          AppLogger.w(
-              '⚠️ Resposta selecionada gera pendência: ${opcaoSelecionada.nome}',
-              tag: 'ChecklistController');
-        }
-
-        AppLogger.d('✅ Resposta selecionada com sucesso',
+    // Encontrar a pergunta e atualizar a resposta
+    for (int i = 0; i < checklistAtual.perguntas.length; i++) {
+      if (checklistAtual.perguntas[i].id == perguntaId) {
+        checklistAtual.perguntas[i].respostaSelecionada = opcaoId;
+        AppLogger.d('✅ Resposta selecionada para pergunta $i',
             tag: 'ChecklistController');
+        break;
       }
-    } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao selecionar resposta', tag: 'ChecklistController', error: e, stackTrace: stackTrace);
     }
+
+    // Atualizar o estado
+    checklist.value = checklistAtual;
+
+    // Verificar se todas as perguntas foram respondidas
+    _verificarCompletude();
   }
 
-  /// Valida se todas as perguntas foram respondidas.
-  bool validarRespostas() {
-    final naoRespondidas =
-        perguntas.where((p) => !p.foiRespondida).toList();
+  /// Verifica se todas as perguntas foram respondidas
+  void _verificarCompletude() {
+    final checklistAtual = checklist.value;
+    if (checklistAtual == null) {
+      checklistCompleto.value = false;
+      return;
+    }
 
-    if (naoRespondidas.isNotEmpty) {
-      AppLogger.w(
-          '⚠️ ${naoRespondidas.length} perguntas não respondidas',
+    final todasRespondidas = checklistAtual.perguntas
+        .every((pergunta) => pergunta.respostaSelecionada != null);
+
+    checklistCompleto.value = todasRespondidas;
+    AppLogger.d('🔍 Checklist completo: $todasRespondidas',
+        tag: 'ChecklistController');
+  }
+
+  /// Avança para a próxima pergunta
+  void proximaPergunta() {
+    final checklistAtual = checklist.value;
+    if (checklistAtual == null) return;
+
+    if (perguntaAtual.value < checklistAtual.perguntas.length - 1) {
+      perguntaAtual.value++;
+      AppLogger.d(
+          '➡️ Próxima pergunta: ${perguntaAtual.value + 1}/${checklistAtual.perguntas.length}',
           tag: 'ChecklistController');
-      Get.snackbar(
-        'Atenção',
-        'Por favor, responda todas as perguntas antes de continuar',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return false;
+    }
+  }
+
+  /// Volta para a pergunta anterior
+  void perguntaAnterior() {
+    if (perguntaAtual.value > 0) {
+      perguntaAtual.value--;
+      AppLogger.d('⬅️ Pergunta anterior: ${perguntaAtual.value + 1}',
+          tag: 'ChecklistController');
+    }
+  }
+
+  /// Vai para uma pergunta específica
+  void irParaPergunta(int indice) {
+    final checklistAtual = checklist.value;
+    if (checklistAtual == null) return;
+
+    if (indice >= 0 && indice < checklistAtual.perguntas.length) {
+      perguntaAtual.value = indice;
+      AppLogger.d('🎯 Indo para pergunta: ${indice + 1}',
+          tag: 'ChecklistController');
+    }
+  }
+
+  /// Salva o checklist preenchido
+  Future<void> salvarChecklist({double? latitude, double? longitude}) async {
+    if (!checklistCompleto.value) {
+      AppLogger.w('⚠️ Checklist não está completo', tag: 'ChecklistController');
+      Get.snackbar('Atenção', 'Responda todas as perguntas antes de salvar');
+      return;
     }
 
-    return true;
-  }
-
-  /// Verifica se há pendências nas respostas.
-  bool hasPendencias() {
-    return perguntas.any((p) =>
-        p.opcaoSelecionada != null && p.opcaoSelecionada!.geraPendencia);
-  }
-
-  /// Finaliza o checklist e avança para a próxima etapa.
-  Future<void> finalizarChecklist() async {
     try {
-      if (!validarRespostas()) {
+      isSaving.value = true;
+      AppLogger.d('💾 Salvando checklist preenchido...',
+          tag: 'ChecklistController');
+
+      final checklistAtual = checklist.value;
+      if (checklistAtual == null) {
+        AppLogger.e('❌ Checklist não encontrado', tag: 'ChecklistController');
         return;
       }
 
-      AppLogger.d('💾 Finalizando checklist...', tag: 'ChecklistController');
+      final sucesso = await _checklistService.salvarChecklistPreenchido(
+        checklist: checklistAtual,
+        perguntasRespondidas: checklistAtual.perguntas,
+        latitude: latitude,
+        longitude: longitude,
+      );
 
-      final temPendencias = hasPendencias();
-      if (temPendencias) {
-        AppLogger.w('⚠️ Checklist possui pendências',
+      if (sucesso) {
+        AppLogger.i('✅ Checklist salvo com sucesso',
             tag: 'ChecklistController');
-        // TODO: Aqui você pode salvar as pendências no banco
+        Get.snackbar('Sucesso', 'Checklist salvo com sucesso!');
+
+        // Navegar para a próxima tela ou voltar
+        Get.back();
+      } else {
+        AppLogger.e('❌ Erro ao salvar checklist', tag: 'ChecklistController');
+        Get.snackbar('Erro', 'Erro ao salvar checklist');
       }
-
-      // TODO: Salvar respostas do checklist no banco
-
-      AppLogger.i('✅ Checklist finalizado com sucesso',
-          tag: 'ChecklistController');
-
-      Get.snackbar(
-        'Sucesso',
-        temPendencias
-            ? 'Checklist concluído com pendências'
-            : 'Checklist concluído com sucesso',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-
-      // Navegar para a próxima tela (serviços do turno)
-      Get.offAllNamed(Routes.turnoServicos);
     } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao finalizar checklist',
+      AppLogger.e('❌ Erro ao salvar checklist: $e',
           tag: 'ChecklistController', error: e, stackTrace: stackTrace);
-      Get.snackbar(
-        'Erro',
-        'Erro ao finalizar checklist',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Erro', 'Erro ao salvar checklist: $e');
+    } finally {
+      isSaving.value = false;
     }
   }
 
-  /// Retorna o progresso do checklist (quantidade de perguntas respondidas).
-  double get progresso {
-    if (perguntas.isEmpty) return 0.0;
-    final respondidas = perguntas.where((p) => p.foiRespondida).length;
-    return respondidas / perguntas.length;
+  /// Recarrega o checklist
+  Future<void> recarregar() async {
+    AppLogger.d('🔄 Recarregando checklist...', tag: 'ChecklistController');
+    await _carregarChecklist();
   }
 
-  /// Retorna texto do progresso.
-  String get progressoTexto {
-    final respondidas = perguntas.where((p) => p.foiRespondida).length;
-    return '$respondidas/${perguntas.length}';
+  /// Getters para facilitar o acesso
+  ChecklistCompletoModel? get checklistAtual => checklist.value;
+  List<ChecklistPerguntaModel> get perguntas =>
+      checklist.value?.perguntas ?? [];
+  ChecklistPerguntaModel? get perguntaAtualModel {
+    final perguntas = this.perguntas;
+    if (perguntaAtual.value >= 0 && perguntaAtual.value < perguntas.length) {
+      return perguntas[perguntaAtual.value];
+    }
+    return null;
   }
+
+  int get totalPerguntas => perguntas.length;
+  int get perguntaAtualIndex => perguntaAtual.value;
+  bool get temPerguntaAnterior => perguntaAtual.value > 0;
+  bool get temProximaPergunta => perguntaAtual.value < totalPerguntas - 1;
+  bool get isUltimaPergunta => perguntaAtual.value == totalPerguntas - 1;
 }
-

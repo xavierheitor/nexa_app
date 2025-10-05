@@ -10,7 +10,7 @@ import 'package:nexa_app/core/domain/repositories/checklist_opcao_resposta_repo.
 import 'package:nexa_app/core/domain/repositories/checklist_pergunta_repo.dart';
 import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
 import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
-import 'package:nexa_app/modules/turno/checklist/checklist_service.dart';
+import 'package:nexa_app/modules/turno/checklist/veicular/checklist_service.dart';
 
 /// Conjunto de testes para validar a montagem do checklist após a refatoração.
 ///

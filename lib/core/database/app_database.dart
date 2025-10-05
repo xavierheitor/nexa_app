@@ -32,6 +32,8 @@ import 'package:nexa_app/core/database/daos/checklist_pergunta_relacao_dao.dart'
 import 'package:nexa_app/core/database/daos/checklist_opcao_resposta_relacao_dao.dart';
 import 'package:nexa_app/core/database/daos/checklist_tipo_equipe_relacao_dao.dart';
 import 'package:nexa_app/core/database/daos/checklist_tipo_veiculo_relacao_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_preenchido_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_resposta_dao.dart';
 import 'package:nexa_app/core/database/logging_executor.dart';
 import 'package:nexa_app/core/database/models/eletricista_table.dart';
 import 'package:nexa_app/core/database/models/equipe_table.dart';
@@ -48,6 +50,8 @@ import 'package:nexa_app/core/database/models/checklist_opcao_resposta_relacao_t
 import 'package:nexa_app/core/database/models/checklist_pergunta_relacao_table.dart';
 import 'package:nexa_app/core/database/models/checklist_tipo_equipe_relacao_table.dart';
 import 'package:nexa_app/core/database/models/checklist_tipo_veiculo_relacao_table.dart';
+import 'package:nexa_app/core/database/models/checklist_preenchido_table.dart';
+import 'package:nexa_app/core/database/models/checklist_resposta_table.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -85,6 +89,8 @@ LazyDatabase _openConnection() {
     ChecklistPerguntaRelacaoTable,
     ChecklistTipoEquipeRelacaoTable,
     ChecklistTipoVeiculoRelacaoTable,
+    ChecklistPreenchidoTable,
+    ChecklistRespostaTable,
   ],
   daos: [
     UsuarioDao,
@@ -102,6 +108,8 @@ LazyDatabase _openConnection() {
     ChecklistOpcaoRespostaRelacaoDao,
     ChecklistTipoEquipeRelacaoDao,
     ChecklistTipoVeiculoRelacaoDao,
+    ChecklistPreenchidoDao,
+    ChecklistRespostaDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -110,7 +118,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -147,6 +155,11 @@ class AppDatabase extends _$AppDatabase {
             await m.drop(tipoVeiculoTable);
             await m.createTable(veiculoTable);
             await m.createTable(tipoVeiculoTable);
+          }
+          if (from == 10 && to == 11) {
+            // Migração: adicionar tabelas de checklist preenchido
+            await m.createTable(checklistPreenchidoTable);
+            await m.createTable(checklistRespostaTable);
           }
           // versões futuras aqui
         },
