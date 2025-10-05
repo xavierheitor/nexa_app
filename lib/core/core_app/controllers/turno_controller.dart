@@ -258,7 +258,9 @@ class TurnoController extends GetxController {
       // Vai para tela de abertura de turno
       AppLogger.d('Navegando para tela de abertura de turno',
           tag: 'TurnoController');
-      Get.toNamed('/abrir-turno');
+      // Utiliza a rota nomeada centralizada para manter consistência e
+      // facilitar futuras alterações de caminho sem afetar chamadas diretas.
+      Get.toNamed(Routes.turnoAbrir);
     } else {
       // Vai para a rota específica
       AppLogger.d('Navegando para: $rota', tag: 'TurnoController');
