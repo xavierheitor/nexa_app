@@ -8,5 +8,7 @@ abstract class ApiConstants {
 
   static const veiculos = '/veiculos/sync';
   static const tiposVeiculo = '/tipo-veiculo/sync';
+  static const equipes = '/equipes/sync';
+  static const tiposEquipe = '/tipo-equipe/sync';
 
 }

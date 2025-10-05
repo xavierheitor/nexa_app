@@ -19,6 +19,8 @@ import 'package:drift/native.dart';
 import 'package:nexa_app/core/database/daos/usuario_dao.dart';
 import 'package:nexa_app/core/database/daos/tipo_veiculo_dao.dart';
 import 'package:nexa_app/core/database/daos/veiculo_dao.dart';
+import 'package:nexa_app/core/database/daos/tipo_equipe_dao.dart';
+import 'package:nexa_app/core/database/daos/equipe_dao.dart';
 import 'package:nexa_app/core/database/logging_executor.dart';
 import 'package:nexa_app/core/database/models/equipe_table.dart';
 import 'package:nexa_app/core/database/models/tipo_equipe_table.dart';
@@ -53,7 +55,7 @@ LazyDatabase _openConnection() {
     TipoEquipeTable,
     EquipeTable
   ],
-  daos: [UsuarioDao, TipoVeiculoDao, VeiculoDao],
+  daos: [UsuarioDao, TipoVeiculoDao, VeiculoDao, TipoEquipeDao, EquipeDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection()) {
