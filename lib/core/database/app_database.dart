@@ -73,7 +73,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -90,6 +90,13 @@ class AppDatabase extends _$AppDatabase {
             // Migration: adicionar tabelas de veículos e tipos de veículos
             await m.createTable(tipoVeiculoTable);
             await m.createTable(veiculoTable);
+          }
+
+          if (from == 3 && to == 4) {
+            // Migration: adicionar tabelas de equipes e eletricistas
+            await m.createTable(tipoEquipeTable);
+            await m.createTable(equipeTable);
+            await m.createTable(eletricistaTable);
           }
 
           // versões futuras aqui
