@@ -25,6 +25,9 @@ import 'package:nexa_app/core/database/daos/equipe_dao.dart';
 import 'package:nexa_app/core/database/daos/eletricista_dao.dart';
 import 'package:nexa_app/core/database/daos/turno_dao.dart';
 import 'package:nexa_app/core/database/daos/turno_eletricistas_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_modelo_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_pergunta_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_opcao_resposta_dao.dart';
 import 'package:nexa_app/core/database/logging_executor.dart';
 import 'package:nexa_app/core/database/models/eletricista_table.dart';
 import 'package:nexa_app/core/database/models/equipe_table.dart';
@@ -34,6 +37,13 @@ import 'package:nexa_app/core/database/models/turno_table.dart';
 import 'package:nexa_app/core/database/models/usuario_table.dart';
 import 'package:nexa_app/core/database/models/tipo_veiculo_table.dart';
 import 'package:nexa_app/core/database/models/veiculo_table.dart';
+import 'package:nexa_app/core/database/models/checklist_modelo_table.dart';
+import 'package:nexa_app/core/database/models/checklist_pergunta_table.dart';
+import 'package:nexa_app/core/database/models/checklist_opcao_resposta_table.dart';
+import 'package:nexa_app/core/database/models/checklist_opcao_resposta_relacao_table.dart';
+import 'package:nexa_app/core/database/models/checklist_pergunta_relacao_table.dart';
+import 'package:nexa_app/core/database/models/checklist_tipo_equipe_relacao_table.dart';
+import 'package:nexa_app/core/database/models/checklist_tipo_veiculo_relacao_table.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -44,7 +54,7 @@ part 'app_database.g.dart';
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'nexa1.sqlite'));
+    final file = File(p.join(dbFolder.path, 'nexa2.sqlite'));
 
     final nativeDb = NativeDatabase(
       file,
@@ -63,7 +73,14 @@ LazyDatabase _openConnection() {
     EquipeTable,
     EletricistaTable,
     TurnoTable,
-    TurnoEletricistasTable
+    TurnoEletricistasTable,
+    ChecklistModeloTable,
+    ChecklistPerguntaTable,
+    ChecklistOpcaoRespostaTable,
+    ChecklistOpcaoRespostaRelacaoTable,
+    ChecklistPerguntaRelacaoTable,
+    ChecklistTipoEquipeRelacaoTable,
+    ChecklistTipoVeiculoRelacaoTable,
   ],
   daos: [
     UsuarioDao,
@@ -73,7 +90,10 @@ LazyDatabase _openConnection() {
     EquipeDao,
     EletricistaDao,
     TurnoDao,
-    TurnoEletricistasDao
+    TurnoEletricistasDao,
+    ChecklistModeloDao,
+    ChecklistPerguntaDao,
+    ChecklistOpcaoRespostaDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -82,7 +102,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -90,8 +110,8 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
         },
         onUpgrade: (m, from, to) async {
-          if (from == 4 && to == 5) {
-            // Migration: renomear coluna uuid para remote_id
+          if (from == 5 && to == 6) {
+            // Migration: adicionar tabelas de checklist
             await m.createAll();
           }
           // versões futuras aqui

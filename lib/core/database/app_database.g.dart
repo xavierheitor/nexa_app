@@ -2938,6 +2938,2762 @@ class TurnoEletricistasTableCompanion
   }
 }
 
+class $ChecklistModeloTableTable extends ChecklistModeloTable
+    with TableInfo<$ChecklistModeloTableTable, ChecklistModeloTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistModeloTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  @override
+  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
+      'nome', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 2, maxTextLength: 100),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _tipoChecklistIdMeta =
+      const VerificationMeta('tipoChecklistId');
+  @override
+  late final GeneratedColumn<int> tipoChecklistId = GeneratedColumn<int>(
+      'tipo_checklist_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, remoteId, createdAt, updatedAt, sincronizado, nome, tipoChecklistId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_modelo_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistModeloTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
+    }
+    if (data.containsKey('nome')) {
+      context.handle(
+          _nomeMeta, nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta));
+    } else if (isInserting) {
+      context.missing(_nomeMeta);
+    }
+    if (data.containsKey('tipo_checklist_id')) {
+      context.handle(
+          _tipoChecklistIdMeta,
+          tipoChecklistId.isAcceptableOrUnknown(
+              data['tipo_checklist_id']!, _tipoChecklistIdMeta));
+    } else if (isInserting) {
+      context.missing(_tipoChecklistIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistModeloTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistModeloTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
+      nome: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}nome'])!,
+      tipoChecklistId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}tipo_checklist_id'])!,
+    );
+  }
+
+  @override
+  $ChecklistModeloTableTable createAlias(String alias) {
+    return $ChecklistModeloTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistModeloTableData extends DataClass
+    implements Insertable<ChecklistModeloTableData> {
+  final int id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
+  final String nome;
+  final int tipoChecklistId;
+  const ChecklistModeloTableData(
+      {required this.id,
+      required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
+      required this.nome,
+      required this.tipoChecklistId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    map['nome'] = Variable<String>(nome);
+    map['tipo_checklist_id'] = Variable<int>(tipoChecklistId);
+    return map;
+  }
+
+  ChecklistModeloTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistModeloTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
+      nome: Value(nome),
+      tipoChecklistId: Value(tipoChecklistId),
+    );
+  }
+
+  factory ChecklistModeloTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistModeloTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+      nome: serializer.fromJson<String>(json['nome']),
+      tipoChecklistId: serializer.fromJson<int>(json['tipoChecklistId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+      'nome': serializer.toJson<String>(nome),
+      'tipoChecklistId': serializer.toJson<int>(tipoChecklistId),
+    };
+  }
+
+  ChecklistModeloTableData copyWith(
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          String? nome,
+          int? tipoChecklistId}) =>
+      ChecklistModeloTableData(
+        id: id ?? this.id,
+        remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
+        nome: nome ?? this.nome,
+        tipoChecklistId: tipoChecklistId ?? this.tipoChecklistId,
+      );
+  ChecklistModeloTableData copyWithCompanion(
+      ChecklistModeloTableCompanion data) {
+    return ChecklistModeloTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+      nome: data.nome.present ? data.nome.value : this.nome,
+      tipoChecklistId: data.tipoChecklistId.present
+          ? data.tipoChecklistId.value
+          : this.tipoChecklistId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistModeloTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('nome: $nome, ')
+          ..write('tipoChecklistId: $tipoChecklistId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, remoteId, createdAt, updatedAt, sincronizado, nome, tipoChecklistId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistModeloTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
+          other.nome == this.nome &&
+          other.tipoChecklistId == this.tipoChecklistId);
+}
+
+class ChecklistModeloTableCompanion
+    extends UpdateCompanion<ChecklistModeloTableData> {
+  final Value<int> id;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
+  final Value<String> nome;
+  final Value<int> tipoChecklistId;
+  const ChecklistModeloTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.nome = const Value.absent(),
+    this.tipoChecklistId = const Value.absent(),
+  });
+  ChecklistModeloTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
+    required String nome,
+    required int tipoChecklistId,
+  })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        nome = Value(nome),
+        tipoChecklistId = Value(tipoChecklistId);
+  static Insertable<ChecklistModeloTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
+    Expression<String>? nome,
+    Expression<int>? tipoChecklistId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (nome != null) 'nome': nome,
+      if (tipoChecklistId != null) 'tipo_checklist_id': tipoChecklistId,
+    });
+  }
+
+  ChecklistModeloTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
+      Value<String>? nome,
+      Value<int>? tipoChecklistId}) {
+    return ChecklistModeloTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
+      nome: nome ?? this.nome,
+      tipoChecklistId: tipoChecklistId ?? this.tipoChecklistId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (nome.present) {
+      map['nome'] = Variable<String>(nome.value);
+    }
+    if (tipoChecklistId.present) {
+      map['tipo_checklist_id'] = Variable<int>(tipoChecklistId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistModeloTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('nome: $nome, ')
+          ..write('tipoChecklistId: $tipoChecklistId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistPerguntaTableTable extends ChecklistPerguntaTable
+    with TableInfo<$ChecklistPerguntaTableTable, ChecklistPerguntaTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistPerguntaTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  @override
+  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
+      'nome', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 2, maxTextLength: 100),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, remoteId, createdAt, updatedAt, sincronizado, nome];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_pergunta_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistPerguntaTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
+    }
+    if (data.containsKey('nome')) {
+      context.handle(
+          _nomeMeta, nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta));
+    } else if (isInserting) {
+      context.missing(_nomeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistPerguntaTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistPerguntaTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
+      nome: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}nome'])!,
+    );
+  }
+
+  @override
+  $ChecklistPerguntaTableTable createAlias(String alias) {
+    return $ChecklistPerguntaTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistPerguntaTableData extends DataClass
+    implements Insertable<ChecklistPerguntaTableData> {
+  final int id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
+  final String nome;
+  const ChecklistPerguntaTableData(
+      {required this.id,
+      required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
+      required this.nome});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    map['nome'] = Variable<String>(nome);
+    return map;
+  }
+
+  ChecklistPerguntaTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistPerguntaTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
+      nome: Value(nome),
+    );
+  }
+
+  factory ChecklistPerguntaTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistPerguntaTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+      nome: serializer.fromJson<String>(json['nome']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+      'nome': serializer.toJson<String>(nome),
+    };
+  }
+
+  ChecklistPerguntaTableData copyWith(
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          String? nome}) =>
+      ChecklistPerguntaTableData(
+        id: id ?? this.id,
+        remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
+        nome: nome ?? this.nome,
+      );
+  ChecklistPerguntaTableData copyWithCompanion(
+      ChecklistPerguntaTableCompanion data) {
+    return ChecklistPerguntaTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+      nome: data.nome.present ? data.nome.value : this.nome,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistPerguntaTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('nome: $nome')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, remoteId, createdAt, updatedAt, sincronizado, nome);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistPerguntaTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
+          other.nome == this.nome);
+}
+
+class ChecklistPerguntaTableCompanion
+    extends UpdateCompanion<ChecklistPerguntaTableData> {
+  final Value<int> id;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
+  final Value<String> nome;
+  const ChecklistPerguntaTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.nome = const Value.absent(),
+  });
+  ChecklistPerguntaTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
+    required String nome,
+  })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        nome = Value(nome);
+  static Insertable<ChecklistPerguntaTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
+    Expression<String>? nome,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (nome != null) 'nome': nome,
+    });
+  }
+
+  ChecklistPerguntaTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
+      Value<String>? nome}) {
+    return ChecklistPerguntaTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
+      nome: nome ?? this.nome,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (nome.present) {
+      map['nome'] = Variable<String>(nome.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistPerguntaTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('nome: $nome')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistOpcaoRespostaTableTable extends ChecklistOpcaoRespostaTable
+    with
+        TableInfo<$ChecklistOpcaoRespostaTableTable,
+            ChecklistOpcaoRespostaTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistOpcaoRespostaTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  @override
+  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
+      'nome', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 2, maxTextLength: 100),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _geraPendenciaMeta =
+      const VerificationMeta('geraPendencia');
+  @override
+  late final GeneratedColumn<bool> geraPendencia = GeneratedColumn<bool>(
+      'gera_pendencia', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("gera_pendencia" IN (0, 1))'));
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, remoteId, createdAt, updatedAt, sincronizado, nome, geraPendencia];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_opcao_resposta_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistOpcaoRespostaTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
+    }
+    if (data.containsKey('nome')) {
+      context.handle(
+          _nomeMeta, nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta));
+    } else if (isInserting) {
+      context.missing(_nomeMeta);
+    }
+    if (data.containsKey('gera_pendencia')) {
+      context.handle(
+          _geraPendenciaMeta,
+          geraPendencia.isAcceptableOrUnknown(
+              data['gera_pendencia']!, _geraPendenciaMeta));
+    } else if (isInserting) {
+      context.missing(_geraPendenciaMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistOpcaoRespostaTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistOpcaoRespostaTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
+      nome: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}nome'])!,
+      geraPendencia: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}gera_pendencia'])!,
+    );
+  }
+
+  @override
+  $ChecklistOpcaoRespostaTableTable createAlias(String alias) {
+    return $ChecklistOpcaoRespostaTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistOpcaoRespostaTableData extends DataClass
+    implements Insertable<ChecklistOpcaoRespostaTableData> {
+  final int id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
+  final String nome;
+  final bool geraPendencia;
+  const ChecklistOpcaoRespostaTableData(
+      {required this.id,
+      required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
+      required this.nome,
+      required this.geraPendencia});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    map['nome'] = Variable<String>(nome);
+    map['gera_pendencia'] = Variable<bool>(geraPendencia);
+    return map;
+  }
+
+  ChecklistOpcaoRespostaTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistOpcaoRespostaTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
+      nome: Value(nome),
+      geraPendencia: Value(geraPendencia),
+    );
+  }
+
+  factory ChecklistOpcaoRespostaTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistOpcaoRespostaTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+      nome: serializer.fromJson<String>(json['nome']),
+      geraPendencia: serializer.fromJson<bool>(json['geraPendencia']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+      'nome': serializer.toJson<String>(nome),
+      'geraPendencia': serializer.toJson<bool>(geraPendencia),
+    };
+  }
+
+  ChecklistOpcaoRespostaTableData copyWith(
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          String? nome,
+          bool? geraPendencia}) =>
+      ChecklistOpcaoRespostaTableData(
+        id: id ?? this.id,
+        remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
+        nome: nome ?? this.nome,
+        geraPendencia: geraPendencia ?? this.geraPendencia,
+      );
+  ChecklistOpcaoRespostaTableData copyWithCompanion(
+      ChecklistOpcaoRespostaTableCompanion data) {
+    return ChecklistOpcaoRespostaTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+      nome: data.nome.present ? data.nome.value : this.nome,
+      geraPendencia: data.geraPendencia.present
+          ? data.geraPendencia.value
+          : this.geraPendencia,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistOpcaoRespostaTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('nome: $nome, ')
+          ..write('geraPendencia: $geraPendencia')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, remoteId, createdAt, updatedAt, sincronizado, nome, geraPendencia);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistOpcaoRespostaTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
+          other.nome == this.nome &&
+          other.geraPendencia == this.geraPendencia);
+}
+
+class ChecklistOpcaoRespostaTableCompanion
+    extends UpdateCompanion<ChecklistOpcaoRespostaTableData> {
+  final Value<int> id;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
+  final Value<String> nome;
+  final Value<bool> geraPendencia;
+  const ChecklistOpcaoRespostaTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.nome = const Value.absent(),
+    this.geraPendencia = const Value.absent(),
+  });
+  ChecklistOpcaoRespostaTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
+    required String nome,
+    required bool geraPendencia,
+  })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        nome = Value(nome),
+        geraPendencia = Value(geraPendencia);
+  static Insertable<ChecklistOpcaoRespostaTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
+    Expression<String>? nome,
+    Expression<bool>? geraPendencia,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (nome != null) 'nome': nome,
+      if (geraPendencia != null) 'gera_pendencia': geraPendencia,
+    });
+  }
+
+  ChecklistOpcaoRespostaTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
+      Value<String>? nome,
+      Value<bool>? geraPendencia}) {
+    return ChecklistOpcaoRespostaTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
+      nome: nome ?? this.nome,
+      geraPendencia: geraPendencia ?? this.geraPendencia,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (nome.present) {
+      map['nome'] = Variable<String>(nome.value);
+    }
+    if (geraPendencia.present) {
+      map['gera_pendencia'] = Variable<bool>(geraPendencia.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistOpcaoRespostaTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('nome: $nome, ')
+          ..write('geraPendencia: $geraPendencia')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistOpcaoRespostaRelacaoTableTable
+    extends ChecklistOpcaoRespostaRelacaoTable
+    with
+        TableInfo<$ChecklistOpcaoRespostaRelacaoTableTable,
+            ChecklistOpcaoRespostaRelacaoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistOpcaoRespostaRelacaoTableTable(this.attachedDatabase,
+      [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _checklistOpcaoRespostaIdMeta =
+      const VerificationMeta('checklistOpcaoRespostaId');
+  @override
+  late final GeneratedColumn<int> checklistOpcaoRespostaId =
+      GeneratedColumn<int>('checklist_opcao_resposta_id', aliasedName, false,
+          type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _checklistModeloIdMeta =
+      const VerificationMeta('checklistModeloId');
+  @override
+  late final GeneratedColumn<int> checklistModeloId = GeneratedColumn<int>(
+      'checklist_modelo_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        remoteId,
+        createdAt,
+        updatedAt,
+        sincronizado,
+        checklistOpcaoRespostaId,
+        checklistModeloId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_opcao_resposta_relacao_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistOpcaoRespostaRelacaoTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
+    }
+    if (data.containsKey('checklist_opcao_resposta_id')) {
+      context.handle(
+          _checklistOpcaoRespostaIdMeta,
+          checklistOpcaoRespostaId.isAcceptableOrUnknown(
+              data['checklist_opcao_resposta_id']!,
+              _checklistOpcaoRespostaIdMeta));
+    } else if (isInserting) {
+      context.missing(_checklistOpcaoRespostaIdMeta);
+    }
+    if (data.containsKey('checklist_modelo_id')) {
+      context.handle(
+          _checklistModeloIdMeta,
+          checklistModeloId.isAcceptableOrUnknown(
+              data['checklist_modelo_id']!, _checklistModeloIdMeta));
+    } else if (isInserting) {
+      context.missing(_checklistModeloIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistOpcaoRespostaRelacaoTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistOpcaoRespostaRelacaoTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
+      checklistOpcaoRespostaId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}checklist_opcao_resposta_id'])!,
+      checklistModeloId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}checklist_modelo_id'])!,
+    );
+  }
+
+  @override
+  $ChecklistOpcaoRespostaRelacaoTableTable createAlias(String alias) {
+    return $ChecklistOpcaoRespostaRelacaoTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistOpcaoRespostaRelacaoTableData extends DataClass
+    implements Insertable<ChecklistOpcaoRespostaRelacaoTableData> {
+  final int id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
+  final int checklistOpcaoRespostaId;
+  final int checklistModeloId;
+  const ChecklistOpcaoRespostaRelacaoTableData(
+      {required this.id,
+      required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
+      required this.checklistOpcaoRespostaId,
+      required this.checklistModeloId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    map['checklist_opcao_resposta_id'] =
+        Variable<int>(checklistOpcaoRespostaId);
+    map['checklist_modelo_id'] = Variable<int>(checklistModeloId);
+    return map;
+  }
+
+  ChecklistOpcaoRespostaRelacaoTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistOpcaoRespostaRelacaoTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
+      checklistOpcaoRespostaId: Value(checklistOpcaoRespostaId),
+      checklistModeloId: Value(checklistModeloId),
+    );
+  }
+
+  factory ChecklistOpcaoRespostaRelacaoTableData.fromJson(
+      Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistOpcaoRespostaRelacaoTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+      checklistOpcaoRespostaId:
+          serializer.fromJson<int>(json['checklistOpcaoRespostaId']),
+      checklistModeloId: serializer.fromJson<int>(json['checklistModeloId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+      'checklistOpcaoRespostaId':
+          serializer.toJson<int>(checklistOpcaoRespostaId),
+      'checklistModeloId': serializer.toJson<int>(checklistModeloId),
+    };
+  }
+
+  ChecklistOpcaoRespostaRelacaoTableData copyWith(
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          int? checklistOpcaoRespostaId,
+          int? checklistModeloId}) =>
+      ChecklistOpcaoRespostaRelacaoTableData(
+        id: id ?? this.id,
+        remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
+        checklistOpcaoRespostaId:
+            checklistOpcaoRespostaId ?? this.checklistOpcaoRespostaId,
+        checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+      );
+  ChecklistOpcaoRespostaRelacaoTableData copyWithCompanion(
+      ChecklistOpcaoRespostaRelacaoTableCompanion data) {
+    return ChecklistOpcaoRespostaRelacaoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+      checklistOpcaoRespostaId: data.checklistOpcaoRespostaId.present
+          ? data.checklistOpcaoRespostaId.value
+          : this.checklistOpcaoRespostaId,
+      checklistModeloId: data.checklistModeloId.present
+          ? data.checklistModeloId.value
+          : this.checklistModeloId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistOpcaoRespostaRelacaoTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('checklistOpcaoRespostaId: $checklistOpcaoRespostaId, ')
+          ..write('checklistModeloId: $checklistModeloId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, remoteId, createdAt, updatedAt,
+      sincronizado, checklistOpcaoRespostaId, checklistModeloId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistOpcaoRespostaRelacaoTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
+          other.checklistOpcaoRespostaId == this.checklistOpcaoRespostaId &&
+          other.checklistModeloId == this.checklistModeloId);
+}
+
+class ChecklistOpcaoRespostaRelacaoTableCompanion
+    extends UpdateCompanion<ChecklistOpcaoRespostaRelacaoTableData> {
+  final Value<int> id;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
+  final Value<int> checklistOpcaoRespostaId;
+  final Value<int> checklistModeloId;
+  const ChecklistOpcaoRespostaRelacaoTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.checklistOpcaoRespostaId = const Value.absent(),
+    this.checklistModeloId = const Value.absent(),
+  });
+  ChecklistOpcaoRespostaRelacaoTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
+    required int checklistOpcaoRespostaId,
+    required int checklistModeloId,
+  })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        checklistOpcaoRespostaId = Value(checklistOpcaoRespostaId),
+        checklistModeloId = Value(checklistModeloId);
+  static Insertable<ChecklistOpcaoRespostaRelacaoTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
+    Expression<int>? checklistOpcaoRespostaId,
+    Expression<int>? checklistModeloId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (checklistOpcaoRespostaId != null)
+        'checklist_opcao_resposta_id': checklistOpcaoRespostaId,
+      if (checklistModeloId != null) 'checklist_modelo_id': checklistModeloId,
+    });
+  }
+
+  ChecklistOpcaoRespostaRelacaoTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
+      Value<int>? checklistOpcaoRespostaId,
+      Value<int>? checklistModeloId}) {
+    return ChecklistOpcaoRespostaRelacaoTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
+      checklistOpcaoRespostaId:
+          checklistOpcaoRespostaId ?? this.checklistOpcaoRespostaId,
+      checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (checklistOpcaoRespostaId.present) {
+      map['checklist_opcao_resposta_id'] =
+          Variable<int>(checklistOpcaoRespostaId.value);
+    }
+    if (checklistModeloId.present) {
+      map['checklist_modelo_id'] = Variable<int>(checklistModeloId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistOpcaoRespostaRelacaoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('checklistOpcaoRespostaId: $checklistOpcaoRespostaId, ')
+          ..write('checklistModeloId: $checklistModeloId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistPerguntaRelacaoTableTable extends ChecklistPerguntaRelacaoTable
+    with
+        TableInfo<$ChecklistPerguntaRelacaoTableTable,
+            ChecklistPerguntaRelacaoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistPerguntaRelacaoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _checklistModeloIdMeta =
+      const VerificationMeta('checklistModeloId');
+  @override
+  late final GeneratedColumn<int> checklistModeloId = GeneratedColumn<int>(
+      'checklist_modelo_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _checklistPerguntaIdMeta =
+      const VerificationMeta('checklistPerguntaId');
+  @override
+  late final GeneratedColumn<int> checklistPerguntaId = GeneratedColumn<int>(
+      'checklist_pergunta_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        remoteId,
+        createdAt,
+        updatedAt,
+        sincronizado,
+        checklistModeloId,
+        checklistPerguntaId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_pergunta_relacao_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistPerguntaRelacaoTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
+    }
+    if (data.containsKey('checklist_modelo_id')) {
+      context.handle(
+          _checklistModeloIdMeta,
+          checklistModeloId.isAcceptableOrUnknown(
+              data['checklist_modelo_id']!, _checklistModeloIdMeta));
+    } else if (isInserting) {
+      context.missing(_checklistModeloIdMeta);
+    }
+    if (data.containsKey('checklist_pergunta_id')) {
+      context.handle(
+          _checklistPerguntaIdMeta,
+          checklistPerguntaId.isAcceptableOrUnknown(
+              data['checklist_pergunta_id']!, _checklistPerguntaIdMeta));
+    } else if (isInserting) {
+      context.missing(_checklistPerguntaIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistPerguntaRelacaoTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistPerguntaRelacaoTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
+      checklistModeloId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}checklist_modelo_id'])!,
+      checklistPerguntaId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}checklist_pergunta_id'])!,
+    );
+  }
+
+  @override
+  $ChecklistPerguntaRelacaoTableTable createAlias(String alias) {
+    return $ChecklistPerguntaRelacaoTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistPerguntaRelacaoTableData extends DataClass
+    implements Insertable<ChecklistPerguntaRelacaoTableData> {
+  final int id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
+  final int checklistModeloId;
+  final int checklistPerguntaId;
+  const ChecklistPerguntaRelacaoTableData(
+      {required this.id,
+      required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
+      required this.checklistModeloId,
+      required this.checklistPerguntaId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    map['checklist_modelo_id'] = Variable<int>(checklistModeloId);
+    map['checklist_pergunta_id'] = Variable<int>(checklistPerguntaId);
+    return map;
+  }
+
+  ChecklistPerguntaRelacaoTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistPerguntaRelacaoTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
+      checklistModeloId: Value(checklistModeloId),
+      checklistPerguntaId: Value(checklistPerguntaId),
+    );
+  }
+
+  factory ChecklistPerguntaRelacaoTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistPerguntaRelacaoTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+      checklistModeloId: serializer.fromJson<int>(json['checklistModeloId']),
+      checklistPerguntaId:
+          serializer.fromJson<int>(json['checklistPerguntaId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+      'checklistModeloId': serializer.toJson<int>(checklistModeloId),
+      'checklistPerguntaId': serializer.toJson<int>(checklistPerguntaId),
+    };
+  }
+
+  ChecklistPerguntaRelacaoTableData copyWith(
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          int? checklistModeloId,
+          int? checklistPerguntaId}) =>
+      ChecklistPerguntaRelacaoTableData(
+        id: id ?? this.id,
+        remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
+        checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+        checklistPerguntaId: checklistPerguntaId ?? this.checklistPerguntaId,
+      );
+  ChecklistPerguntaRelacaoTableData copyWithCompanion(
+      ChecklistPerguntaRelacaoTableCompanion data) {
+    return ChecklistPerguntaRelacaoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+      checklistModeloId: data.checklistModeloId.present
+          ? data.checklistModeloId.value
+          : this.checklistModeloId,
+      checklistPerguntaId: data.checklistPerguntaId.present
+          ? data.checklistPerguntaId.value
+          : this.checklistPerguntaId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistPerguntaRelacaoTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('checklistPerguntaId: $checklistPerguntaId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, remoteId, createdAt, updatedAt,
+      sincronizado, checklistModeloId, checklistPerguntaId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistPerguntaRelacaoTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
+          other.checklistModeloId == this.checklistModeloId &&
+          other.checklistPerguntaId == this.checklistPerguntaId);
+}
+
+class ChecklistPerguntaRelacaoTableCompanion
+    extends UpdateCompanion<ChecklistPerguntaRelacaoTableData> {
+  final Value<int> id;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
+  final Value<int> checklistModeloId;
+  final Value<int> checklistPerguntaId;
+  const ChecklistPerguntaRelacaoTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.checklistModeloId = const Value.absent(),
+    this.checklistPerguntaId = const Value.absent(),
+  });
+  ChecklistPerguntaRelacaoTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
+    required int checklistModeloId,
+    required int checklistPerguntaId,
+  })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        checklistModeloId = Value(checklistModeloId),
+        checklistPerguntaId = Value(checklistPerguntaId);
+  static Insertable<ChecklistPerguntaRelacaoTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
+    Expression<int>? checklistModeloId,
+    Expression<int>? checklistPerguntaId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (checklistModeloId != null) 'checklist_modelo_id': checklistModeloId,
+      if (checklistPerguntaId != null)
+        'checklist_pergunta_id': checklistPerguntaId,
+    });
+  }
+
+  ChecklistPerguntaRelacaoTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
+      Value<int>? checklistModeloId,
+      Value<int>? checklistPerguntaId}) {
+    return ChecklistPerguntaRelacaoTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
+      checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+      checklistPerguntaId: checklistPerguntaId ?? this.checklistPerguntaId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (checklistModeloId.present) {
+      map['checklist_modelo_id'] = Variable<int>(checklistModeloId.value);
+    }
+    if (checklistPerguntaId.present) {
+      map['checklist_pergunta_id'] = Variable<int>(checklistPerguntaId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistPerguntaRelacaoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('checklistPerguntaId: $checklistPerguntaId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistTipoEquipeRelacaoTableTable
+    extends ChecklistTipoEquipeRelacaoTable
+    with
+        TableInfo<$ChecklistTipoEquipeRelacaoTableTable,
+            ChecklistTipoEquipeRelacaoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistTipoEquipeRelacaoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _checklistModeloIdMeta =
+      const VerificationMeta('checklistModeloId');
+  @override
+  late final GeneratedColumn<int> checklistModeloId = GeneratedColumn<int>(
+      'checklist_modelo_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _tipoEquipeIdMeta =
+      const VerificationMeta('tipoEquipeId');
+  @override
+  late final GeneratedColumn<int> tipoEquipeId = GeneratedColumn<int>(
+      'tipo_equipe_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        remoteId,
+        createdAt,
+        updatedAt,
+        sincronizado,
+        checklistModeloId,
+        tipoEquipeId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_tipo_equipe_relacao_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistTipoEquipeRelacaoTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
+    }
+    if (data.containsKey('checklist_modelo_id')) {
+      context.handle(
+          _checklistModeloIdMeta,
+          checklistModeloId.isAcceptableOrUnknown(
+              data['checklist_modelo_id']!, _checklistModeloIdMeta));
+    } else if (isInserting) {
+      context.missing(_checklistModeloIdMeta);
+    }
+    if (data.containsKey('tipo_equipe_id')) {
+      context.handle(
+          _tipoEquipeIdMeta,
+          tipoEquipeId.isAcceptableOrUnknown(
+              data['tipo_equipe_id']!, _tipoEquipeIdMeta));
+    } else if (isInserting) {
+      context.missing(_tipoEquipeIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistTipoEquipeRelacaoTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistTipoEquipeRelacaoTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
+      checklistModeloId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}checklist_modelo_id'])!,
+      tipoEquipeId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}tipo_equipe_id'])!,
+    );
+  }
+
+  @override
+  $ChecklistTipoEquipeRelacaoTableTable createAlias(String alias) {
+    return $ChecklistTipoEquipeRelacaoTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistTipoEquipeRelacaoTableData extends DataClass
+    implements Insertable<ChecklistTipoEquipeRelacaoTableData> {
+  final int id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
+  final int checklistModeloId;
+  final int tipoEquipeId;
+  const ChecklistTipoEquipeRelacaoTableData(
+      {required this.id,
+      required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
+      required this.checklistModeloId,
+      required this.tipoEquipeId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    map['checklist_modelo_id'] = Variable<int>(checklistModeloId);
+    map['tipo_equipe_id'] = Variable<int>(tipoEquipeId);
+    return map;
+  }
+
+  ChecklistTipoEquipeRelacaoTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistTipoEquipeRelacaoTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
+      checklistModeloId: Value(checklistModeloId),
+      tipoEquipeId: Value(tipoEquipeId),
+    );
+  }
+
+  factory ChecklistTipoEquipeRelacaoTableData.fromJson(
+      Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistTipoEquipeRelacaoTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+      checklistModeloId: serializer.fromJson<int>(json['checklistModeloId']),
+      tipoEquipeId: serializer.fromJson<int>(json['tipoEquipeId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+      'checklistModeloId': serializer.toJson<int>(checklistModeloId),
+      'tipoEquipeId': serializer.toJson<int>(tipoEquipeId),
+    };
+  }
+
+  ChecklistTipoEquipeRelacaoTableData copyWith(
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          int? checklistModeloId,
+          int? tipoEquipeId}) =>
+      ChecklistTipoEquipeRelacaoTableData(
+        id: id ?? this.id,
+        remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
+        checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+        tipoEquipeId: tipoEquipeId ?? this.tipoEquipeId,
+      );
+  ChecklistTipoEquipeRelacaoTableData copyWithCompanion(
+      ChecklistTipoEquipeRelacaoTableCompanion data) {
+    return ChecklistTipoEquipeRelacaoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+      checklistModeloId: data.checklistModeloId.present
+          ? data.checklistModeloId.value
+          : this.checklistModeloId,
+      tipoEquipeId: data.tipoEquipeId.present
+          ? data.tipoEquipeId.value
+          : this.tipoEquipeId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistTipoEquipeRelacaoTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('tipoEquipeId: $tipoEquipeId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, remoteId, createdAt, updatedAt,
+      sincronizado, checklistModeloId, tipoEquipeId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistTipoEquipeRelacaoTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
+          other.checklistModeloId == this.checklistModeloId &&
+          other.tipoEquipeId == this.tipoEquipeId);
+}
+
+class ChecklistTipoEquipeRelacaoTableCompanion
+    extends UpdateCompanion<ChecklistTipoEquipeRelacaoTableData> {
+  final Value<int> id;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
+  final Value<int> checklistModeloId;
+  final Value<int> tipoEquipeId;
+  const ChecklistTipoEquipeRelacaoTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.checklistModeloId = const Value.absent(),
+    this.tipoEquipeId = const Value.absent(),
+  });
+  ChecklistTipoEquipeRelacaoTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
+    required int checklistModeloId,
+    required int tipoEquipeId,
+  })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        checklistModeloId = Value(checklistModeloId),
+        tipoEquipeId = Value(tipoEquipeId);
+  static Insertable<ChecklistTipoEquipeRelacaoTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
+    Expression<int>? checklistModeloId,
+    Expression<int>? tipoEquipeId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (checklistModeloId != null) 'checklist_modelo_id': checklistModeloId,
+      if (tipoEquipeId != null) 'tipo_equipe_id': tipoEquipeId,
+    });
+  }
+
+  ChecklistTipoEquipeRelacaoTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
+      Value<int>? checklistModeloId,
+      Value<int>? tipoEquipeId}) {
+    return ChecklistTipoEquipeRelacaoTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
+      checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+      tipoEquipeId: tipoEquipeId ?? this.tipoEquipeId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (checklistModeloId.present) {
+      map['checklist_modelo_id'] = Variable<int>(checklistModeloId.value);
+    }
+    if (tipoEquipeId.present) {
+      map['tipo_equipe_id'] = Variable<int>(tipoEquipeId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistTipoEquipeRelacaoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('tipoEquipeId: $tipoEquipeId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistTipoVeiculoRelacaoTableTable
+    extends ChecklistTipoVeiculoRelacaoTable
+    with
+        TableInfo<$ChecklistTipoVeiculoRelacaoTableTable,
+            ChecklistTipoVeiculoRelacaoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistTipoVeiculoRelacaoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _remoteIdMeta =
+      const VerificationMeta('remoteId');
+  @override
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
+      'remote_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _checklistModeloIdMeta =
+      const VerificationMeta('checklistModeloId');
+  @override
+  late final GeneratedColumn<int> checklistModeloId = GeneratedColumn<int>(
+      'checklist_modelo_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _tipoVeiculoIdMeta =
+      const VerificationMeta('tipoVeiculoId');
+  @override
+  late final GeneratedColumn<int> tipoVeiculoId = GeneratedColumn<int>(
+      'tipo_veiculo_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        remoteId,
+        createdAt,
+        updatedAt,
+        sincronizado,
+        checklistModeloId,
+        tipoVeiculoId
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_tipo_veiculo_relacao_table';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ChecklistTipoVeiculoRelacaoTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(_remoteIdMeta,
+          remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
+    } else if (isInserting) {
+      context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
+    }
+    if (data.containsKey('checklist_modelo_id')) {
+      context.handle(
+          _checklistModeloIdMeta,
+          checklistModeloId.isAcceptableOrUnknown(
+              data['checklist_modelo_id']!, _checklistModeloIdMeta));
+    } else if (isInserting) {
+      context.missing(_checklistModeloIdMeta);
+    }
+    if (data.containsKey('tipo_veiculo_id')) {
+      context.handle(
+          _tipoVeiculoIdMeta,
+          tipoVeiculoId.isAcceptableOrUnknown(
+              data['tipo_veiculo_id']!, _tipoVeiculoIdMeta));
+    } else if (isInserting) {
+      context.missing(_tipoVeiculoIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChecklistTipoVeiculoRelacaoTableData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistTipoVeiculoRelacaoTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      remoteId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
+      checklistModeloId: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}checklist_modelo_id'])!,
+      tipoVeiculoId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}tipo_veiculo_id'])!,
+    );
+  }
+
+  @override
+  $ChecklistTipoVeiculoRelacaoTableTable createAlias(String alias) {
+    return $ChecklistTipoVeiculoRelacaoTableTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistTipoVeiculoRelacaoTableData extends DataClass
+    implements Insertable<ChecklistTipoVeiculoRelacaoTableData> {
+  final int id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
+  final int checklistModeloId;
+  final int tipoVeiculoId;
+  const ChecklistTipoVeiculoRelacaoTableData(
+      {required this.id,
+      required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
+      required this.checklistModeloId,
+      required this.tipoVeiculoId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    map['checklist_modelo_id'] = Variable<int>(checklistModeloId);
+    map['tipo_veiculo_id'] = Variable<int>(tipoVeiculoId);
+    return map;
+  }
+
+  ChecklistTipoVeiculoRelacaoTableCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistTipoVeiculoRelacaoTableCompanion(
+      id: Value(id),
+      remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
+      checklistModeloId: Value(checklistModeloId),
+      tipoVeiculoId: Value(tipoVeiculoId),
+    );
+  }
+
+  factory ChecklistTipoVeiculoRelacaoTableData.fromJson(
+      Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistTipoVeiculoRelacaoTableData(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+      checklistModeloId: serializer.fromJson<int>(json['checklistModeloId']),
+      tipoVeiculoId: serializer.fromJson<int>(json['tipoVeiculoId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+      'checklistModeloId': serializer.toJson<int>(checklistModeloId),
+      'tipoVeiculoId': serializer.toJson<int>(tipoVeiculoId),
+    };
+  }
+
+  ChecklistTipoVeiculoRelacaoTableData copyWith(
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          int? checklistModeloId,
+          int? tipoVeiculoId}) =>
+      ChecklistTipoVeiculoRelacaoTableData(
+        id: id ?? this.id,
+        remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
+        checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+        tipoVeiculoId: tipoVeiculoId ?? this.tipoVeiculoId,
+      );
+  ChecklistTipoVeiculoRelacaoTableData copyWithCompanion(
+      ChecklistTipoVeiculoRelacaoTableCompanion data) {
+    return ChecklistTipoVeiculoRelacaoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+      checklistModeloId: data.checklistModeloId.present
+          ? data.checklistModeloId.value
+          : this.checklistModeloId,
+      tipoVeiculoId: data.tipoVeiculoId.present
+          ? data.tipoVeiculoId.value
+          : this.tipoVeiculoId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistTipoVeiculoRelacaoTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('tipoVeiculoId: $tipoVeiculoId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, remoteId, createdAt, updatedAt,
+      sincronizado, checklistModeloId, tipoVeiculoId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistTipoVeiculoRelacaoTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
+          other.checklistModeloId == this.checklistModeloId &&
+          other.tipoVeiculoId == this.tipoVeiculoId);
+}
+
+class ChecklistTipoVeiculoRelacaoTableCompanion
+    extends UpdateCompanion<ChecklistTipoVeiculoRelacaoTableData> {
+  final Value<int> id;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
+  final Value<int> checklistModeloId;
+  final Value<int> tipoVeiculoId;
+  const ChecklistTipoVeiculoRelacaoTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.checklistModeloId = const Value.absent(),
+    this.tipoVeiculoId = const Value.absent(),
+  });
+  ChecklistTipoVeiculoRelacaoTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
+    required int checklistModeloId,
+    required int tipoVeiculoId,
+  })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
+        checklistModeloId = Value(checklistModeloId),
+        tipoVeiculoId = Value(tipoVeiculoId);
+  static Insertable<ChecklistTipoVeiculoRelacaoTableData> custom({
+    Expression<int>? id,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
+    Expression<int>? checklistModeloId,
+    Expression<int>? tipoVeiculoId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (checklistModeloId != null) 'checklist_modelo_id': checklistModeloId,
+      if (tipoVeiculoId != null) 'tipo_veiculo_id': tipoVeiculoId,
+    });
+  }
+
+  ChecklistTipoVeiculoRelacaoTableCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
+      Value<int>? checklistModeloId,
+      Value<int>? tipoVeiculoId}) {
+    return ChecklistTipoVeiculoRelacaoTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
+      checklistModeloId: checklistModeloId ?? this.checklistModeloId,
+      tipoVeiculoId: tipoVeiculoId ?? this.tipoVeiculoId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (checklistModeloId.present) {
+      map['checklist_modelo_id'] = Variable<int>(checklistModeloId.value);
+    }
+    if (tipoVeiculoId.present) {
+      map['tipo_veiculo_id'] = Variable<int>(tipoVeiculoId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistTipoVeiculoRelacaoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('checklistModeloId: $checklistModeloId, ')
+          ..write('tipoVeiculoId: $tipoVeiculoId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2953,6 +5709,23 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TurnoTableTable turnoTable = $TurnoTableTable(this);
   late final $TurnoEletricistasTableTable turnoEletricistasTable =
       $TurnoEletricistasTableTable(this);
+  late final $ChecklistModeloTableTable checklistModeloTable =
+      $ChecklistModeloTableTable(this);
+  late final $ChecklistPerguntaTableTable checklistPerguntaTable =
+      $ChecklistPerguntaTableTable(this);
+  late final $ChecklistOpcaoRespostaTableTable checklistOpcaoRespostaTable =
+      $ChecklistOpcaoRespostaTableTable(this);
+  late final $ChecklistOpcaoRespostaRelacaoTableTable
+      checklistOpcaoRespostaRelacaoTable =
+      $ChecklistOpcaoRespostaRelacaoTableTable(this);
+  late final $ChecklistPerguntaRelacaoTableTable checklistPerguntaRelacaoTable =
+      $ChecklistPerguntaRelacaoTableTable(this);
+  late final $ChecklistTipoEquipeRelacaoTableTable
+      checklistTipoEquipeRelacaoTable =
+      $ChecklistTipoEquipeRelacaoTableTable(this);
+  late final $ChecklistTipoVeiculoRelacaoTableTable
+      checklistTipoVeiculoRelacaoTable =
+      $ChecklistTipoVeiculoRelacaoTableTable(this);
   late final UsuarioDao usuarioDao = UsuarioDao(this as AppDatabase);
   late final TipoVeiculoDao tipoVeiculoDao =
       TipoVeiculoDao(this as AppDatabase);
@@ -2964,6 +5737,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final TurnoDao turnoDao = TurnoDao(this as AppDatabase);
   late final TurnoEletricistasDao turnoEletricistasDao =
       TurnoEletricistasDao(this as AppDatabase);
+  late final ChecklistModeloDao checklistModeloDao =
+      ChecklistModeloDao(this as AppDatabase);
+  late final ChecklistPerguntaDao checklistPerguntaDao =
+      ChecklistPerguntaDao(this as AppDatabase);
+  late final ChecklistOpcaoRespostaDao checklistOpcaoRespostaDao =
+      ChecklistOpcaoRespostaDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2976,7 +5755,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         equipeTable,
         eletricistaTable,
         turnoTable,
-        turnoEletricistasTable
+        turnoEletricistasTable,
+        checklistModeloTable,
+        checklistPerguntaTable,
+        checklistOpcaoRespostaTable,
+        checklistOpcaoRespostaRelacaoTable,
+        checklistPerguntaRelacaoTable,
+        checklistTipoEquipeRelacaoTable,
+        checklistTipoVeiculoRelacaoTable
       ];
 }
 
@@ -4504,6 +7290,1449 @@ typedef $$TurnoEletricistasTableTableProcessedTableManager
         ),
         TurnoEletricistasTableData,
         PrefetchHooks Function()>;
+typedef $$ChecklistModeloTableTableCreateCompanionBuilder
+    = ChecklistModeloTableCompanion Function({
+  Value<int> id,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
+  required String nome,
+  required int tipoChecklistId,
+});
+typedef $$ChecklistModeloTableTableUpdateCompanionBuilder
+    = ChecklistModeloTableCompanion Function({
+  Value<int> id,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
+  Value<String> nome,
+  Value<int> tipoChecklistId,
+});
+
+class $$ChecklistModeloTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistModeloTableTable> {
+  $$ChecklistModeloTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nome => $composableBuilder(
+      column: $table.nome, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get tipoChecklistId => $composableBuilder(
+      column: $table.tipoChecklistId,
+      builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistModeloTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistModeloTableTable> {
+  $$ChecklistModeloTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nome => $composableBuilder(
+      column: $table.nome, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get tipoChecklistId => $composableBuilder(
+      column: $table.tipoChecklistId,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistModeloTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistModeloTableTable> {
+  $$ChecklistModeloTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
+
+  GeneratedColumn<String> get nome =>
+      $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  GeneratedColumn<int> get tipoChecklistId => $composableBuilder(
+      column: $table.tipoChecklistId, builder: (column) => column);
+}
+
+class $$ChecklistModeloTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ChecklistModeloTableTable,
+    ChecklistModeloTableData,
+    $$ChecklistModeloTableTableFilterComposer,
+    $$ChecklistModeloTableTableOrderingComposer,
+    $$ChecklistModeloTableTableAnnotationComposer,
+    $$ChecklistModeloTableTableCreateCompanionBuilder,
+    $$ChecklistModeloTableTableUpdateCompanionBuilder,
+    (
+      ChecklistModeloTableData,
+      BaseReferences<_$AppDatabase, $ChecklistModeloTableTable,
+          ChecklistModeloTableData>
+    ),
+    ChecklistModeloTableData,
+    PrefetchHooks Function()> {
+  $$ChecklistModeloTableTableTableManager(
+      _$AppDatabase db, $ChecklistModeloTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistModeloTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistModeloTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistModeloTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
+            Value<String> nome = const Value.absent(),
+            Value<int> tipoChecklistId = const Value.absent(),
+          }) =>
+              ChecklistModeloTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            nome: nome,
+            tipoChecklistId: tipoChecklistId,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
+            required String nome,
+            required int tipoChecklistId,
+          }) =>
+              ChecklistModeloTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            nome: nome,
+            tipoChecklistId: tipoChecklistId,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistModeloTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistModeloTableTable,
+        ChecklistModeloTableData,
+        $$ChecklistModeloTableTableFilterComposer,
+        $$ChecklistModeloTableTableOrderingComposer,
+        $$ChecklistModeloTableTableAnnotationComposer,
+        $$ChecklistModeloTableTableCreateCompanionBuilder,
+        $$ChecklistModeloTableTableUpdateCompanionBuilder,
+        (
+          ChecklistModeloTableData,
+          BaseReferences<_$AppDatabase, $ChecklistModeloTableTable,
+              ChecklistModeloTableData>
+        ),
+        ChecklistModeloTableData,
+        PrefetchHooks Function()>;
+typedef $$ChecklistPerguntaTableTableCreateCompanionBuilder
+    = ChecklistPerguntaTableCompanion Function({
+  Value<int> id,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
+  required String nome,
+});
+typedef $$ChecklistPerguntaTableTableUpdateCompanionBuilder
+    = ChecklistPerguntaTableCompanion Function({
+  Value<int> id,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
+  Value<String> nome,
+});
+
+class $$ChecklistPerguntaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistPerguntaTableTable> {
+  $$ChecklistPerguntaTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nome => $composableBuilder(
+      column: $table.nome, builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistPerguntaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistPerguntaTableTable> {
+  $$ChecklistPerguntaTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nome => $composableBuilder(
+      column: $table.nome, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistPerguntaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistPerguntaTableTable> {
+  $$ChecklistPerguntaTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
+
+  GeneratedColumn<String> get nome =>
+      $composableBuilder(column: $table.nome, builder: (column) => column);
+}
+
+class $$ChecklistPerguntaTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ChecklistPerguntaTableTable,
+    ChecklistPerguntaTableData,
+    $$ChecklistPerguntaTableTableFilterComposer,
+    $$ChecklistPerguntaTableTableOrderingComposer,
+    $$ChecklistPerguntaTableTableAnnotationComposer,
+    $$ChecklistPerguntaTableTableCreateCompanionBuilder,
+    $$ChecklistPerguntaTableTableUpdateCompanionBuilder,
+    (
+      ChecklistPerguntaTableData,
+      BaseReferences<_$AppDatabase, $ChecklistPerguntaTableTable,
+          ChecklistPerguntaTableData>
+    ),
+    ChecklistPerguntaTableData,
+    PrefetchHooks Function()> {
+  $$ChecklistPerguntaTableTableTableManager(
+      _$AppDatabase db, $ChecklistPerguntaTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistPerguntaTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistPerguntaTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistPerguntaTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
+            Value<String> nome = const Value.absent(),
+          }) =>
+              ChecklistPerguntaTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            nome: nome,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
+            required String nome,
+          }) =>
+              ChecklistPerguntaTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            nome: nome,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistPerguntaTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistPerguntaTableTable,
+        ChecklistPerguntaTableData,
+        $$ChecklistPerguntaTableTableFilterComposer,
+        $$ChecklistPerguntaTableTableOrderingComposer,
+        $$ChecklistPerguntaTableTableAnnotationComposer,
+        $$ChecklistPerguntaTableTableCreateCompanionBuilder,
+        $$ChecklistPerguntaTableTableUpdateCompanionBuilder,
+        (
+          ChecklistPerguntaTableData,
+          BaseReferences<_$AppDatabase, $ChecklistPerguntaTableTable,
+              ChecklistPerguntaTableData>
+        ),
+        ChecklistPerguntaTableData,
+        PrefetchHooks Function()>;
+typedef $$ChecklistOpcaoRespostaTableTableCreateCompanionBuilder
+    = ChecklistOpcaoRespostaTableCompanion Function({
+  Value<int> id,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
+  required String nome,
+  required bool geraPendencia,
+});
+typedef $$ChecklistOpcaoRespostaTableTableUpdateCompanionBuilder
+    = ChecklistOpcaoRespostaTableCompanion Function({
+  Value<int> id,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
+  Value<String> nome,
+  Value<bool> geraPendencia,
+});
+
+class $$ChecklistOpcaoRespostaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistOpcaoRespostaTableTable> {
+  $$ChecklistOpcaoRespostaTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get nome => $composableBuilder(
+      column: $table.nome, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get geraPendencia => $composableBuilder(
+      column: $table.geraPendencia, builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistOpcaoRespostaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistOpcaoRespostaTableTable> {
+  $$ChecklistOpcaoRespostaTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get nome => $composableBuilder(
+      column: $table.nome, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get geraPendencia => $composableBuilder(
+      column: $table.geraPendencia,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistOpcaoRespostaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistOpcaoRespostaTableTable> {
+  $$ChecklistOpcaoRespostaTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
+
+  GeneratedColumn<String> get nome =>
+      $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  GeneratedColumn<bool> get geraPendencia => $composableBuilder(
+      column: $table.geraPendencia, builder: (column) => column);
+}
+
+class $$ChecklistOpcaoRespostaTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ChecklistOpcaoRespostaTableTable,
+    ChecklistOpcaoRespostaTableData,
+    $$ChecklistOpcaoRespostaTableTableFilterComposer,
+    $$ChecklistOpcaoRespostaTableTableOrderingComposer,
+    $$ChecklistOpcaoRespostaTableTableAnnotationComposer,
+    $$ChecklistOpcaoRespostaTableTableCreateCompanionBuilder,
+    $$ChecklistOpcaoRespostaTableTableUpdateCompanionBuilder,
+    (
+      ChecklistOpcaoRespostaTableData,
+      BaseReferences<_$AppDatabase, $ChecklistOpcaoRespostaTableTable,
+          ChecklistOpcaoRespostaTableData>
+    ),
+    ChecklistOpcaoRespostaTableData,
+    PrefetchHooks Function()> {
+  $$ChecklistOpcaoRespostaTableTableTableManager(
+      _$AppDatabase db, $ChecklistOpcaoRespostaTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistOpcaoRespostaTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistOpcaoRespostaTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistOpcaoRespostaTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
+            Value<String> nome = const Value.absent(),
+            Value<bool> geraPendencia = const Value.absent(),
+          }) =>
+              ChecklistOpcaoRespostaTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            nome: nome,
+            geraPendencia: geraPendencia,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
+            required String nome,
+            required bool geraPendencia,
+          }) =>
+              ChecklistOpcaoRespostaTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            nome: nome,
+            geraPendencia: geraPendencia,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistOpcaoRespostaTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistOpcaoRespostaTableTable,
+        ChecklistOpcaoRespostaTableData,
+        $$ChecklistOpcaoRespostaTableTableFilterComposer,
+        $$ChecklistOpcaoRespostaTableTableOrderingComposer,
+        $$ChecklistOpcaoRespostaTableTableAnnotationComposer,
+        $$ChecklistOpcaoRespostaTableTableCreateCompanionBuilder,
+        $$ChecklistOpcaoRespostaTableTableUpdateCompanionBuilder,
+        (
+          ChecklistOpcaoRespostaTableData,
+          BaseReferences<_$AppDatabase, $ChecklistOpcaoRespostaTableTable,
+              ChecklistOpcaoRespostaTableData>
+        ),
+        ChecklistOpcaoRespostaTableData,
+        PrefetchHooks Function()>;
+typedef $$ChecklistOpcaoRespostaRelacaoTableTableCreateCompanionBuilder
+    = ChecklistOpcaoRespostaRelacaoTableCompanion Function({
+  Value<int> id,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
+  required int checklistOpcaoRespostaId,
+  required int checklistModeloId,
+});
+typedef $$ChecklistOpcaoRespostaRelacaoTableTableUpdateCompanionBuilder
+    = ChecklistOpcaoRespostaRelacaoTableCompanion Function({
+  Value<int> id,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
+  Value<int> checklistOpcaoRespostaId,
+  Value<int> checklistModeloId,
+});
+
+class $$ChecklistOpcaoRespostaRelacaoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistOpcaoRespostaRelacaoTableTable> {
+  $$ChecklistOpcaoRespostaRelacaoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checklistOpcaoRespostaId => $composableBuilder(
+      column: $table.checklistOpcaoRespostaId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistOpcaoRespostaRelacaoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistOpcaoRespostaRelacaoTableTable> {
+  $$ChecklistOpcaoRespostaRelacaoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checklistOpcaoRespostaId => $composableBuilder(
+      column: $table.checklistOpcaoRespostaId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistOpcaoRespostaRelacaoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistOpcaoRespostaRelacaoTableTable> {
+  $$ChecklistOpcaoRespostaRelacaoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
+
+  GeneratedColumn<int> get checklistOpcaoRespostaId => $composableBuilder(
+      column: $table.checklistOpcaoRespostaId, builder: (column) => column);
+
+  GeneratedColumn<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId, builder: (column) => column);
+}
+
+class $$ChecklistOpcaoRespostaRelacaoTableTableTableManager
+    extends RootTableManager<
+        _$AppDatabase,
+        $ChecklistOpcaoRespostaRelacaoTableTable,
+        ChecklistOpcaoRespostaRelacaoTableData,
+        $$ChecklistOpcaoRespostaRelacaoTableTableFilterComposer,
+        $$ChecklistOpcaoRespostaRelacaoTableTableOrderingComposer,
+        $$ChecklistOpcaoRespostaRelacaoTableTableAnnotationComposer,
+        $$ChecklistOpcaoRespostaRelacaoTableTableCreateCompanionBuilder,
+        $$ChecklistOpcaoRespostaRelacaoTableTableUpdateCompanionBuilder,
+        (
+          ChecklistOpcaoRespostaRelacaoTableData,
+          BaseReferences<
+              _$AppDatabase,
+              $ChecklistOpcaoRespostaRelacaoTableTable,
+              ChecklistOpcaoRespostaRelacaoTableData>
+        ),
+        ChecklistOpcaoRespostaRelacaoTableData,
+        PrefetchHooks Function()> {
+  $$ChecklistOpcaoRespostaRelacaoTableTableTableManager(
+      _$AppDatabase db, $ChecklistOpcaoRespostaRelacaoTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistOpcaoRespostaRelacaoTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistOpcaoRespostaRelacaoTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistOpcaoRespostaRelacaoTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
+            Value<int> checklistOpcaoRespostaId = const Value.absent(),
+            Value<int> checklistModeloId = const Value.absent(),
+          }) =>
+              ChecklistOpcaoRespostaRelacaoTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            checklistOpcaoRespostaId: checklistOpcaoRespostaId,
+            checklistModeloId: checklistModeloId,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
+            required int checklistOpcaoRespostaId,
+            required int checklistModeloId,
+          }) =>
+              ChecklistOpcaoRespostaRelacaoTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            checklistOpcaoRespostaId: checklistOpcaoRespostaId,
+            checklistModeloId: checklistModeloId,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistOpcaoRespostaRelacaoTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistOpcaoRespostaRelacaoTableTable,
+        ChecklistOpcaoRespostaRelacaoTableData,
+        $$ChecklistOpcaoRespostaRelacaoTableTableFilterComposer,
+        $$ChecklistOpcaoRespostaRelacaoTableTableOrderingComposer,
+        $$ChecklistOpcaoRespostaRelacaoTableTableAnnotationComposer,
+        $$ChecklistOpcaoRespostaRelacaoTableTableCreateCompanionBuilder,
+        $$ChecklistOpcaoRespostaRelacaoTableTableUpdateCompanionBuilder,
+        (
+          ChecklistOpcaoRespostaRelacaoTableData,
+          BaseReferences<
+              _$AppDatabase,
+              $ChecklistOpcaoRespostaRelacaoTableTable,
+              ChecklistOpcaoRespostaRelacaoTableData>
+        ),
+        ChecklistOpcaoRespostaRelacaoTableData,
+        PrefetchHooks Function()>;
+typedef $$ChecklistPerguntaRelacaoTableTableCreateCompanionBuilder
+    = ChecklistPerguntaRelacaoTableCompanion Function({
+  Value<int> id,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
+  required int checklistModeloId,
+  required int checklistPerguntaId,
+});
+typedef $$ChecklistPerguntaRelacaoTableTableUpdateCompanionBuilder
+    = ChecklistPerguntaRelacaoTableCompanion Function({
+  Value<int> id,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
+  Value<int> checklistModeloId,
+  Value<int> checklistPerguntaId,
+});
+
+class $$ChecklistPerguntaRelacaoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistPerguntaRelacaoTableTable> {
+  $$ChecklistPerguntaRelacaoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checklistPerguntaId => $composableBuilder(
+      column: $table.checklistPerguntaId,
+      builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistPerguntaRelacaoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistPerguntaRelacaoTableTable> {
+  $$ChecklistPerguntaRelacaoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checklistPerguntaId => $composableBuilder(
+      column: $table.checklistPerguntaId,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistPerguntaRelacaoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistPerguntaRelacaoTableTable> {
+  $$ChecklistPerguntaRelacaoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
+
+  GeneratedColumn<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId, builder: (column) => column);
+
+  GeneratedColumn<int> get checklistPerguntaId => $composableBuilder(
+      column: $table.checklistPerguntaId, builder: (column) => column);
+}
+
+class $$ChecklistPerguntaRelacaoTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ChecklistPerguntaRelacaoTableTable,
+    ChecklistPerguntaRelacaoTableData,
+    $$ChecklistPerguntaRelacaoTableTableFilterComposer,
+    $$ChecklistPerguntaRelacaoTableTableOrderingComposer,
+    $$ChecklistPerguntaRelacaoTableTableAnnotationComposer,
+    $$ChecklistPerguntaRelacaoTableTableCreateCompanionBuilder,
+    $$ChecklistPerguntaRelacaoTableTableUpdateCompanionBuilder,
+    (
+      ChecklistPerguntaRelacaoTableData,
+      BaseReferences<_$AppDatabase, $ChecklistPerguntaRelacaoTableTable,
+          ChecklistPerguntaRelacaoTableData>
+    ),
+    ChecklistPerguntaRelacaoTableData,
+    PrefetchHooks Function()> {
+  $$ChecklistPerguntaRelacaoTableTableTableManager(
+      _$AppDatabase db, $ChecklistPerguntaRelacaoTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistPerguntaRelacaoTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistPerguntaRelacaoTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistPerguntaRelacaoTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
+            Value<int> checklistModeloId = const Value.absent(),
+            Value<int> checklistPerguntaId = const Value.absent(),
+          }) =>
+              ChecklistPerguntaRelacaoTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            checklistModeloId: checklistModeloId,
+            checklistPerguntaId: checklistPerguntaId,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
+            required int checklistModeloId,
+            required int checklistPerguntaId,
+          }) =>
+              ChecklistPerguntaRelacaoTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            checklistModeloId: checklistModeloId,
+            checklistPerguntaId: checklistPerguntaId,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistPerguntaRelacaoTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistPerguntaRelacaoTableTable,
+        ChecklistPerguntaRelacaoTableData,
+        $$ChecklistPerguntaRelacaoTableTableFilterComposer,
+        $$ChecklistPerguntaRelacaoTableTableOrderingComposer,
+        $$ChecklistPerguntaRelacaoTableTableAnnotationComposer,
+        $$ChecklistPerguntaRelacaoTableTableCreateCompanionBuilder,
+        $$ChecklistPerguntaRelacaoTableTableUpdateCompanionBuilder,
+        (
+          ChecklistPerguntaRelacaoTableData,
+          BaseReferences<_$AppDatabase, $ChecklistPerguntaRelacaoTableTable,
+              ChecklistPerguntaRelacaoTableData>
+        ),
+        ChecklistPerguntaRelacaoTableData,
+        PrefetchHooks Function()>;
+typedef $$ChecklistTipoEquipeRelacaoTableTableCreateCompanionBuilder
+    = ChecklistTipoEquipeRelacaoTableCompanion Function({
+  Value<int> id,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
+  required int checklistModeloId,
+  required int tipoEquipeId,
+});
+typedef $$ChecklistTipoEquipeRelacaoTableTableUpdateCompanionBuilder
+    = ChecklistTipoEquipeRelacaoTableCompanion Function({
+  Value<int> id,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
+  Value<int> checklistModeloId,
+  Value<int> tipoEquipeId,
+});
+
+class $$ChecklistTipoEquipeRelacaoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistTipoEquipeRelacaoTableTable> {
+  $$ChecklistTipoEquipeRelacaoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get tipoEquipeId => $composableBuilder(
+      column: $table.tipoEquipeId, builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistTipoEquipeRelacaoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistTipoEquipeRelacaoTableTable> {
+  $$ChecklistTipoEquipeRelacaoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get tipoEquipeId => $composableBuilder(
+      column: $table.tipoEquipeId,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistTipoEquipeRelacaoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistTipoEquipeRelacaoTableTable> {
+  $$ChecklistTipoEquipeRelacaoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
+
+  GeneratedColumn<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId, builder: (column) => column);
+
+  GeneratedColumn<int> get tipoEquipeId => $composableBuilder(
+      column: $table.tipoEquipeId, builder: (column) => column);
+}
+
+class $$ChecklistTipoEquipeRelacaoTableTableTableManager
+    extends RootTableManager<
+        _$AppDatabase,
+        $ChecklistTipoEquipeRelacaoTableTable,
+        ChecklistTipoEquipeRelacaoTableData,
+        $$ChecklistTipoEquipeRelacaoTableTableFilterComposer,
+        $$ChecklistTipoEquipeRelacaoTableTableOrderingComposer,
+        $$ChecklistTipoEquipeRelacaoTableTableAnnotationComposer,
+        $$ChecklistTipoEquipeRelacaoTableTableCreateCompanionBuilder,
+        $$ChecklistTipoEquipeRelacaoTableTableUpdateCompanionBuilder,
+        (
+          ChecklistTipoEquipeRelacaoTableData,
+          BaseReferences<_$AppDatabase, $ChecklistTipoEquipeRelacaoTableTable,
+              ChecklistTipoEquipeRelacaoTableData>
+        ),
+        ChecklistTipoEquipeRelacaoTableData,
+        PrefetchHooks Function()> {
+  $$ChecklistTipoEquipeRelacaoTableTableTableManager(
+      _$AppDatabase db, $ChecklistTipoEquipeRelacaoTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistTipoEquipeRelacaoTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistTipoEquipeRelacaoTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistTipoEquipeRelacaoTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
+            Value<int> checklistModeloId = const Value.absent(),
+            Value<int> tipoEquipeId = const Value.absent(),
+          }) =>
+              ChecklistTipoEquipeRelacaoTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            checklistModeloId: checklistModeloId,
+            tipoEquipeId: tipoEquipeId,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
+            required int checklistModeloId,
+            required int tipoEquipeId,
+          }) =>
+              ChecklistTipoEquipeRelacaoTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            checklistModeloId: checklistModeloId,
+            tipoEquipeId: tipoEquipeId,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistTipoEquipeRelacaoTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistTipoEquipeRelacaoTableTable,
+        ChecklistTipoEquipeRelacaoTableData,
+        $$ChecklistTipoEquipeRelacaoTableTableFilterComposer,
+        $$ChecklistTipoEquipeRelacaoTableTableOrderingComposer,
+        $$ChecklistTipoEquipeRelacaoTableTableAnnotationComposer,
+        $$ChecklistTipoEquipeRelacaoTableTableCreateCompanionBuilder,
+        $$ChecklistTipoEquipeRelacaoTableTableUpdateCompanionBuilder,
+        (
+          ChecklistTipoEquipeRelacaoTableData,
+          BaseReferences<_$AppDatabase, $ChecklistTipoEquipeRelacaoTableTable,
+              ChecklistTipoEquipeRelacaoTableData>
+        ),
+        ChecklistTipoEquipeRelacaoTableData,
+        PrefetchHooks Function()>;
+typedef $$ChecklistTipoVeiculoRelacaoTableTableCreateCompanionBuilder
+    = ChecklistTipoVeiculoRelacaoTableCompanion Function({
+  Value<int> id,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
+  required int checklistModeloId,
+  required int tipoVeiculoId,
+});
+typedef $$ChecklistTipoVeiculoRelacaoTableTableUpdateCompanionBuilder
+    = ChecklistTipoVeiculoRelacaoTableCompanion Function({
+  Value<int> id,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
+  Value<int> checklistModeloId,
+  Value<int> tipoVeiculoId,
+});
+
+class $$ChecklistTipoVeiculoRelacaoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistTipoVeiculoRelacaoTableTable> {
+  $$ChecklistTipoVeiculoRelacaoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get tipoVeiculoId => $composableBuilder(
+      column: $table.tipoVeiculoId, builder: (column) => ColumnFilters(column));
+}
+
+class $$ChecklistTipoVeiculoRelacaoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistTipoVeiculoRelacaoTableTable> {
+  $$ChecklistTipoVeiculoRelacaoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get remoteId => $composableBuilder(
+      column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get tipoVeiculoId => $composableBuilder(
+      column: $table.tipoVeiculoId,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$ChecklistTipoVeiculoRelacaoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistTipoVeiculoRelacaoTableTable> {
+  $$ChecklistTipoVeiculoRelacaoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
+
+  GeneratedColumn<int> get checklistModeloId => $composableBuilder(
+      column: $table.checklistModeloId, builder: (column) => column);
+
+  GeneratedColumn<int> get tipoVeiculoId => $composableBuilder(
+      column: $table.tipoVeiculoId, builder: (column) => column);
+}
+
+class $$ChecklistTipoVeiculoRelacaoTableTableTableManager
+    extends RootTableManager<
+        _$AppDatabase,
+        $ChecklistTipoVeiculoRelacaoTableTable,
+        ChecklistTipoVeiculoRelacaoTableData,
+        $$ChecklistTipoVeiculoRelacaoTableTableFilterComposer,
+        $$ChecklistTipoVeiculoRelacaoTableTableOrderingComposer,
+        $$ChecklistTipoVeiculoRelacaoTableTableAnnotationComposer,
+        $$ChecklistTipoVeiculoRelacaoTableTableCreateCompanionBuilder,
+        $$ChecklistTipoVeiculoRelacaoTableTableUpdateCompanionBuilder,
+        (
+          ChecklistTipoVeiculoRelacaoTableData,
+          BaseReferences<_$AppDatabase, $ChecklistTipoVeiculoRelacaoTableTable,
+              ChecklistTipoVeiculoRelacaoTableData>
+        ),
+        ChecklistTipoVeiculoRelacaoTableData,
+        PrefetchHooks Function()> {
+  $$ChecklistTipoVeiculoRelacaoTableTableTableManager(
+      _$AppDatabase db, $ChecklistTipoVeiculoRelacaoTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistTipoVeiculoRelacaoTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistTipoVeiculoRelacaoTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistTipoVeiculoRelacaoTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
+            Value<int> checklistModeloId = const Value.absent(),
+            Value<int> tipoVeiculoId = const Value.absent(),
+          }) =>
+              ChecklistTipoVeiculoRelacaoTableCompanion(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            checklistModeloId: checklistModeloId,
+            tipoVeiculoId: tipoVeiculoId,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
+            required int checklistModeloId,
+            required int tipoVeiculoId,
+          }) =>
+              ChecklistTipoVeiculoRelacaoTableCompanion.insert(
+            id: id,
+            remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
+            checklistModeloId: checklistModeloId,
+            tipoVeiculoId: tipoVeiculoId,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ChecklistTipoVeiculoRelacaoTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ChecklistTipoVeiculoRelacaoTableTable,
+        ChecklistTipoVeiculoRelacaoTableData,
+        $$ChecklistTipoVeiculoRelacaoTableTableFilterComposer,
+        $$ChecklistTipoVeiculoRelacaoTableTableOrderingComposer,
+        $$ChecklistTipoVeiculoRelacaoTableTableAnnotationComposer,
+        $$ChecklistTipoVeiculoRelacaoTableTableCreateCompanionBuilder,
+        $$ChecklistTipoVeiculoRelacaoTableTableUpdateCompanionBuilder,
+        (
+          ChecklistTipoVeiculoRelacaoTableData,
+          BaseReferences<_$AppDatabase, $ChecklistTipoVeiculoRelacaoTableTable,
+              ChecklistTipoVeiculoRelacaoTableData>
+        ),
+        ChecklistTipoVeiculoRelacaoTableData,
+        PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4525,4 +8754,29 @@ class $AppDatabaseManager {
   $$TurnoEletricistasTableTableTableManager get turnoEletricistasTable =>
       $$TurnoEletricistasTableTableTableManager(
           _db, _db.turnoEletricistasTable);
+  $$ChecklistModeloTableTableTableManager get checklistModeloTable =>
+      $$ChecklistModeloTableTableTableManager(_db, _db.checklistModeloTable);
+  $$ChecklistPerguntaTableTableTableManager get checklistPerguntaTable =>
+      $$ChecklistPerguntaTableTableTableManager(
+          _db, _db.checklistPerguntaTable);
+  $$ChecklistOpcaoRespostaTableTableTableManager
+      get checklistOpcaoRespostaTable =>
+          $$ChecklistOpcaoRespostaTableTableTableManager(
+              _db, _db.checklistOpcaoRespostaTable);
+  $$ChecklistOpcaoRespostaRelacaoTableTableTableManager
+      get checklistOpcaoRespostaRelacaoTable =>
+          $$ChecklistOpcaoRespostaRelacaoTableTableTableManager(
+              _db, _db.checklistOpcaoRespostaRelacaoTable);
+  $$ChecklistPerguntaRelacaoTableTableTableManager
+      get checklistPerguntaRelacaoTable =>
+          $$ChecklistPerguntaRelacaoTableTableTableManager(
+              _db, _db.checklistPerguntaRelacaoTable);
+  $$ChecklistTipoEquipeRelacaoTableTableTableManager
+      get checklistTipoEquipeRelacaoTable =>
+          $$ChecklistTipoEquipeRelacaoTableTableTableManager(
+              _db, _db.checklistTipoEquipeRelacaoTable);
+  $$ChecklistTipoVeiculoRelacaoTableTableTableManager
+      get checklistTipoVeiculoRelacaoTable =>
+          $$ChecklistTipoVeiculoRelacaoTableTableTableManager(
+              _db, _db.checklistTipoVeiculoRelacaoTable);
 }
