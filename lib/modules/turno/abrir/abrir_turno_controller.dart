@@ -7,6 +7,7 @@ import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/equipe_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_service.dart';
+import 'package:nexa_app/modules/turno/abrir/validators/turno_validator.dart';
 
 /// Controlador da tela de abrir turno.
 ///
@@ -86,45 +87,12 @@ class AbrirTurnoController extends GetxController {
   }
 
   /// Valida campo de KM inicial.
-  String? validateKmInicial(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'KM inicial é obrigatório';
-    }
-
-    final km = int.tryParse(value.trim());
-    if (km == null) {
-      return 'KM deve ser um número válido';
-    }
-
-    if (km < 0) {
-      return 'KM não pode ser negativo';
-    }
-
-    if (km > 999999) {
-      return 'KM muito alto (máximo 999.999)';
-    }
-
-    return null;
-  }
+  String? validateKmInicial(String? value) =>
+      TurnoValidator.validateKmInicial(value);
 
   /// Valida lista de eletricistas.
-  String? validateEletricistas() {
-    if (eletricistasSelecionados.isEmpty) {
-      return 'Pelo menos 2 eletricistas são obrigatórios';
-    }
-
-    if (eletricistasSelecionados.length < 2) {
-      return 'Mínimo de 2 eletricistas necessários';
-    }
-
-    // Verifica se há pelo menos um motorista selecionado
-    final temMotorista = eletricistasSelecionados.any((e) => e.isMotorista);
-    if (!temMotorista) {
-      return 'É obrigatório marcar um motorista';
-    }
-
-    return null;
-  }
+  String? validateEletricistas() =>
+      TurnoValidator.validateEletricistas(eletricistasSelecionados);
 
   /// Adiciona eletricista à lista.
   void adicionarEletricista(EletricistaTableDto eletricista) {
@@ -390,23 +358,3 @@ class AbrirTurnoController extends GetxController {
   }
 }
 
-/// Classe para representar um eletricista selecionado com suas propriedades.
-class EletricistaSelecionado {
-  final EletricistaTableDto eletricista;
-  final bool isMotorista;
-
-  EletricistaSelecionado({
-    required this.eletricista,
-    this.isMotorista = false,
-  });
-
-  EletricistaSelecionado copyWith({
-    EletricistaTableDto? eletricista,
-    bool? isMotorista,
-  }) {
-    return EletricistaSelecionado(
-      eletricista: eletricista ?? this.eletricista,
-      isMotorista: isMotorista ?? this.isMotorista,
-    );
-  }
-}
