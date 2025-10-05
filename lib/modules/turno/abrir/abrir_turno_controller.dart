@@ -9,6 +9,7 @@ import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/equipe_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_service.dart';
+import 'package:nexa_app/modules/turno/abrir/models/abrir_turno_dados.dart';
 import 'package:nexa_app/modules/turno/abrir/validators/turno_validator.dart';
 
 /// Controlador da tela de abrir turno.
@@ -25,6 +26,10 @@ class AbrirTurnoController extends GetxController {
 
   /// Serviço para buscar dados de abertura de turno.
   final AbrirTurnoService _abrirTurnoService = Get.find<AbrirTurnoService>();
+
+  /// Cache local com os dados carregados do serviço para evitar requisições
+  /// repetidas ao digitar nas buscas dos dropdowns.
+  AbrirTurnoDados? _dadosCarregados;
 
   /// Repositório de turno para operações de banco.
   final TurnoRepo _turnoRepo = Get.find<TurnoRepo>();
@@ -312,43 +317,37 @@ class AbrirTurnoController extends GetxController {
   // ============================================================================
 
 
-  /// Carrega dados iniciais usando o serviço.
+  /// Carrega dados iniciais usando o serviço e reaproveita o resultado em cache.
   Future<void> _carregarDadosIniciais() async {
     try {
-      // Carrega veículos
-      final veiculos = await _abrirTurnoService.buscarVeiculos();
-      veiculoDropdownController.setItems(veiculos);
-
-      // Carrega equipes
-      final equipes = await _abrirTurnoService.buscarEquipes();
-      equipeDropdownController.setItems(equipes);
-
-      // Carrega eletricistas
-      final eletricistas = await _abrirTurnoService.buscarEletricistas();
-      eletricistaDropdownController.setItems(eletricistas);
+      final dados = await _obterDadosCarregados(forceRefresh: true);
 
       AppLogger.d(
-          'Dados iniciais carregados: ${veiculos.length} veículos, ${equipes.length} equipes, ${eletricistas.length} eletricistas',
-          tag: 'AbrirTurnoController');
+        'Dados iniciais carregados: '
+        '${dados.veiculos.length} veículos, '
+        '${dados.equipes.length} equipes, '
+        '${dados.eletricistas.length} eletricistas',
+        tag: 'AbrirTurnoController',
+      );
     } catch (e) {
       AppLogger.e('Erro ao carregar dados iniciais',
           tag: 'AbrirTurnoController', error: e);
     }
   }
 
-  /// Busca veículos remotamente.
+  /// Busca veículos remotamente utilizando os dados já carregados em cache.
   Future<List<VeiculoTableDto>> _buscarVeiculos(String query) async {
     try {
+      final veiculos = (await _obterDadosCarregados()).veiculos;
+
       if (query.isEmpty) {
-        return veiculoDropdownController.items;
+        return veiculos;
       }
 
-      final veiculos = await _abrirTurnoService.buscarVeiculos();
-      final veiculoDtos = veiculos
-          .where((v) => v.placa.toLowerCase().contains(query.toLowerCase()))
+      final filtro = query.toLowerCase();
+      return veiculos
+          .where((v) => v.placa.toLowerCase().contains(filtro))
           .toList();
-
-      return veiculoDtos;
     } catch (e) {
       AppLogger.e('Erro ao buscar veículos',
           tag: 'AbrirTurnoController', error: e);
@@ -356,19 +355,19 @@ class AbrirTurnoController extends GetxController {
     }
   }
 
-  /// Busca equipes remotamente.
+  /// Busca equipes remotamente reutilizando os dados carregados.
   Future<List<EquipeTableDto>> _buscarEquipes(String query) async {
     try {
+      final equipes = (await _obterDadosCarregados()).equipes;
+
       if (query.isEmpty) {
-        return equipeDropdownController.items;
+        return equipes;
       }
 
-      final equipes = await _abrirTurnoService.buscarEquipes();
-      final equipeDtos = equipes
-          .where((e) => e.nome.toLowerCase().contains(query.toLowerCase()))
+      final filtro = query.toLowerCase();
+      return equipes
+          .where((e) => e.nome.toLowerCase().contains(filtro))
           .toList();
-
-      return equipeDtos;
     } catch (e) {
       AppLogger.e('Erro ao buscar equipes',
           tag: 'AbrirTurnoController', error: e);
@@ -376,26 +375,51 @@ class AbrirTurnoController extends GetxController {
     }
   }
 
-  /// Busca eletricistas remotamente.
+  /// Busca eletricistas remotamente utilizando os dados em cache.
   Future<List<EletricistaTableDto>> _buscarEletricistas(String query) async {
     try {
+      final eletricistas = (await _obterDadosCarregados()).eletricistas;
+
       if (query.isEmpty) {
-        return eletricistaDropdownController.items;
+        return eletricistas;
       }
 
-      final eletricistas = await _abrirTurnoService.buscarEletricistas();
-      final eletricistaDtos = eletricistas
+      final filtro = query.toLowerCase();
+      return eletricistas
           .where((e) =>
-              e.nome.toLowerCase().contains(query.toLowerCase()) ||
-              e.matricula.toLowerCase().contains(query.toLowerCase()))
+              e.nome.toLowerCase().contains(filtro) ||
+              e.matricula.toLowerCase().contains(filtro))
           .toList();
-
-      return eletricistaDtos;
     } catch (e) {
       AppLogger.e('Erro ao buscar eletricistas',
           tag: 'AbrirTurnoController', error: e);
       return [];
     }
+  }
+
+  /// Busca os dados previamente carregados ou realiza uma nova busca se
+  /// necessário, atualizando os dropdowns ao mesmo tempo.
+  Future<AbrirTurnoDados> _obterDadosCarregados({bool forceRefresh = false}) async {
+    if (!forceRefresh && _dadosCarregados != null) {
+      return _dadosCarregados!;
+    }
+
+    final dados = await _abrirTurnoService.buscarDadosIniciais(
+      forceRefresh: forceRefresh,
+    );
+    _dadosCarregados = dados;
+
+    if (veiculoDropdownController.items.isEmpty || forceRefresh) {
+      veiculoDropdownController.setItems(dados.veiculos);
+    }
+    if (equipeDropdownController.items.isEmpty || forceRefresh) {
+      equipeDropdownController.setItems(dados.equipes);
+    }
+    if (eletricistaDropdownController.items.isEmpty || forceRefresh) {
+      eletricistaDropdownController.setItems(dados.eletricistas);
+    }
+
+    return dados;
   }
 }
 

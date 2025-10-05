@@ -12,11 +12,18 @@ class AbrirTurnoBinding extends Bindings {
   @override
   void dependencies() {
 
-    Get.lazyPut(() => VeiculoRepo(dio: Get.find(), db: Get.find()));
-    Get.lazyPut(() => EletricistaRepo(dio: Get.find(), db: Get.find()));
-    Get.lazyPut(() => EquipeRepo(dio: Get.find(), db: Get.find()));
+    Get.lazyPut(() => EletricistaRepo(dio: Get.find(), db: Get.find()),
+        fenix: true);
+    Get.lazyPut(() => EquipeRepo(dio: Get.find(), db: Get.find()),
+        fenix: true);
 
-    Get.lazyPut(() => AbrirTurnoService());
+    Get.lazyPut(
+      () => AbrirTurnoService(
+        veiculoRepo: Get.find<VeiculoRepo>(),
+        eletricistaRepo: Get.find<EletricistaRepo>(),
+        equipeRepo: Get.find<EquipeRepo>(),
+      ),
+    );
     Get.lazyPut(() => AbrirTurnoController());
   }
 }
