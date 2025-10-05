@@ -7,16 +7,23 @@ import 'package:nexa_app/core/utils/errors/app_exception.dart';
 
 class TipoVeiculoTableDto extends BaseDto
     with DriftDtoMixin, TableValidationMixin {
-  final String id;
-  final String remoteId;
   final String nome;
   final String? descricao;
+
+  final String id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
 
   TipoVeiculoTableDto({
     required this.id,
     required this.remoteId,
     required this.nome,
     this.descricao,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.sincronizado,
   });
 
   factory TipoVeiculoTableDto.fromEntity(TipoVeiculoTableData entity) {
@@ -25,6 +32,9 @@ class TipoVeiculoTableDto extends BaseDto
       remoteId: entity.remoteId,
       nome: entity.nome,
       descricao: entity.descricao,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      sincronizado: entity.sincronizado,
     );
   }
 
@@ -34,6 +44,9 @@ class TipoVeiculoTableDto extends BaseDto
       remoteId: Value(remoteId),
       nome: Value(nome),
       descricao: Value(descricao),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
     );
   }
 
@@ -44,6 +57,9 @@ class TipoVeiculoTableDto extends BaseDto
       remoteId: remoteId,
       nome: nome,
       descricao: descricao,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      sincronizado: sincronizado,
     );
   }
 
@@ -62,9 +78,12 @@ class TipoVeiculoTableDto extends BaseDto
 
       return TipoVeiculoTableDto(
         id: id,
-        remoteId: remoteId,
+        remoteId: int.parse(remoteId),
         nome: nome,
         descricao: descricao?.isEmpty == true ? null : descricao,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        sincronizado: false,
       );
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -104,7 +123,7 @@ class TipoVeiculoTableDto extends BaseDto
 
   void validateSpecific() {
     // Validação do remoteId
-    BaseDto.validateStringLength(remoteId, 'remoteId',
+    BaseDto.validateStringLength(remoteId.toString(), 'remoteId',
         minLength: 1, maxLength: 100);
 
     // Validação do nome

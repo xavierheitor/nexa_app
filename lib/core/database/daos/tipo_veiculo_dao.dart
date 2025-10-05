@@ -36,14 +36,14 @@ class TipoVeiculoDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Busca um tipo de veículo por remote ID
-  Future<TipoVeiculoTableData> buscarPorRemoteId(String remoteId) async {
+  Future<TipoVeiculoTableData> buscarPorRemoteId(int remoteId) async {
     return await (select(tipoVeiculoTable)
           ..where((t) => t.remoteId.equals(remoteId)))
         .getSingle();
   }
 
   /// Busca um tipo de veículo por remote ID (retorna null se não encontrar)
-  Future<TipoVeiculoTableData?> buscarPorRemoteIdOuNull(String remoteId) async {
+  Future<TipoVeiculoTableData?> buscarPorRemoteIdOuNull(int remoteId) async {
     try {
       return await (select(tipoVeiculoTable)
             ..where((t) => t.remoteId.equals(remoteId)))

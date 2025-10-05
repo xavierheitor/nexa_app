@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/database/models/checklist_modelo_table.dart';
 import 'package:nexa_app/core/domain/dto/checklist_modelo_table_dto.dart';
+import 'package:nexa_app/core/utils/logger/app_logger.dart';
 
 part 'checklist_modelo_dao.g.dart';
 
@@ -47,6 +48,30 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
 
   /// Busca modelos por tipo de veículo.
   Future<List<ChecklistModeloTableDto>> buscarPorTipoVeiculo(int tipoVeiculoId) async {
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Buscando checklist para tipoVeiculoId: $tipoVeiculoId',
+        tag: 'ChecklistModeloDao');
+
+    // Primeiro, vamos verificar se existem dados nas tabelas
+    final todosModelos = await listar();
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Total de modelos de checklist: ${todosModelos.length}',
+        tag: 'ChecklistModeloDao');
+
+    final todasRelacoes = await db.checklistTipoVeiculoRelacaoDao.listar();
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Total de relações tipo-veículo: ${todasRelacoes.length}',
+        tag: 'ChecklistModeloDao');
+
+    if (todasRelacoes.isNotEmpty) {
+      for (int i = 0; i < todasRelacoes.length; i++) {
+        final relacao = todasRelacoes[i];
+        AppLogger.d(
+            '🔍 [DIAGNÓSTICO DAO] Relação $i: checklistModeloId=${relacao.checklistModeloId}, tipoVeiculoId=${relacao.tipoVeiculoId}',
+            tag: 'ChecklistModeloDao');
+      }
+    }
+    
     // Implementação com JOIN manual
     final query = select(db.checklistModeloTable)
         .join([
@@ -58,8 +83,37 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
         ..where(db.checklistTipoVeiculoRelacaoTable.tipoVeiculoId.equals(tipoVeiculoId))
         ..orderBy([OrderingTerm.asc(db.checklistModeloTable.nome)]);
     
+    AppLogger.d('🔍 [DIAGNÓSTICO DAO] Executando query com JOIN...',
+        tag: 'ChecklistModeloDao');
+    
     final results = await query.get();
-    return results.map((row) => ChecklistModeloTableDto.fromTable(row.readTable(db.checklistModeloTable))).toList();
+    
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Query executada. ${results.length} resultados brutos encontrados',
+        tag: 'ChecklistModeloDao');
+
+    if (results.isNotEmpty) {
+      for (int i = 0; i < results.length; i++) {
+        final row = results[i];
+        final modelo = row.readTable(db.checklistModeloTable);
+        final relacao =
+            row.readTableOrNull(db.checklistTipoVeiculoRelacaoTable);
+        AppLogger.d(
+            '🔍 [DIAGNÓSTICO DAO] Resultado $i: modeloId=${modelo.id}, relacaoTipoVeiculoId=${relacao?.tipoVeiculoId}',
+            tag: 'ChecklistModeloDao');
+      }
+    }
+
+    final dtos = results
+        .map((row) => ChecklistModeloTableDto.fromTable(
+            row.readTable(db.checklistModeloTable)))
+        .toList();
+
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Convertidos para DTOs: ${dtos.length} modelos',
+        tag: 'ChecklistModeloDao');
+
+    return dtos;
   }
 
   /// Busca modelos por tipo de equipe.

@@ -110,7 +110,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -126,6 +126,27 @@ class AppDatabase extends _$AppDatabase {
             // Migration: adicionar campo motorista em turno_eletricistas_table
             await m.addColumn(
                 turnoEletricistasTable, turnoEletricistasTable.motorista);
+          }
+          if (from == 7 && to == 8) {
+            // Migração: resetar banco para corrigir estrutura das tabelas
+            await m.drop(veiculoTable);
+            await m.drop(tipoVeiculoTable);
+            await m.createTable(veiculoTable);
+            await m.createTable(tipoVeiculoTable);
+          }
+          if (from == 8 && to == 9) {
+            // Migração: resetar banco para corrigir tipos de remoteId
+            await m.drop(veiculoTable);
+            await m.drop(tipoVeiculoTable);
+            await m.createTable(veiculoTable);
+            await m.createTable(tipoVeiculoTable);
+          }
+          if (from == 9 && to == 10) {
+            // Migração: forçar limpeza completa das tabelas problemáticas
+            await m.drop(veiculoTable);
+            await m.drop(tipoVeiculoTable);
+            await m.createTable(veiculoTable);
+            await m.createTable(tipoVeiculoTable);
           }
           // versões futuras aqui
         },

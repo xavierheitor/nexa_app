@@ -6,16 +6,23 @@ import 'package:nexa_app/core/domain/dto/base/table_validation_mixin.dart';
 import 'package:nexa_app/core/utils/errors/app_exception.dart';
 
 class VeiculoTableDto extends BaseDto with DriftDtoMixin, TableValidationMixin {
-  final String id;
-  final String remoteId;
   final String placa;
   final int tipoVeiculoId;
+
+  final String id;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
 
   VeiculoTableDto({
     required this.id,
     required this.remoteId,
     required this.placa,
     required this.tipoVeiculoId,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.sincronizado,
   });
 
   factory VeiculoTableDto.fromEntity(VeiculoTableData entity) {
@@ -24,6 +31,9 @@ class VeiculoTableDto extends BaseDto with DriftDtoMixin, TableValidationMixin {
       remoteId: entity.remoteId,
       placa: entity.placa,
       tipoVeiculoId: entity.tipoVeiculoId,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      sincronizado: entity.sincronizado,
     );
   }
 
@@ -33,6 +43,9 @@ class VeiculoTableDto extends BaseDto with DriftDtoMixin, TableValidationMixin {
       remoteId: Value(remoteId),
       placa: Value(placa),
       tipoVeiculoId: Value(tipoVeiculoId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
     );
   }
 
@@ -43,6 +56,9 @@ class VeiculoTableDto extends BaseDto with DriftDtoMixin, TableValidationMixin {
       remoteId: remoteId,
       placa: placa,
       tipoVeiculoId: tipoVeiculoId,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      sincronizado: sincronizado,
     );
   }
 
@@ -61,9 +77,12 @@ class VeiculoTableDto extends BaseDto with DriftDtoMixin, TableValidationMixin {
 
       return VeiculoTableDto(
         id: id,
-        remoteId: remoteId,
+        remoteId: int.parse(remoteId),
         placa: placa,
         tipoVeiculoId: tipoVeiculoId,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        sincronizado: false,
       );
     } catch (e) {
       if (e is DtoError) rethrow;
@@ -103,7 +122,8 @@ class VeiculoTableDto extends BaseDto with DriftDtoMixin, TableValidationMixin {
 
   void validateSpecific() {
     // Validação do remoteId
-    BaseDto.validateStringLength(remoteId, 'remoteId', minLength: 1, maxLength: 100);
+    BaseDto.validateStringLength(remoteId.toString(), 'remoteId',
+        minLength: 1, maxLength: 100);
     
     // Validação da placa
     BaseDto.validateStringLength(placa, 'placa', minLength: 7, maxLength: 8);

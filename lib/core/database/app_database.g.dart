@@ -456,12 +456,31 @@ class $TipoVeiculoTableTable extends TipoVeiculoTable
   static const VerificationMeta _remoteIdMeta =
       const VerificationMeta('remoteId');
   @override
-  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
       'remote_id', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 100),
-      type: DriftSqlType.string,
-      requiredDuringInsert: true);
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
   @override
   late final GeneratedColumn<String> nome = GeneratedColumn<String>(
@@ -479,7 +498,8 @@ class $TipoVeiculoTableTable extends TipoVeiculoTable
       type: DriftSqlType.string,
       requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [id, remoteId, nome, descricao];
+  List<GeneratedColumn> get $columns =>
+      [id, remoteId, createdAt, updatedAt, sincronizado, nome, descricao];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -499,6 +519,24 @@ class $TipoVeiculoTableTable extends TipoVeiculoTable
           remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
     } else if (isInserting) {
       context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
     }
     if (data.containsKey('nome')) {
       context.handle(
@@ -522,7 +560,13 @@ class $TipoVeiculoTableTable extends TipoVeiculoTable
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       remoteId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}remote_id'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
       nome: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}nome'])!,
       descricao: attachedDatabase.typeMapping
@@ -539,19 +583,28 @@ class $TipoVeiculoTableTable extends TipoVeiculoTable
 class TipoVeiculoTableData extends DataClass
     implements Insertable<TipoVeiculoTableData> {
   final int id;
-  final String remoteId;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
   final String nome;
   final String? descricao;
   const TipoVeiculoTableData(
       {required this.id,
       required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
       required this.nome,
       this.descricao});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['remote_id'] = Variable<String>(remoteId);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
     map['nome'] = Variable<String>(nome);
     if (!nullToAbsent || descricao != null) {
       map['descricao'] = Variable<String>(descricao);
@@ -563,6 +616,9 @@ class TipoVeiculoTableData extends DataClass
     return TipoVeiculoTableCompanion(
       id: Value(id),
       remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
       nome: Value(nome),
       descricao: descricao == null && nullToAbsent
           ? const Value.absent()
@@ -575,7 +631,10 @@ class TipoVeiculoTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TipoVeiculoTableData(
       id: serializer.fromJson<int>(json['id']),
-      remoteId: serializer.fromJson<String>(json['remoteId']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
       nome: serializer.fromJson<String>(json['nome']),
       descricao: serializer.fromJson<String?>(json['descricao']),
     );
@@ -585,7 +644,10 @@ class TipoVeiculoTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'remoteId': serializer.toJson<String>(remoteId),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
       'nome': serializer.toJson<String>(nome),
       'descricao': serializer.toJson<String?>(descricao),
     };
@@ -593,12 +655,18 @@ class TipoVeiculoTableData extends DataClass
 
   TipoVeiculoTableData copyWith(
           {int? id,
-          String? remoteId,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
           String? nome,
           Value<String?> descricao = const Value.absent()}) =>
       TipoVeiculoTableData(
         id: id ?? this.id,
         remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
         nome: nome ?? this.nome,
         descricao: descricao.present ? descricao.value : this.descricao,
       );
@@ -606,6 +674,11 @@ class TipoVeiculoTableData extends DataClass
     return TipoVeiculoTableData(
       id: data.id.present ? data.id.value : this.id,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
       nome: data.nome.present ? data.nome.value : this.nome,
       descricao: data.descricao.present ? data.descricao.value : this.descricao,
     );
@@ -616,6 +689,9 @@ class TipoVeiculoTableData extends DataClass
     return (StringBuffer('TipoVeiculoTableData(')
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
           ..write('nome: $nome, ')
           ..write('descricao: $descricao')
           ..write(')'))
@@ -623,44 +699,65 @@ class TipoVeiculoTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, remoteId, nome, descricao);
+  int get hashCode => Object.hash(
+      id, remoteId, createdAt, updatedAt, sincronizado, nome, descricao);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TipoVeiculoTableData &&
           other.id == this.id &&
           other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
           other.nome == this.nome &&
           other.descricao == this.descricao);
 }
 
 class TipoVeiculoTableCompanion extends UpdateCompanion<TipoVeiculoTableData> {
   final Value<int> id;
-  final Value<String> remoteId;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
   final Value<String> nome;
   final Value<String?> descricao;
   const TipoVeiculoTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
     this.nome = const Value.absent(),
     this.descricao = const Value.absent(),
   });
   TipoVeiculoTableCompanion.insert({
     this.id = const Value.absent(),
-    required String remoteId,
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
     required String nome,
     this.descricao = const Value.absent(),
   })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
         nome = Value(nome);
   static Insertable<TipoVeiculoTableData> custom({
     Expression<int>? id,
-    Expression<String>? remoteId,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
     Expression<String>? nome,
     Expression<String>? descricao,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
       if (nome != null) 'nome': nome,
       if (descricao != null) 'descricao': descricao,
     });
@@ -668,12 +765,18 @@ class TipoVeiculoTableCompanion extends UpdateCompanion<TipoVeiculoTableData> {
 
   TipoVeiculoTableCompanion copyWith(
       {Value<int>? id,
-      Value<String>? remoteId,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
       Value<String>? nome,
       Value<String?>? descricao}) {
     return TipoVeiculoTableCompanion(
       id: id ?? this.id,
       remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
       nome: nome ?? this.nome,
       descricao: descricao ?? this.descricao,
     );
@@ -686,7 +789,16 @@ class TipoVeiculoTableCompanion extends UpdateCompanion<TipoVeiculoTableData> {
       map['id'] = Variable<int>(id.value);
     }
     if (remoteId.present) {
-      map['remote_id'] = Variable<String>(remoteId.value);
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
     }
     if (nome.present) {
       map['nome'] = Variable<String>(nome.value);
@@ -702,6 +814,9 @@ class TipoVeiculoTableCompanion extends UpdateCompanion<TipoVeiculoTableData> {
     return (StringBuffer('TipoVeiculoTableCompanion(')
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
           ..write('nome: $nome, ')
           ..write('descricao: $descricao')
           ..write(')'))
@@ -727,12 +842,31 @@ class $VeiculoTableTable extends VeiculoTable
   static const VerificationMeta _remoteIdMeta =
       const VerificationMeta('remoteId');
   @override
-  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> remoteId = GeneratedColumn<int>(
       'remote_id', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 100),
-      type: DriftSqlType.string,
-      requiredDuringInsert: true);
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _sincronizadoMeta =
+      const VerificationMeta('sincronizado');
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+      'sincronizado', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("sincronizado" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _placaMeta = const VerificationMeta('placa');
   @override
   late final GeneratedColumn<String> placa = GeneratedColumn<String>(
@@ -748,7 +882,8 @@ class $VeiculoTableTable extends VeiculoTable
       'tipo_veiculo_id', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, remoteId, placa, tipoVeiculoId];
+  List<GeneratedColumn> get $columns =>
+      [id, remoteId, createdAt, updatedAt, sincronizado, placa, tipoVeiculoId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -767,6 +902,24 @@ class $VeiculoTableTable extends VeiculoTable
           remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta));
     } else if (isInserting) {
       context.missing(_remoteIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+          _sincronizadoMeta,
+          sincronizado.isAcceptableOrUnknown(
+              data['sincronizado']!, _sincronizadoMeta));
     }
     if (data.containsKey('placa')) {
       context.handle(
@@ -794,7 +947,13 @@ class $VeiculoTableTable extends VeiculoTable
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       remoteId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}remote_id'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}remote_id'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      sincronizado: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}sincronizado'])!,
       placa: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}placa'])!,
       tipoVeiculoId: attachedDatabase.typeMapping
@@ -811,19 +970,28 @@ class $VeiculoTableTable extends VeiculoTable
 class VeiculoTableData extends DataClass
     implements Insertable<VeiculoTableData> {
   final int id;
-  final String remoteId;
+  final int remoteId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool sincronizado;
   final String placa;
   final int tipoVeiculoId;
   const VeiculoTableData(
       {required this.id,
       required this.remoteId,
+      required this.createdAt,
+      required this.updatedAt,
+      required this.sincronizado,
       required this.placa,
       required this.tipoVeiculoId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['remote_id'] = Variable<String>(remoteId);
+    map['remote_id'] = Variable<int>(remoteId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sincronizado'] = Variable<bool>(sincronizado);
     map['placa'] = Variable<String>(placa);
     map['tipo_veiculo_id'] = Variable<int>(tipoVeiculoId);
     return map;
@@ -833,6 +1001,9 @@ class VeiculoTableData extends DataClass
     return VeiculoTableCompanion(
       id: Value(id),
       remoteId: Value(remoteId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sincronizado: Value(sincronizado),
       placa: Value(placa),
       tipoVeiculoId: Value(tipoVeiculoId),
     );
@@ -843,7 +1014,10 @@ class VeiculoTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return VeiculoTableData(
       id: serializer.fromJson<int>(json['id']),
-      remoteId: serializer.fromJson<String>(json['remoteId']),
+      remoteId: serializer.fromJson<int>(json['remoteId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
       placa: serializer.fromJson<String>(json['placa']),
       tipoVeiculoId: serializer.fromJson<int>(json['tipoVeiculoId']),
     );
@@ -853,17 +1027,29 @@ class VeiculoTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'remoteId': serializer.toJson<String>(remoteId),
+      'remoteId': serializer.toJson<int>(remoteId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
       'placa': serializer.toJson<String>(placa),
       'tipoVeiculoId': serializer.toJson<int>(tipoVeiculoId),
     };
   }
 
   VeiculoTableData copyWith(
-          {int? id, String? remoteId, String? placa, int? tipoVeiculoId}) =>
+          {int? id,
+          int? remoteId,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          bool? sincronizado,
+          String? placa,
+          int? tipoVeiculoId}) =>
       VeiculoTableData(
         id: id ?? this.id,
         remoteId: remoteId ?? this.remoteId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        sincronizado: sincronizado ?? this.sincronizado,
         placa: placa ?? this.placa,
         tipoVeiculoId: tipoVeiculoId ?? this.tipoVeiculoId,
       );
@@ -871,6 +1057,11 @@ class VeiculoTableData extends DataClass
     return VeiculoTableData(
       id: data.id.present ? data.id.value : this.id,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
       placa: data.placa.present ? data.placa.value : this.placa,
       tipoVeiculoId: data.tipoVeiculoId.present
           ? data.tipoVeiculoId.value
@@ -883,6 +1074,9 @@ class VeiculoTableData extends DataClass
     return (StringBuffer('VeiculoTableData(')
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
           ..write('placa: $placa, ')
           ..write('tipoVeiculoId: $tipoVeiculoId')
           ..write(')'))
@@ -890,45 +1084,66 @@ class VeiculoTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, remoteId, placa, tipoVeiculoId);
+  int get hashCode => Object.hash(
+      id, remoteId, createdAt, updatedAt, sincronizado, placa, tipoVeiculoId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is VeiculoTableData &&
           other.id == this.id &&
           other.remoteId == this.remoteId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sincronizado == this.sincronizado &&
           other.placa == this.placa &&
           other.tipoVeiculoId == this.tipoVeiculoId);
 }
 
 class VeiculoTableCompanion extends UpdateCompanion<VeiculoTableData> {
   final Value<int> id;
-  final Value<String> remoteId;
+  final Value<int> remoteId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> sincronizado;
   final Value<String> placa;
   final Value<int> tipoVeiculoId;
   const VeiculoTableCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sincronizado = const Value.absent(),
     this.placa = const Value.absent(),
     this.tipoVeiculoId = const Value.absent(),
   });
   VeiculoTableCompanion.insert({
     this.id = const Value.absent(),
-    required String remoteId,
+    required int remoteId,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.sincronizado = const Value.absent(),
     required String placa,
     required int tipoVeiculoId,
   })  : remoteId = Value(remoteId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt),
         placa = Value(placa),
         tipoVeiculoId = Value(tipoVeiculoId);
   static Insertable<VeiculoTableData> custom({
     Expression<int>? id,
-    Expression<String>? remoteId,
+    Expression<int>? remoteId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? sincronizado,
     Expression<String>? placa,
     Expression<int>? tipoVeiculoId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (remoteId != null) 'remote_id': remoteId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sincronizado != null) 'sincronizado': sincronizado,
       if (placa != null) 'placa': placa,
       if (tipoVeiculoId != null) 'tipo_veiculo_id': tipoVeiculoId,
     });
@@ -936,12 +1151,18 @@ class VeiculoTableCompanion extends UpdateCompanion<VeiculoTableData> {
 
   VeiculoTableCompanion copyWith(
       {Value<int>? id,
-      Value<String>? remoteId,
+      Value<int>? remoteId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<bool>? sincronizado,
       Value<String>? placa,
       Value<int>? tipoVeiculoId}) {
     return VeiculoTableCompanion(
       id: id ?? this.id,
       remoteId: remoteId ?? this.remoteId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sincronizado: sincronizado ?? this.sincronizado,
       placa: placa ?? this.placa,
       tipoVeiculoId: tipoVeiculoId ?? this.tipoVeiculoId,
     );
@@ -954,7 +1175,16 @@ class VeiculoTableCompanion extends UpdateCompanion<VeiculoTableData> {
       map['id'] = Variable<int>(id.value);
     }
     if (remoteId.present) {
-      map['remote_id'] = Variable<String>(remoteId.value);
+      map['remote_id'] = Variable<int>(remoteId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
     }
     if (placa.present) {
       map['placa'] = Variable<String>(placa.value);
@@ -970,6 +1200,9 @@ class VeiculoTableCompanion extends UpdateCompanion<VeiculoTableData> {
     return (StringBuffer('VeiculoTableCompanion(')
           ..write('id: $id, ')
           ..write('remoteId: $remoteId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sincronizado: $sincronizado, ')
           ..write('placa: $placa, ')
           ..write('tipoVeiculoId: $tipoVeiculoId')
           ..write(')'))
@@ -6031,14 +6264,20 @@ typedef $$UsuarioTableTableProcessedTableManager = ProcessedTableManager<
 typedef $$TipoVeiculoTableTableCreateCompanionBuilder
     = TipoVeiculoTableCompanion Function({
   Value<int> id,
-  required String remoteId,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
   required String nome,
   Value<String?> descricao,
 });
 typedef $$TipoVeiculoTableTableUpdateCompanionBuilder
     = TipoVeiculoTableCompanion Function({
   Value<int> id,
-  Value<String> remoteId,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
   Value<String> nome,
   Value<String?> descricao,
 });
@@ -6055,8 +6294,17 @@ class $$TipoVeiculoTableTableFilterComposer
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get remoteId => $composableBuilder(
+  ColumnFilters<int> get remoteId => $composableBuilder(
       column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get nome => $composableBuilder(
       column: $table.nome, builder: (column) => ColumnFilters(column));
@@ -6077,8 +6325,18 @@ class $$TipoVeiculoTableTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get remoteId => $composableBuilder(
+  ColumnOrderings<int> get remoteId => $composableBuilder(
       column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get nome => $composableBuilder(
       column: $table.nome, builder: (column) => ColumnOrderings(column));
@@ -6099,8 +6357,17 @@ class $$TipoVeiculoTableTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get remoteId =>
+  GeneratedColumn<int> get remoteId =>
       $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
 
   GeneratedColumn<String> get nome =>
       $composableBuilder(column: $table.nome, builder: (column) => column);
@@ -6138,25 +6405,37 @@ class $$TipoVeiculoTableTableTableManager extends RootTableManager<
               $$TipoVeiculoTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            Value<String> remoteId = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
             Value<String> nome = const Value.absent(),
             Value<String?> descricao = const Value.absent(),
           }) =>
               TipoVeiculoTableCompanion(
             id: id,
             remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
             nome: nome,
             descricao: descricao,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            required String remoteId,
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
             required String nome,
             Value<String?> descricao = const Value.absent(),
           }) =>
               TipoVeiculoTableCompanion.insert(
             id: id,
             remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
             nome: nome,
             descricao: descricao,
           ),
@@ -6186,14 +6465,20 @@ typedef $$TipoVeiculoTableTableProcessedTableManager = ProcessedTableManager<
 typedef $$VeiculoTableTableCreateCompanionBuilder = VeiculoTableCompanion
     Function({
   Value<int> id,
-  required String remoteId,
+  required int remoteId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<bool> sincronizado,
   required String placa,
   required int tipoVeiculoId,
 });
 typedef $$VeiculoTableTableUpdateCompanionBuilder = VeiculoTableCompanion
     Function({
   Value<int> id,
-  Value<String> remoteId,
+  Value<int> remoteId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<bool> sincronizado,
   Value<String> placa,
   Value<int> tipoVeiculoId,
 });
@@ -6210,8 +6495,17 @@ class $$VeiculoTableTableFilterComposer
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get remoteId => $composableBuilder(
+  ColumnFilters<int> get remoteId => $composableBuilder(
       column: $table.remoteId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get placa => $composableBuilder(
       column: $table.placa, builder: (column) => ColumnFilters(column));
@@ -6232,8 +6526,18 @@ class $$VeiculoTableTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get remoteId => $composableBuilder(
+  ColumnOrderings<int> get remoteId => $composableBuilder(
       column: $table.remoteId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get placa => $composableBuilder(
       column: $table.placa, builder: (column) => ColumnOrderings(column));
@@ -6255,8 +6559,17 @@ class $$VeiculoTableTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get remoteId =>
+  GeneratedColumn<int> get remoteId =>
       $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+      column: $table.sincronizado, builder: (column) => column);
 
   GeneratedColumn<String> get placa =>
       $composableBuilder(column: $table.placa, builder: (column) => column);
@@ -6292,25 +6605,37 @@ class $$VeiculoTableTableTableManager extends RootTableManager<
               $$VeiculoTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            Value<String> remoteId = const Value.absent(),
+            Value<int> remoteId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<bool> sincronizado = const Value.absent(),
             Value<String> placa = const Value.absent(),
             Value<int> tipoVeiculoId = const Value.absent(),
           }) =>
               VeiculoTableCompanion(
             id: id,
             remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
             placa: placa,
             tipoVeiculoId: tipoVeiculoId,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            required String remoteId,
+            required int remoteId,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<bool> sincronizado = const Value.absent(),
             required String placa,
             required int tipoVeiculoId,
           }) =>
               VeiculoTableCompanion.insert(
             id: id,
             remoteId: remoteId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            sincronizado: sincronizado,
             placa: placa,
             tipoVeiculoId: tipoVeiculoId,
           ),

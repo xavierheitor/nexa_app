@@ -188,8 +188,9 @@ class AbrirTurnoController extends GetxController {
       final kmInicial = int.tryParse(kmInicialController.text) ?? 0;
 
       // Prepara lista de IDs dos eletricistas
+      // CORREÇÃO: Usar remoteId para eletricistas também
       final eletricistaIds = eletricistasSelecionados
-          .map((e) => int.parse(e.eletricista.id))
+          .map((e) => int.parse(e.eletricista.remoteId))
           .toList();
 
       // Encontra o motorista (eletricista com isMotorista = true)
@@ -197,15 +198,15 @@ class AbrirTurnoController extends GetxController {
           eletricistasSelecionados.where((e) => e.isMotorista).firstOrNull;
 
       final motoristaId = motoristaSelecionado != null
-          ? int.parse(motoristaSelecionado.eletricista.id)
+          ? int.parse(motoristaSelecionado.eletricista.remoteId)
           : null;
 
       AppLogger.d('Dados do turno:', tag: 'AbrirTurnoController');
       AppLogger.d(
-          '- Veículo: ${veiculoSelecionado.placa} (ID: ${veiculoSelecionado.id})',
+          '- Veículo: ${veiculoSelecionado.placa} (ID local: ${veiculoSelecionado.id}, RemoteID: ${veiculoSelecionado.remoteId})',
           tag: 'AbrirTurnoController');
       AppLogger.d(
-          '- Equipe: ${equipeSelecionada.nome} (ID: ${equipeSelecionada.id})',
+          '- Equipe: ${equipeSelecionada.nome} (ID local: ${equipeSelecionada.id}, RemoteID: ${equipeSelecionada.remoteId})',
           tag: 'AbrirTurnoController');
       AppLogger.d('- KM Inicial: $kmInicial', tag: 'AbrirTurnoController');
       AppLogger.d('- Eletricistas: ${eletricistaIds.length}',
@@ -214,10 +215,18 @@ class AbrirTurnoController extends GetxController {
           '- Motorista: ${motoristaId != null ? 'ID $motoristaId' : 'Nenhum'}',
           tag: 'AbrirTurnoController');
 
+      // CORREÇÃO: Usar ID local para veículo e equipe no turno
+      final veiculoId = int.parse(veiculoSelecionado.id);
+      final equipeId = int.parse(equipeSelecionada.id);
+
+      AppLogger.d(
+          '🔧 [CORREÇÃO] Usando IDs locais: veiculo=$veiculoId, equipe=$equipeId',
+          tag: 'AbrirTurnoController');
+
       // Abre o turno usando TurnoRepo
       final turnoId = await _turnoRepo.abrirTurno(
-        veiculoId: int.parse(veiculoSelecionado.id),
-        equipeId: int.parse(equipeSelecionada.id),
+        veiculoId: veiculoId,
+        equipeId: equipeId,
         kmInicial: kmInicial,
         eletricistaIds: eletricistaIds,
         motoristaId: motoristaId,

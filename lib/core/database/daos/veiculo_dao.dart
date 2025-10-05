@@ -41,14 +41,14 @@ class VeiculoDao extends DatabaseAccessor<AppDatabase> with _$VeiculoDaoMixin {
   }
 
   /// Busca um veículo por remote ID
-  Future<VeiculoTableData> buscarPorRemoteId(String remoteId) async {
+  Future<VeiculoTableData> buscarPorRemoteId(int remoteId) async {
     return await (select(veiculoTable)
           ..where((v) => v.remoteId.equals(remoteId)))
         .getSingle();
   }
 
   /// Busca um veículo por remote ID (retorna null se não encontrar)
-  Future<VeiculoTableData?> buscarPorRemoteIdOuNull(String remoteId) async {
+  Future<VeiculoTableData?> buscarPorRemoteIdOuNull(int remoteId) async {
     try {
       return await (select(veiculoTable)
             ..where((v) => v.remoteId.equals(remoteId)))

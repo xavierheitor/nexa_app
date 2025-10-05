@@ -286,7 +286,7 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// final tipo = await tipoVeiculoRepo.buscarPorRemoteId('tipo-123');
   /// print('Tipo encontrado: ${tipo.nome}');
   /// ```
-  Future<TipoVeiculoTableDto> buscarPorRemoteId(String remoteId) async {
+  Future<TipoVeiculoTableDto> buscarPorRemoteId(int remoteId) async {
     /// Executa consulta específica por remote ID no banco de dados.
     final tipo = await tipoVeiculoDao.buscarPorRemoteId(remoteId);
 
