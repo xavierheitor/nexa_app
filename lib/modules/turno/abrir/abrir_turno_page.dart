@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_controller.dart';
+import 'package:nexa_app/widgets/custom_searcheable_dropdown.dart';
 
 /// Página para abertura de novo turno.
 ///
@@ -66,58 +67,87 @@ class AbrirTurnoPage extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              /// Campo de Prefixo.
-              TextFormField(
-                controller: controller.prefixoController,
-                decoration: InputDecoration(
-                  labelText: 'Prefixo',
-                  hintText: 'Ex: A-123',
-                  prefixIcon: const Icon(Icons.tag),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                textCapitalization: TextCapitalization.characters,
-                validator: controller.validatePrefixo,
+              /// Dropdown de Prefixo.
+              SearchableDropdown<String>(
+                controller: controller.prefixoDropdownController,
+                labelText: 'Prefixo',
+                hintText: 'Selecionar prefixo...',
+                leadingIcon: const Icon(Icons.tag),
+                onChanged: (value) {
+                  // Força revalidação quando o valor muda
+                  controller.formKey.currentState?.validate();
+                },
               ),
 
               const SizedBox(height: 16),
 
-              /// Campo de Veículo.
-              TextFormField(
-                controller: controller.veiculoController,
-                decoration: InputDecoration(
-                  labelText: 'Veículo',
-                  hintText: 'Ex: Volkswagen Gol',
-                  prefixIcon: const Icon(Icons.local_shipping),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                textCapitalization: TextCapitalization.words,
-                validator: controller.validateVeiculo,
+              /// Dropdown de Veículo.
+              SearchableDropdown(
+                controller: controller.veiculoDropdownController,
+                labelText: 'Veículo (Placa)',
+                hintText: 'Selecionar veículo...',
+                leadingIcon: const Icon(Icons.directions_car),
+                onChanged: (value) {
+                  // Força revalidação quando o valor muda
+                  controller.formKey.currentState?.validate();
+                },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              /// Campo de Placa.
-              TextFormField(
-                controller: controller.placaController,
-                decoration: InputDecoration(
-                  labelText: 'Placa',
-                  hintText: 'Ex: ABC-1234',
-                  prefixIcon: const Icon(Icons.badge),
-                  border: OutlineInputBorder(
+              /// Card com informações selecionadas.
+              Obx(() {
+                final veiculoSelecionado =
+                    controller.veiculoDropdownController.selected.value;
+                final prefixoSelecionado =
+                    controller.prefixoDropdownController.selected.value;
+
+                if (veiculoSelecionado == null || prefixoSelecionado == null) {
+                  return const SizedBox.shrink();
+                }
+
+                return Card(
+                  color: colorScheme.primaryContainer.withOpacity(0.3),
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                textCapitalization: TextCapitalization.characters,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9-]')),
-                  LengthLimitingTextInputFormatter(8),
-                ],
-                validator: controller.validatePlaca,
-              ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: colorScheme.primary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Informações do Turno',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        _buildInfoRow('Prefixo', prefixoSelecionado, Icons.tag),
+                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                            'Veículo',
+                            'Veículo ${veiculoSelecionado.placa}',
+                            Icons.directions_car),
+                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                            'Placa', veiculoSelecionado.placa, Icons.badge),
+                      ],
+                    ),
+                  ),
+                );
+              }),
 
               const SizedBox(height: 32),
 
@@ -189,6 +219,36 @@ class AbrirTurnoPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  /// Constrói uma linha de informação no card.
+  Widget _buildInfoRow(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Colors.grey[600],
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

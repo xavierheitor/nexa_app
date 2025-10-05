@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/widgets/custom_searcheable_dropdown.dart';
+import 'package:nexa_app/core/database/app_database.dart';
+import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
 
 /// Controlador da tela de abrir turno.
 ///
@@ -15,6 +18,9 @@ class AbrirTurnoController extends GetxController {
   /// Controlador global de turno.
   final TurnoController _turnoController = Get.find<TurnoController>();
 
+  /// Instância do banco de dados.
+  final AppDatabase _db = Get.find<AppDatabase>();
+
   // ============================================================================
   // CONTROLADORES DE FORMULÁRIO
   // ============================================================================
@@ -22,14 +28,19 @@ class AbrirTurnoController extends GetxController {
   /// Controlador do campo de prefixo.
   final prefixoController = TextEditingController();
 
-  /// Controlador do campo de veículo.
-  final veiculoController = TextEditingController();
-
-  /// Controlador do campo de placa.
-  final placaController = TextEditingController();
-
   /// Chave do formulário para validação.
   final formKey = GlobalKey<FormState>();
+
+  // ============================================================================
+  // CONTROLADORES DE DROPDOWN
+  // ============================================================================
+
+  /// Controlador do dropdown de veículos.
+  late final SearchableDropdownController<VeiculoTableDto>
+      veiculoDropdownController;
+
+  /// Controlador do dropdown de prefixos.
+  late final SearchableDropdownController<String> prefixoDropdownController;
 
   // ============================================================================
   // ESTADO REATIVO
@@ -42,41 +53,19 @@ class AbrirTurnoController extends GetxController {
   // VALIDAÇÕES
   // ============================================================================
 
-  /// Valida campo de prefixo.
-  String? validatePrefixo(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Prefixo é obrigatório';
-    }
-    if (value.trim().length < 2) {
-      return 'Prefixo deve ter pelo menos 2 caracteres';
-    }
-    return null;
-  }
-
-  /// Valida campo de veículo.
-  String? validateVeiculo(String? value) {
-    if (value == null || value.trim().isEmpty) {
+  /// Valida seleção de veículo.
+  String? validateVeiculo() {
+    if (veiculoDropdownController.selected.value == null) {
       return 'Veículo é obrigatório';
     }
-    if (value.trim().length < 3) {
-      return 'Veículo deve ter pelo menos 3 caracteres';
-    }
     return null;
   }
 
-  /// Valida campo de placa.
-  String? validatePlaca(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Placa é obrigatória';
+  /// Valida seleção de prefixo.
+  String? validatePrefixo() {
+    if (prefixoDropdownController.selected.value == null) {
+      return 'Prefixo é obrigatório';
     }
-    
-    // Remove caracteres especiais para validação
-    final placaLimpa = value.replaceAll(RegExp(r'[^A-Z0-9]'), '');
-    
-    if (placaLimpa.length != 7) {
-      return 'Placa deve ter 7 caracteres';
-    }
-    
     return null;
   }
 
@@ -95,10 +84,14 @@ class AbrirTurnoController extends GetxController {
       isLoading.value = true;
       AppLogger.i('Abrindo novo turno...', tag: 'AbrirTurnoController');
 
+      final veiculoSelecionado = veiculoDropdownController.selected.value!;
+      final prefixoSelecionado = prefixoDropdownController.selected.value!;
+
       final sucesso = await _turnoController.abrirTurno(
-        prefixo: prefixoController.text.trim(),
-        veiculo: veiculoController.text.trim(),
-        placa: placaController.text.trim().toUpperCase(),
+        prefixo: prefixoSelecionado,
+        veiculo:
+            'Veículo ${veiculoSelecionado.placa}', // Usando placa como identificador
+        placa: veiculoSelecionado.placa,
       );
 
       if (sucesso) {
@@ -142,6 +135,21 @@ class AbrirTurnoController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    
+    // Inicializa controladores dos dropdowns
+    veiculoDropdownController = SearchableDropdownController<VeiculoTableDto>(
+      itemLabel: (veiculo) => veiculo.placa,
+      remoteSearch: _buscarVeiculos,
+    );
+
+    prefixoDropdownController = SearchableDropdownController<String>(
+      initialItems: _getPrefixosIniciais(),
+      itemLabel: (prefixo) => prefixo,
+    );
+
+    // Carrega veículos iniciais
+    _carregarVeiculosIniciais();
+    
     AppLogger.d('AbrirTurnoController inicializado',
         tag: 'AbrirTurnoController');
   }
@@ -149,11 +157,65 @@ class AbrirTurnoController extends GetxController {
   @override
   void onClose() {
     prefixoController.dispose();
-    veiculoController.dispose();
-    placaController.dispose();
     AppLogger.d('AbrirTurnoController finalizado',
         tag: 'AbrirTurnoController');
     super.onClose();
+  }
+
+  // ============================================================================
+  // MÉTODOS AUXILIARES
+  // ============================================================================
+
+  /// Lista de prefixos disponíveis.
+  List<String> _getPrefixosIniciais() {
+    return [
+      'A-001',
+      'A-002',
+      'A-003',
+      'B-001',
+      'B-002',
+      'B-003',
+      'C-001',
+      'C-002',
+      'C-003',
+      'D-001',
+      'D-002',
+      'D-003',
+    ];
+  }
+
+  /// Carrega veículos iniciais do banco local.
+  Future<void> _carregarVeiculosIniciais() async {
+    try {
+      final veiculos = await _db.veiculoDao.listar();
+      final veiculoDtos =
+          veiculos.map((v) => VeiculoTableDto.fromEntity(v)).toList();
+      veiculoDropdownController.setItems(veiculoDtos);
+    } catch (e) {
+      AppLogger.e('Erro ao carregar veículos iniciais',
+          tag: 'AbrirTurnoController', error: e);
+    }
+  }
+
+  /// Busca veículos remotamente.
+  Future<List<VeiculoTableDto>> _buscarVeiculos(String query) async {
+    try {
+      if (query.isEmpty) {
+        return veiculoDropdownController.items;
+      }
+
+      final veiculos = await _db.veiculoDao.listar();
+      final veiculoDtos = veiculos
+          .map((v) => VeiculoTableDto.fromEntity(v))
+          .where((v) => v.placa.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+
+      return veiculoDtos;
+    } catch (e) {
+      AppLogger.e('Erro ao buscar veículos',
+          tag: 'AbrirTurnoController', error: e);
+      return [];
+    }
   }
 }
 
