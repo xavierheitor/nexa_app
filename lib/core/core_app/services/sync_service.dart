@@ -1,3 +1,5 @@
+import 'package:nexa_app/core/domain/repositories/equipe_repo.dart';
+import 'package:nexa_app/core/domain/repositories/tipo_equipe_repo.dart';
 import 'package:nexa_app/core/sync/sync_manager.dart';
 import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
 import 'package:nexa_app/core/domain/repositories/tipo_veiculo_repo.dart';
@@ -102,6 +104,8 @@ class SyncService {
     // Registrar repositórios sincronizáveis
     _syncManager.registrar(VeiculoRepo(dio: Get.find(), db: Get.find()));
     _syncManager.registrar(TipoVeiculoRepo(dio: Get.find(), db: Get.find()));
+    _syncManager.registrar(TipoEquipeRepo(dio: Get.find(), db: Get.find()));
+    _syncManager.registrar(EquipeRepo(dio: Get.find(), db: Get.find()));
 
     AppLogger.i(
         'SyncService inicializado com ${_syncManager.modulosDisponiveis.length} módulos: ${_syncManager.modulosDisponiveis}',
