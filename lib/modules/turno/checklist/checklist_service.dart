@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/database/app_database.dart';
+import 'package:nexa_app/core/domain/dto/checklist_opcao_resposta_table_dto.dart';
 import 'package:nexa_app/core/domain/models/checklist_model.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 
@@ -72,12 +73,34 @@ class ChecklistService extends GetxService {
 
       // 3. Para cada pergunta, buscar suas opções de resposta
       final checklistOpcaoRespostaDao = _db.checklistOpcaoRespostaDao;
+
+      // ----------------------------------------------------------------------
+      // 🧠 Cache das opções por modelo
+      // ----------------------------------------------------------------------
+      // Para evitar leituras repetidas do banco (uma por pergunta) fazemos a
+      // consulta apenas uma vez e armazenamos o resultado localmente. Caso a
+      // base evolua para disponibilizar subconjuntos por pergunta, o mapa
+      // abaixo permite distribuir cada fatia sem novas idas ao banco.
+      final opcoesPorModelo =
+          await checklistOpcaoRespostaDao.buscarPorModelo(modelo.remoteId!);
+      final Map<int, List<ChecklistOpcaoRespostaTableDto>> opcoesPorPergunta =
+          {};
+
+      for (final pergunta in perguntas) {
+        final chavePergunta = pergunta.remoteId ?? pergunta.id;
+        opcoesPorPergunta[chavePergunta] =
+            List<ChecklistOpcaoRespostaTableDto>.from(opcoesPorModelo);
+        AppLogger.d(
+          '♻️ [CACHE] Pergunta ${pergunta.nome} (chave $chavePergunta) recebeu ${opcoesPorPergunta[chavePergunta]!.length} opções em memória',
+          tag: 'ChecklistService',
+        );
+      }
+
       final List<ChecklistPerguntaModel> perguntasCompletas = [];
 
       for (final pergunta in perguntas) {
-        // Buscar opções de resposta desta pergunta através do modelo
-        final opcoes =
-            await checklistOpcaoRespostaDao.buscarPorModelo(modelo.remoteId!);
+        final chavePergunta = pergunta.remoteId ?? pergunta.id;
+        final opcoes = opcoesPorPergunta[chavePergunta] ?? opcoesPorModelo;
 
         final opcoesModel = opcoes.map((opcao) {
           return ChecklistOpcaoRespostaModel(
@@ -87,6 +110,11 @@ class ChecklistService extends GetxService {
             geraPendencia: opcao.geraPendencia,
           );
         }).toList();
+
+        AppLogger.d(
+          '✅ [VALIDAÇÃO] Pergunta ${pergunta.nome} recebeu ${opcoesModel.length} opções convertidas',
+          tag: 'ChecklistService',
+        );
 
         perguntasCompletas.add(ChecklistPerguntaModel(
           id: pergunta.id,
