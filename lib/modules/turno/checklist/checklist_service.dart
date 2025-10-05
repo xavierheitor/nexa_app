@@ -141,6 +141,11 @@ class ChecklistService extends GetxService {
               tag: 'ChecklistService');
         }
 
+        AppLogger.d(
+          '✅ [VALIDAÇÃO] Pergunta ${pergunta.nome} recebeu ${opcoesModel.length} opções convertidas',
+          tag: 'ChecklistService',
+        );
+
         perguntasCompletas.add(ChecklistPerguntaModel(
           id: pergunta.id,
           remoteId: pergunta.remoteId ?? pergunta.id,
