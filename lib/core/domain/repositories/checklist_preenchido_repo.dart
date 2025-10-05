@@ -83,6 +83,32 @@ class ChecklistPreenchidoRepo {
     AppLogger.d('Salvando checklist completo para turno: $turnoId', tag: 'ChecklistPreenchidoRepo');
     
     try {
+      // Verifica se já existe um checklist para a mesma combinação
+      final existente = await _dao.buscarPorChave(
+        turnoId: turnoId,
+        checklistModeloId: checklistModeloId,
+        eletricistaRemoteId: eletricistaRemoteId,
+      );
+
+      if (existente != null) {
+        AppLogger.d(
+            'Checklist existente encontrado (ID ${existente.id}). Atualizando registro.',
+            tag: 'ChecklistPreenchidoRepo');
+
+        final dtoAtualizado = ChecklistPreenchidoTableDto(
+          id: existente.id.toString(),
+          turnoId: turnoId,
+          checklistModeloId: checklistModeloId,
+          eletricistaRemoteId: eletricistaRemoteId,
+          latitude: latitude,
+          longitude: longitude,
+          dataPreenchimento: DateTime.now(),
+        );
+
+        await _dao.atualizar(dtoAtualizado);
+        return int.parse(existente.id);
+      }
+
       // 1. Criar o checklist preenchido
       final checklistDto = ChecklistPreenchidoTableDto(
         id: '0', // Será autoincrementado

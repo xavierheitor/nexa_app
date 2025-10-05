@@ -8,8 +8,11 @@ import 'package:nexa_app/routes/routes.dart';
 class ChecklistController extends GetxController {
   final ChecklistService _checklistService = Get.find<ChecklistService>();
 
+  bool _forcarChecklistEPI = false;
+
   bool get _isChecklistEPC => Get.currentRoute == Routes.turnoChecklistEPC;
-  bool get _isChecklistEPI => Get.currentRoute == Routes.turnoChecklistEPI;
+  bool get _isChecklistEPI =>
+      _forcarChecklistEPI || Get.currentRoute == Routes.turnoChecklistEPI;
   int? get _eletricistaRemoteIdOrNull =>
       _isChecklistEPI ? _eletricistaRemoteId : null;
 
@@ -30,10 +33,11 @@ class ChecklistController extends GetxController {
   void onInit() {
     super.onInit();
 
-    if (_isChecklistEPI) {
-      final args = Get.arguments as Map<String, dynamic>?;
-      _eletricistaRemoteId = args?['eletricistaRemoteId'] as int?;
-      _eletricistaNome = args?['eletricistaNome'] as String?;
+    final args = Get.arguments as Map<String, dynamic>?;
+    if (args != null && args.containsKey('eletricistaRemoteId')) {
+      _forcarChecklistEPI = true;
+      _eletricistaRemoteId = args['eletricistaRemoteId'] as int?;
+      _eletricistaNome = args['eletricistaNome'] as String?;
     }
 
     _carregarChecklist();
@@ -294,7 +298,13 @@ class ChecklistController extends GetxController {
 
   void _navegarParaProximaEtapa() {
     if (_isChecklistEPI) {
-      Get.back(result: true);
+      AppLogger.d(
+          '🚀 [NAVEGAÇÃO] EPI concluído → indo para lista de eletricistas',
+          tag: 'ChecklistController');
+      Get.offAllNamed(
+        Routes.turnoChecklistEletricistas,
+        arguments: {'refresh': true},
+      );
     } else if (_isChecklistEPC) {
       Get.offAllNamed(Routes.turnoChecklistEletricistas);
     } else {

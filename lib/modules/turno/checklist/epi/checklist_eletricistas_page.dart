@@ -95,7 +95,7 @@ class _EletricistaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final concluido = item.concluido;
-    final disabled = item.remoteId == null;
+    final disabled = item.remoteId == null || concluido;
 
     final statusText = disabled
         ? 'Dados incompletos'

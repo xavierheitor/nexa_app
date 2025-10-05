@@ -12,7 +12,9 @@ class ChecklistPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(Get.currentRoute == '/turno/checklist/epc'
             ? 'Checklist EPC'
-            : 'Checklist Veicular'),
+            : Get.currentRoute == '/turno/checklist/epi'
+                ? 'Checklist EPI'
+                : 'Checklist Veicular'),
         backgroundColor: Colors.blue.shade700,
         foregroundColor: Colors.white,
         elevation: 0,

@@ -27,15 +27,29 @@ class ChecklistController extends GetxController {
     return Get.currentRoute == '/turno/checklist/epc';
   }
 
+  bool get _isChecklistEPI {
+    return Get.currentRoute == '/turno/checklist/epi';
+  }
+
   /// Carrega o checklist do turno ativo
   Future<void> _carregarChecklist() async {
     try {
       isLoading.value = true;
       AppLogger.d('🔄 Carregando checklist...', tag: 'ChecklistController');
 
-      final checklistCompleto = _isChecklistEPC
-          ? await _checklistService.buscarChecklistEPCDoTurnoAtivo()
-          : await _checklistService.buscarChecklistDoTurnoAtivo();
+      ChecklistCompletoModel? checklistCompleto;
+      if (_isChecklistEPC) {
+        checklistCompleto =
+            await _checklistService.buscarChecklistEPCDoTurnoAtivo();
+      } else if (_isChecklistEPI) {
+        // Para EPI, precisamos buscar o checklist do eletricista específico
+        // Por enquanto, vamos usar o mesmo método do EPC
+        checklistCompleto =
+            await _checklistService.buscarChecklistEPCDoTurnoAtivo();
+      } else {
+        checklistCompleto =
+            await _checklistService.buscarChecklistDoTurnoAtivo();
+      }
 
       if (checklistCompleto != null) {
         checklist.value = checklistCompleto;
@@ -153,11 +167,24 @@ class ChecklistController extends GetxController {
         return;
       }
 
+      // Para EPI, precisamos passar o eletricistaRemoteId
+      int? eletricistaRemoteId;
+      if (_isChecklistEPI) {
+        // TODO: Obter o eletricistaRemoteId do contexto atual
+        // Por enquanto, vamos usar um valor padrão ou null
+        eletricistaRemoteId =
+            null; // Será implementado quando tivermos o contexto do eletricista
+        AppLogger.d(
+            '🔍 [EPI] Salvando checklist EPI com eletricistaRemoteId: $eletricistaRemoteId',
+            tag: 'ChecklistController');
+      }
+
       final sucesso = await _checklistService.salvarChecklistPreenchido(
         checklist: checklistAtual,
         perguntasRespondidas: checklistAtual.perguntas,
         latitude: latitude,
         longitude: longitude,
+        eletricistaRemoteId: eletricistaRemoteId,
       );
 
       if (sucesso) {
@@ -165,12 +192,43 @@ class ChecklistController extends GetxController {
             tag: 'ChecklistController');
         Get.snackbar('Sucesso', 'Checklist salvo com sucesso!');
 
+        // Debug: verificar rota atual e tipo de checklist
+        AppLogger.d('🔍 [NAVEGAÇÃO] Rota atual: ${Get.currentRoute}',
+            tag: 'ChecklistController');
+        AppLogger.d('🔍 [NAVEGAÇÃO] É EPC: $_isChecklistEPC',
+            tag: 'ChecklistController');
+        AppLogger.d('🔍 [NAVEGAÇÃO] É EPI: $_isChecklistEPI',
+            tag: 'ChecklistController');
+
+        // Pequeno delay para garantir que o snackbar seja exibido
+        await Future.delayed(const Duration(milliseconds: 500));
+
         // Navegar para a próxima tela baseada no tipo de checklist
         if (_isChecklistEPC) {
-          // Se é EPC, vai para serviços
-          Get.offAllNamed('/turno/servicos');
+          // Se é EPC, vai para lista de eletricistas (EPI)
+          AppLogger.d(
+              '🚀 [NAVEGAÇÃO] Navegando para lista de eletricistas (EPC → EPI)',
+              tag: 'ChecklistController');
+          Get.offAllNamed('/turno/checklist/eletricistas');
+        } else if (_isChecklistEPI) {
+          // Se é EPI, volta para lista de eletricistas
+          AppLogger.d(
+              '🚀 [NAVEGAÇÃO] Voltando para lista de eletricistas (EPI → Lista)',
+              tag: 'ChecklistController');
+          // Forçar navegação completa para evitar ficar na mesma rota
+          Get.offAllNamed('/turno/checklist/eletricistas');
+          // Fallback: se continuar na mesma rota, voltar
+          await Future.delayed(const Duration(milliseconds: 200));
+          if (Get.currentRoute == '/turno/checklist/epi') {
+            AppLogger.w(
+                '⚠️ [NAVEGAÇÃO] Ainda na rota EPI após navegação. Aplicando fallback Get.back()',
+                tag: 'ChecklistController');
+            Get.back();
+          }
         } else {
           // Se é veicular, vai para EPC
+          AppLogger.d('🚀 [NAVEGAÇÃO] Navegando para EPC (Veicular → EPC)',
+              tag: 'ChecklistController');
           Get.offAllNamed('/turno/checklist/epc');
         }
       } else {

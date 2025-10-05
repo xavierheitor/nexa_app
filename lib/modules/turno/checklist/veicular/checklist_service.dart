@@ -312,6 +312,10 @@ class ChecklistService extends GetxService {
         tag: 'ChecklistService',
       );
 
+      // Remove respostas previamente associadas para evitar duplicidade.
+      await _checklistRespostaRepo
+          .removerPorChecklistPreenchido(checklistPreenchidoId);
+
       final respostas = <Map<String, dynamic>>[];
 
       for (final pergunta in perguntasRespondidas) {
