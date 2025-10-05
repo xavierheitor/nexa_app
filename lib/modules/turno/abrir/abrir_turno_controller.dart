@@ -5,6 +5,7 @@ import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/widgets/custom_searcheable_dropdown.dart';
 import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/equipe_table_dto.dart';
+import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_service.dart';
 
 /// Controlador da tela de abrir turno.
@@ -50,12 +51,20 @@ class AbrirTurnoController extends GetxController {
   late final SearchableDropdownController<EquipeTableDto>
       equipeDropdownController;
 
+  /// Controlador do dropdown de eletricistas.
+  late final SearchableDropdownController<EletricistaTableDto>
+      eletricistaDropdownController;
+
   // ============================================================================
   // ESTADO REATIVO
   // ============================================================================
 
   /// Flag indicando se está salvando.
   final RxBool isLoading = false.obs;
+
+  /// Lista de eletricistas selecionados.
+  final RxList<EletricistaSelecionado> eletricistasSelecionados =
+      <EletricistaSelecionado>[].obs;
 
   // ============================================================================
   // VALIDAÇÕES
@@ -105,6 +114,72 @@ class AbrirTurnoController extends GetxController {
     }
 
     return null;
+  }
+
+  /// Valida lista de eletricistas.
+  String? validateEletricistas() {
+    if (eletricistasSelecionados.isEmpty) {
+      return 'Pelo menos 2 eletricistas são obrigatórios';
+    }
+
+    if (eletricistasSelecionados.length < 2) {
+      return 'Mínimo de 2 eletricistas necessários';
+    }
+
+    return null;
+  }
+
+  /// Adiciona eletricista à lista.
+  void adicionarEletricista(EletricistaTableDto eletricista) {
+    // Verifica se já não está na lista
+    final jaExiste = eletricistasSelecionados.any(
+      (e) => e.eletricista.id == eletricista.id,
+    );
+
+    if (!jaExiste) {
+      eletricistasSelecionados.add(
+        EletricistaSelecionado(eletricista: eletricista),
+      );
+      AppLogger.d('Eletricista adicionado: ${eletricista.nome}',
+          tag: 'AbrirTurnoController');
+    }
+  }
+
+  /// Remove eletricista da lista.
+  void removerEletricista(String eletricistaId) {
+    eletricistasSelecionados.removeWhere(
+      (e) => e.eletricista.id == eletricistaId,
+    );
+    AppLogger.d('Eletricista removido: $eletricistaId',
+        tag: 'AbrirTurnoController');
+  }
+
+  /// Alterna status de motorista de um eletricista.
+  void alternarMotorista(String eletricistaId) {
+    final index = eletricistasSelecionados.indexWhere(
+      (e) => e.eletricista.id == eletricistaId,
+    );
+
+    if (index != -1) {
+      final eletricista = eletricistasSelecionados[index];
+
+      // Se está marcando como motorista, desmarca os outros
+      if (!eletricista.isMotorista) {
+        for (int i = 0; i < eletricistasSelecionados.length; i++) {
+          eletricistasSelecionados[i] = eletricistasSelecionados[i].copyWith(
+            isMotorista: false,
+          );
+        }
+      }
+
+      // Alterna o status do eletricista selecionado
+      eletricistasSelecionados[index] = eletricista.copyWith(
+        isMotorista: !eletricista.isMotorista,
+      );
+
+      AppLogger.d('Motorista alternado: ${eletricista.eletricista.nome}',
+          tag: 'AbrirTurnoController');
+    }
   }
 
   // ============================================================================
@@ -192,6 +267,13 @@ class AbrirTurnoController extends GetxController {
       remoteSearch: _buscarEquipes,
     );
 
+    eletricistaDropdownController =
+        SearchableDropdownController<EletricistaTableDto>(
+      itemLabel: (eletricista) =>
+          '${eletricista.matricula} - ${eletricista.nome}',
+      remoteSearch: _buscarEletricistas,
+    );
+
     // Carrega dados iniciais
     _carregarDadosIniciais();
     
@@ -240,9 +322,13 @@ class AbrirTurnoController extends GetxController {
       // Carrega equipes
       final equipes = await _abrirTurnoService.buscarEquipes();
       equipeDropdownController.setItems(equipes);
+      
+      // Carrega eletricistas
+      final eletricistas = await _abrirTurnoService.buscarEletricistas();
+      eletricistaDropdownController.setItems(eletricistas);
 
       AppLogger.d(
-          'Dados iniciais carregados: ${veiculos.length} veículos, ${equipes.length} equipes',
+          'Dados iniciais carregados: ${veiculos.length} veículos, ${equipes.length} equipes, ${eletricistas.length} eletricistas',
           tag: 'AbrirTurnoController');
     } catch (e) {
       AppLogger.e('Erro ao carregar dados iniciais', 
@@ -288,6 +374,49 @@ class AbrirTurnoController extends GetxController {
           tag: 'AbrirTurnoController', error: e);
       return [];
     }
+  }
+
+  /// Busca eletricistas remotamente.
+  Future<List<EletricistaTableDto>> _buscarEletricistas(String query) async {
+    try {
+      if (query.isEmpty) {
+        return eletricistaDropdownController.items;
+      }
+
+      final eletricistas = await _abrirTurnoService.buscarEletricistas();
+      final eletricistaDtos = eletricistas
+          .where((e) =>
+              e.nome.toLowerCase().contains(query.toLowerCase()) ||
+              e.matricula.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+
+      return eletricistaDtos;
+    } catch (e) {
+      AppLogger.e('Erro ao buscar eletricistas',
+          tag: 'AbrirTurnoController', error: e);
+      return [];
+    }
+  }
+}
+
+/// Classe para representar um eletricista selecionado com suas propriedades.
+class EletricistaSelecionado {
+  final EletricistaTableDto eletricista;
+  final bool isMotorista;
+
+  EletricistaSelecionado({
+    required this.eletricista,
+    this.isMotorista = false,
+  });
+
+  EletricistaSelecionado copyWith({
+    EletricistaTableDto? eletricista,
+    bool? isMotorista,
+  }) {
+    return EletricistaSelecionado(
+      eletricista: eletricista ?? this.eletricista,
+      isMotorista: isMotorista ?? this.isMotorista,
+    );
   }
 }
 

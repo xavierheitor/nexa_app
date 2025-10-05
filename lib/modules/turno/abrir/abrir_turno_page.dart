@@ -113,6 +113,174 @@ class AbrirTurnoPage extends StatelessWidget {
                 },
               ),
 
+              const SizedBox(height: 16),
+
+              /// Dropdown de Eletricistas.
+              SearchableDropdown(
+                controller: controller.eletricistaDropdownController,
+                labelText: 'Eletricistas',
+                hintText: 'Selecionar eletricista...',
+                leadingIcon: const Icon(Icons.person),
+                onChanged: (value) {
+                  if (value != null) {
+                    controller.adicionarEletricista(value);
+                    // Limpa a seleção do dropdown após adicionar
+                    controller.eletricistaDropdownController.clearSelection();
+                  }
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              /// Lista de Eletricistas Selecionados.
+              Obx(() {
+                if (controller.eletricistasSelecionados.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return Card(
+                  color: colorScheme.surfaceVariant.withOpacity(0.3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.people,
+                              color: colorScheme.primary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Eletricistas Selecionados (${controller.eletricistasSelecionados.length})',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        ...controller.eletricistasSelecionados
+                            .map((eletricistaSelecionado) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: eletricistaSelecionado.isMotorista
+                                    ? colorScheme.primaryContainer
+                                        .withOpacity(0.3)
+                                    : colorScheme.surface,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: eletricistaSelecionado.isMotorista
+                                      ? colorScheme.primary
+                                      : colorScheme.outline.withOpacity(0.3),
+                                  width: eletricistaSelecionado.isMotorista
+                                      ? 2
+                                      : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${eletricistaSelecionado.eletricista.matricula} - ${eletricistaSelecionado.eletricista.nome}',
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        if (eletricistaSelecionado.isMotorista)
+                                          Text(
+                                            'Motorista',
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                              color: colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Toggle para motorista
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.drive_eta,
+                                            color: eletricistaSelecionado
+                                                    .isMotorista
+                                                ? colorScheme.primary
+                                                : colorScheme.onSurface
+                                                    .withOpacity(0.6),
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Switch(
+                                            value: eletricistaSelecionado
+                                                .isMotorista,
+                                            onChanged: (value) {
+                                              controller.alternarMotorista(
+                                                eletricistaSelecionado
+                                                    .eletricista.id,
+                                              );
+                                            },
+                                            activeColor: colorScheme.primary,
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(width: 8),
+                                      // Botão de remover
+                                      IconButton(
+                                        onPressed: () {
+                                          controller.removerEletricista(
+                                            eletricistaSelecionado
+                                                .eletricista.id,
+                                          );
+                                        },
+                                        icon: Icon(
+                                          Icons.remove_circle_outline,
+                                          color: colorScheme.error,
+                                        ),
+                                        tooltip: 'Remover eletricista',
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        if (controller.eletricistasSelecionados.length < 2)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              'Mínimo de 2 eletricistas necessários',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.error,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+
               const SizedBox(height: 24),
 
               /// Card com informações selecionadas.
@@ -128,7 +296,8 @@ class AbrirTurnoPage extends StatelessWidget {
                 if (veiculoSelecionado == null ||
                     prefixoSelecionado == null ||
                     equipeSelecionada == null ||
-                    kmInicial.isEmpty) {
+                    kmInicial.isEmpty ||
+                    controller.eletricistasSelecionados.length < 2) {
                   return const SizedBox.shrink();
                 }
 
@@ -175,6 +344,25 @@ class AbrirTurnoPage extends StatelessWidget {
                         const SizedBox(height: 8),
                         _buildInfoRow(
                             'KM Inicial', '${kmInicial} km', Icons.speed),
+                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                          'Eletricistas',
+                          '${controller.eletricistasSelecionados.length} selecionados',
+                          Icons.people,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                          'Motorista',
+                          controller.eletricistasSelecionados
+                                  .where((e) => e.isMotorista)
+                                  .isNotEmpty
+                              ? controller.eletricistasSelecionados
+                                  .firstWhere((e) => e.isMotorista)
+                                  .eletricista
+                                  .nome
+                              : 'Não definido',
+                          Icons.drive_eta,
+                        ),
                       ],
                     ),
                   ),
