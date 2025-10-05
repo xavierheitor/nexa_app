@@ -1,4 +1,4 @@
-import 'package:nexa_app/core/database/models/turno_eletricistas_table.dart';
+import 'package:nexa_app/core/database/app_database.dart';
 
 /// DTO para a tabela TurnoEletricistasTable.
 ///

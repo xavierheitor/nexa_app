@@ -4,6 +4,7 @@ import 'package:nexa_app/core/core_app/services/auth_service.dart';
 import 'package:nexa_app/core/core_app/services/sync_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
 import 'package:nexa_app/core/database/app_database.dart';
+import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
 import 'package:nexa_app/core/domain/repositories/usuario_repo.dart';
 import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
 import 'package:nexa_app/core/domain/repositories/tipo_veiculo_repo.dart';
@@ -25,6 +26,7 @@ class InitialBinding extends Bindings {
         fenix: true);
     Get.lazyPut(() => TipoVeiculoRepo(dio: Get.find(), db: Get.find()),
         fenix: true);
+    Get.lazyPut(() => TurnoRepo(dio: Get.find(), db: Get.find()), fenix: true);
 
     // === Services ===
     // Lógica de negócio centralizada

@@ -1,5 +1,5 @@
 import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart';
-import 'package:nexa_app/core/database/models/turno_table.dart';
+import 'package:nexa_app/core/database/app_database.dart';
 
 /// DTO para a tabela TurnoTable.
 ///

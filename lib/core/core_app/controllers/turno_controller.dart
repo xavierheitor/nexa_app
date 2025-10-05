@@ -1,5 +1,9 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/domain/models/turno_model.dart';
+import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
+import 'package:nexa_app/core/domain/dto/turno_table_dto.dart';
+import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
+import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 
 /// Controlador global responsável pelo gerenciamento de turnos.
@@ -26,11 +30,23 @@ import 'package:nexa_app/core/utils/logger/app_logger.dart';
 /// ```
 class TurnoController extends GetxController {
   // ============================================================================
+  // DEPENDÊNCIAS
+  // ============================================================================
+
+  late final TurnoRepo _turnoRepo;
+
+  // ============================================================================
   // ESTADO REATIVO
   // ============================================================================
 
   /// Turno ativo atual (se houver).
   final Rxn<TurnoModel> turnoAtivo = Rxn<TurnoModel>();
+
+  /// Dados completos do turno atual (incluindo eletricistas).
+  final Rxn<TurnoTableDto> turnoCompleto = Rxn<TurnoTableDto>();
+
+  /// Lista de eletricistas do turno atual.
+  final RxList<EletricistaTableDto> eletricistas = <EletricistaTableDto>[].obs;
 
   /// Lista de serviços executados no turno atual.
   final RxList<ServicoModel> servicos = <ServicoModel>[].obs;
@@ -43,13 +59,37 @@ class TurnoController extends GetxController {
   // ============================================================================
 
   /// Verifica se há turno aberto.
-  bool get hasTurnoAberto => turnoAtivo.value?.estaAberto ?? false;
+  bool get hasTurnoAberto =>
+      turnoCompleto.value?.situacaoTurno == SituacaoTurno.aberto;
+
+  /// Verifica se há turno em abertura.
+  bool get hasTurnoEmAbertura =>
+      turnoCompleto.value?.situacaoTurno == SituacaoTurno.emAbertura;
 
   /// Verifica se há turno fechado.
-  bool get hasTurnoFechado => turnoAtivo.value?.estaFechado ?? false;
+  bool get hasTurnoFechado =>
+      turnoCompleto.value?.situacaoTurno == SituacaoTurno.fechado;
+
+  /// Verifica se há algum turno (qualquer situação).
+  bool get hasTurno => turnoCompleto.value != null;
 
   /// Retorna o turno atual (se houver).
   TurnoModel? get turno => turnoAtivo.value;
+
+  /// Retorna os dados completos do turno.
+  TurnoTableDto? get turnoCompletoData => turnoCompleto.value;
+
+  /// Retorna a lista de eletricistas do turno.
+  List<EletricistaTableDto> get eletricistasDoTurno => eletricistas;
+
+  /// Retorna os nomes dos eletricistas como string.
+  String get nomesEletricistas => eletricistas.map((e) => e.nome).join(', ');
+
+  /// Retorna a placa do veículo do turno.
+  String? get placaVeiculo => turno?.placa;
+
+  /// Retorna o prefixo do turno.
+  String? get prefixoTurno => turno?.prefixo;
 
   // ============================================================================
   // INICIALIZAÇÃO
@@ -58,41 +98,88 @@ class TurnoController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _turnoRepo = Get.find<TurnoRepo>();
     AppLogger.i('TurnoController inicializado', tag: 'TurnoController');
     _carregarTurnoAtivo();
   }
 
   /// Carrega turno ativo do banco local.
+  ///
+  /// SEMPRE busca do banco para garantir dados atualizados.
   Future<void> _carregarTurnoAtivo() async {
     try {
       isLoading.value = true;
-      AppLogger.d('Carregando turno ativo...', tag: 'TurnoController');
-
-      // TODO: Buscar turno real do banco/API
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Simula turno aberto (remover quando integrar com API)
-      turnoAtivo.value = TurnoModel(
-        id: '1',
-        prefixo: 'A-123',
-        veiculo: 'Volkswagen Gol',
-        placa: 'ABC-1234',
-        horaInicio: DateTime.now().subtract(const Duration(hours: 2)),
-        status: StatusTurno.aberto,
-      );
-
-      if (hasTurnoAberto) {
-        await _carregarServicos();
-      }
-
-      AppLogger.i('Turno carregado: ${turnoAtivo.value?.prefixo ?? "Nenhum"}',
+      AppLogger.d('🔄 Carregando turno ativo do banco...',
           tag: 'TurnoController');
+
+      // SEMPRE busca do banco - não confia na memória
+      final turnoAtivoDb = await _turnoRepo.buscarTurnoAtivo();
+
+      if (turnoAtivoDb != null) {
+        turnoCompleto.value = turnoAtivoDb;
+
+        // Carrega eletricistas do turno
+        await _carregarEletricistasDoTurno(turnoAtivoDb.id);
+
+        // Converte para TurnoModel unificado
+        turnoAtivo.value = await _converterParaTurnoModelCompleto(turnoAtivoDb);
+
+        if (hasTurnoAberto) {
+          await _carregarServicos();
+        }
+
+        AppLogger.i(
+            '✅ Turno carregado do banco: ${turnoAtivoDb.id} (${turnoAtivoDb.situacaoTurno.name})',
+            tag: 'TurnoController');
+      } else {
+        // Limpa tudo - não há turno ativo
+        _limparEstado();
+        AppLogger.i('ℹ️ Nenhum turno ativo encontrado no banco',
+            tag: 'TurnoController');
+      }
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao carregar turno',
+      AppLogger.e('❌ Erro ao carregar turno do banco',
           tag: 'TurnoController', error: e, stackTrace: stackTrace);
-      turnoAtivo.value = null;
+      _limparEstado();
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Limpa todo o estado do controller.
+  void _limparEstado() {
+    turnoCompleto.value = null;
+    turnoAtivo.value = null;
+    eletricistas.clear();
+    servicos.clear();
+  }
+
+  /// Carrega eletricistas do turno atual.
+  Future<void> _carregarEletricistasDoTurno(int turnoId) async {
+    try {
+      AppLogger.d('🔄 Carregando eletricistas do turno: $turnoId',
+          tag: 'TurnoController');
+
+      // Busca relacionamentos turno-eletricista
+      final relacionamentos =
+          await _turnoRepo.buscarEletricistasDoTurno(turnoId);
+
+      if (relacionamentos.isNotEmpty) {
+        // TODO: Buscar dados completos dos eletricistas
+        // Por enquanto, limpa a lista
+        eletricistas.clear();
+
+        AppLogger.i('✅ ${relacionamentos.length} relacionamentos encontrados',
+            tag: 'TurnoController');
+      } else {
+        eletricistas.clear();
+        AppLogger.i('ℹ️ Nenhum eletricista encontrado para o turno',
+            tag: 'TurnoController');
+      }
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao carregar eletricistas do turno',
+          tag: 'TurnoController', error: e, stackTrace: stackTrace);
+      eletricistas.clear();
     }
   }
 
@@ -127,6 +214,145 @@ class TurnoController extends GetxController {
           tag: 'TurnoController', error: e, stackTrace: stackTrace);
       servicos.clear();
     }
+  }
+
+  /// Converte TurnoTableDto para TurnoModel com dados completos.
+  Future<TurnoModel> _converterParaTurnoModelCompleto(
+      TurnoTableDto turnoDto) async {
+    // TODO: Buscar dados reais do veículo e prefixo
+    final prefixo = 'A-${turnoDto.id}';
+    final veiculo = 'Veículo ${turnoDto.veiculoId}';
+    final placa = 'PLACA-${turnoDto.veiculoId}';
+
+    return TurnoModel(
+      id: turnoDto.id.toString(),
+      prefixo: prefixo,
+      veiculo: veiculo,
+      placa: placa,
+      horaInicio: turnoDto.horaInicio,
+      horaFim: turnoDto.horaFim,
+      status: _converterSituacaoParaStatus(turnoDto.situacaoTurno),
+    );
+  }
+
+  /// Converte TurnoTableDto para TurnoModel (compatibilidade).
+  TurnoModel _converterParaTurnoModel(TurnoTableDto turnoDto) {
+    return TurnoModel(
+      id: turnoDto.id.toString(),
+      prefixo: 'A-${turnoDto.id}', // TODO: Buscar prefixo real
+      veiculo:
+          'Veículo ${turnoDto.veiculoId}', // TODO: Buscar nome real do veículo
+      placa: 'PLACA-${turnoDto.veiculoId}', // TODO: Buscar placa real
+      horaInicio: turnoDto.horaInicio,
+      horaFim: turnoDto.horaFim,
+      status: _converterSituacaoParaStatus(turnoDto.situacaoTurno),
+    );
+  }
+
+  /// Converte SituacaoTurno para StatusTurno.
+  StatusTurno _converterSituacaoParaStatus(SituacaoTurno situacao) {
+    switch (situacao) {
+      case SituacaoTurno.aberto:
+        return StatusTurno.aberto;
+      case SituacaoTurno.fechado:
+        return StatusTurno.fechado;
+      case SituacaoTurno.emAbertura:
+        return StatusTurno.aberto; // Considera em abertura como aberto
+    }
+  }
+
+  // ============================================================================
+  // NAVEGAÇÃO E FLUXO
+  // ============================================================================
+
+  /// Determina para onde navegar baseado no estado do turno.
+  ///
+  /// Retorna a rota de destino:
+  /// - null: Nenhum turno (vai para abertura)
+  /// - '/checklists': Turno em abertura (vai para checklists)
+  /// - '/servicos': Turno aberto (vai para serviços)
+  String? determinarProximaRota() {
+    if (!hasTurno) {
+      AppLogger.d('Nenhum turno encontrado - redirecionando para abertura',
+          tag: 'TurnoController');
+      return null; // Vai para tela de abertura
+    }
+
+    if (hasTurnoEmAbertura) {
+      AppLogger.d('Turno em abertura - redirecionando para checklists',
+          tag: 'TurnoController');
+      return '/checklists';
+    }
+
+    if (hasTurnoAberto) {
+      AppLogger.d('Turno aberto - redirecionando para serviços',
+          tag: 'TurnoController');
+      return '/servicos';
+    }
+
+    if (hasTurnoFechado) {
+      AppLogger.d('Turno fechado - redirecionando para abertura',
+          tag: 'TurnoController');
+      return null; // Vai para tela de abertura
+    }
+
+    AppLogger.w(
+        'Estado de turno não reconhecido - redirecionando para abertura',
+        tag: 'TurnoController');
+    return null;
+  }
+
+  /// Navega para a tela apropriada baseada no estado do turno.
+  Future<void> navegarParaTelaApropriada() async {
+    final rota = determinarProximaRota();
+
+    if (rota == null) {
+      // Vai para tela de abertura de turno
+      AppLogger.d('Navegando para tela de abertura de turno',
+          tag: 'TurnoController');
+      Get.toNamed('/abrir-turno');
+    } else {
+      // Vai para a rota específica
+      AppLogger.d('Navegando para: $rota', tag: 'TurnoController');
+      Get.toNamed(rota);
+    }
+  }
+
+  /// Obtém informações resumidas do turno para exibição.
+  Map<String, dynamic> obterInfoTurno() {
+    if (!hasTurno) {
+      return {
+        'temTurno': false,
+        'situacao': 'Nenhum turno',
+        'mensagem': 'Nenhum turno ativo',
+      };
+    }
+
+    final turno = turnoCompletoData!;
+    final situacao = turno.situacaoTurno.name;
+
+    String mensagem;
+    switch (turno.situacaoTurno) {
+      case SituacaoTurno.emAbertura:
+        mensagem = 'Turno em abertura - Aguardando checklists';
+        break;
+      case SituacaoTurno.aberto:
+        mensagem = 'Turno ativo - ${eletricistas.length} eletricistas';
+        break;
+      case SituacaoTurno.fechado:
+        mensagem = 'Turno finalizado';
+        break;
+    }
+
+    return {
+      'temTurno': true,
+      'situacao': situacao,
+      'mensagem': mensagem,
+      'turnoId': turno.id,
+      'horaInicio': turno.horaInicio,
+      'horaFim': turno.horaFim,
+      'eletricistas': eletricistas.map((e) => e.nome).toList(),
+    };
   }
 
   // ============================================================================
@@ -272,6 +498,31 @@ class TurnoController extends GetxController {
     await _carregarTurnoAtivo();
   }
 
+  /// Força recarregamento completo dos dados.
+  Future<void> recarregar() async {
+    AppLogger.d('🔄 Recarregando dados do turno...', tag: 'TurnoController');
+    await _carregarTurnoAtivo();
+  }
+
+  /// Método chamado pelo pull-to-refresh da home.
+  ///
+  /// SEMPRE recarrega do banco para garantir dados atualizados.
+  Future<void> atualizarAposSync() async {
+    AppLogger.d('🔄 Atualizando turno após sincronização...',
+        tag: 'TurnoController');
+
+    try {
+      // Força recarregamento do banco
+      await _carregarTurnoAtivo();
+
+      AppLogger.i('✅ Turno atualizado após sincronização',
+          tag: 'TurnoController');
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao atualizar turno após sincronização',
+          tag: 'TurnoController', error: e, stackTrace: stackTrace);
+    }
+  }
+
   // ============================================================================
   // CICLO DE VIDA
   // ============================================================================
@@ -325,4 +576,3 @@ extension TipoServicoExtension on TipoServico {
     }
   }
 }
-
