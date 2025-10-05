@@ -1,5 +1,6 @@
 import 'package:nexa_app/core/sync/sync_result.dart';
 import 'package:nexa_app/core/sync/syncable_repository.dart';
+import 'package:nexa_app/core/utils/logger/app_logger.dart';
 
 /// Gerenciador central de sincronização de dados.
 ///
@@ -174,27 +175,82 @@ class SyncManager {
   Future<SyncResult> sincronizarTudo({bool force = false}) async {
     bool falhou = false;
     bool temDadosLocais = false;
+    int totalModulos = _repos.length;
+    int modulosProcessados = 0;
+    int modulosPulados = 0;
+    int modulosComErro = 0;
+
+    AppLogger.v('🔄 Iniciando sincronização de $totalModulos módulos',
+        tag: 'SyncManager');
 
     for (var entry in _repos.entries) {
+      final nomeEntidade = entry.key;
       final repo = entry.value;
+      modulosProcessados++;
+
+      AppLogger.v(
+          '📦 Processando módulo $modulosProcessados/$totalModulos: $nomeEntidade',
+          tag: 'SyncManager');
 
       try {
+        // Verifica se deve pular módulo com dados locais
         if (!force) {
-          final vazio = await repo.estaVazio(entry.key);
+          final vazio = await repo.estaVazio(nomeEntidade);
           if (!vazio) {
             temDadosLocais = true;
-            continue; // pula sincronização se já tem dados locais e não for forçado
+            modulosPulados++;
+            AppLogger.v(
+                '⏭️ Módulo $nomeEntidade pulado (dados locais existentes)',
+                tag: 'SyncManager');
+            continue;
           }
         }
 
+        AppLogger.v('🌐 Buscando dados da API para $nomeEntidade...',
+            tag: 'SyncManager');
         final dados = await repo.buscarDaApi();
-        await repo.sincronizarComBanco(dados);
-      } catch (_) {
+        final quantidadeDados = dados.length;
+
+        AppLogger.v(
+            '📊 API retornou $quantidadeDados registros para $nomeEntidade',
+            tag: 'SyncManager');
+
+        if (quantidadeDados > 0) {
+          AppLogger.v(
+              '💾 Salvando $quantidadeDados registros no banco local para $nomeEntidade...',
+              tag: 'SyncManager');
+          await repo.sincronizarComBanco(dados);
+          AppLogger.v(
+              '✅ Módulo $nomeEntidade sincronizado com sucesso ($quantidadeDados registros)',
+              tag: 'SyncManager');
+        } else {
+          AppLogger.v('⚠️ Módulo $nomeEntidade retornou 0 registros da API',
+              tag: 'SyncManager');
+        }
+      } catch (e, stackTrace) {
         falhou = true;
-        final vazio = await repo.estaVazio(entry.key);
-        if (!vazio) temDadosLocais = true;
+        modulosComErro++;
+        AppLogger.e('❌ Erro ao sincronizar módulo $nomeEntidade',
+            tag: 'SyncManager', error: e, stackTrace: stackTrace);
+
+        // Verifica se tem dados locais para continuar
+        try {
+          final vazio = await repo.estaVazio(nomeEntidade);
+          if (!vazio) temDadosLocais = true;
+        } catch (_) {
+          // Ignora erro na verificação de dados locais
+        }
       }
     }
+
+    AppLogger.v('📈 Resumo da sincronização:', tag: 'SyncManager');
+    AppLogger.v('   • Total de módulos: $totalModulos', tag: 'SyncManager');
+    AppLogger.v('   • Processados: $modulosProcessados', tag: 'SyncManager');
+    AppLogger.v('   • Pulados: $modulosPulados', tag: 'SyncManager');
+    AppLogger.v('   • Com erro: $modulosComErro', tag: 'SyncManager');
+    AppLogger.v('   • Sucesso: ${!falhou}', tag: 'SyncManager');
+    AppLogger.v('   • Pode continuar: ${!falhou || temDadosLocais}',
+        tag: 'SyncManager');
 
     return SyncResult(
       sucesso: !falhou,
@@ -269,7 +325,16 @@ class SyncManager {
   /// - Erros de persistência são propagados
   /// - Não há retry automático (responsabilidade do chamador)
   Future<void> _executar(SyncableRepository repo) async {
+    AppLogger.v('🔄 Executando sincronização para ${repo.nomeEntidade}...',
+        tag: 'SyncManager');
+    
     final dados = await repo.buscarDaApi();
+    AppLogger.v(
+        '📊 Dados obtidos da API para ${repo.nomeEntidade}: ${dados.length} registros',
+        tag: 'SyncManager');
+    
     await repo.sincronizarComBanco(dados);
+    AppLogger.v('💾 Dados salvos no banco local para ${repo.nomeEntidade}',
+        tag: 'SyncManager');
   }
 }

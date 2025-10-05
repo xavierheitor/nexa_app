@@ -271,6 +271,64 @@ class SyncService {
   /// ```
   List<String> get modulosDisponiveis => _syncManager.modulosDisponiveis;
 
+  /// Executa sincronização completa de todas as tabelas.
+  ///
+  /// Método público que chama sincronizarTudo do SyncManager,
+  /// sincronizando todos os repositórios registrados.
+  ///
+  /// ## Retorno:
+  /// - `Future<bool>`: true se sincronização foi bem-sucedida, false caso contrário
+  Future<bool> sincronizarTudo() async {
+    if (_isSyncing) {
+      AppLogger.w('Sincronização já em andamento', tag: 'SyncService');
+      return false;
+    }
+
+    _isSyncing = true;
+    AppLogger.i('🔄 Iniciando sincronização completa (FORÇADA)',
+        tag: 'SyncService');
+    AppLogger.v('📋 Módulos disponíveis: ${_syncManager.modulosDisponiveis}',
+        tag: 'SyncService');
+    AppLogger.v('⚡ Modo FORÇADO: ignorando dados locais existentes',
+        tag: 'SyncService');
+
+    try {
+      final resultado = await _syncManager.sincronizarTudo(force: true);
+
+      if (resultado.sucesso) {
+        AppLogger.i('✅ Sincronização completa concluída com sucesso',
+            tag: 'SyncService');
+        AppLogger.v(
+            '📊 Resultado: sucesso=true, podeContinuar=${resultado.podeContinuar}',
+            tag: 'SyncService');
+        return true;
+      } else if (resultado.podeContinuar) {
+        AppLogger.w(
+            '⚠️ Sincronização parcial - alguns módulos falharam mas pode continuar',
+            tag: 'SyncService');
+        AppLogger.v(
+            '📊 Resultado: sucesso=false, podeContinuar=${resultado.podeContinuar}',
+            tag: 'SyncService');
+        return true;
+      } else {
+        AppLogger.e('❌ Falha crítica na sincronização completa',
+            tag: 'SyncService');
+        AppLogger.v(
+            '📊 Resultado: sucesso=false, podeContinuar=${resultado.podeContinuar}',
+            tag: 'SyncService');
+        return false;
+      }
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro inesperado durante sincronização completa',
+          tag: 'SyncService', error: e, stackTrace: stackTrace);
+      return false;
+    } finally {
+      _isSyncing = false;
+      AppLogger.v('🏁 Sincronização finalizada (isSyncing=false)',
+          tag: 'SyncService');
+    }
+  }
+
   /// Cancela sincronização em andamento.
   void cancelar() {
     if (_isSyncing) {

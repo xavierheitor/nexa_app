@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/services/auth_service.dart';
+import 'package:nexa_app/core/core_app/services/sync_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
 import 'package:nexa_app/modules/home/home_controller.dart';
 
@@ -15,6 +16,7 @@ class HomeBinding extends Bindings {
       () => HomeController(
         sessionManager: Get.find<SessionManager>(),
         authService: Get.find<AuthService>(),
+        syncService: Get.find<SyncService>(),
       ),
     );
   }

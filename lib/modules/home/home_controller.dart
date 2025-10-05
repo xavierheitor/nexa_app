@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/core_app/services/auth_service.dart';
+import 'package:nexa_app/core/core_app/services/sync_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/routes/routes.dart';
@@ -17,6 +18,9 @@ class HomeController extends GetxController {
   /// Serviço de autenticação para operações de logout.
   final AuthService _authService;
 
+  /// Serviço de sincronização para atualização de dados.
+  final SyncService _syncService;
+
   /// Controlador global de turno.
   final TurnoController turnoController = Get.find<TurnoController>();
 
@@ -24,8 +28,10 @@ class HomeController extends GetxController {
   HomeController({
     required SessionManager sessionManager,
     required AuthService authService,
+    required SyncService syncService,
   })  : _sessionManager = sessionManager,
-        _authService = authService;
+        _authService = authService,
+        _syncService = syncService;
 
   // ============================================================================
   // ESTADO REATIVO
@@ -150,6 +156,47 @@ class HomeController extends GetxController {
   /// Atualiza dados da tela.
   Future<void> atualizar() async {
     AppLogger.d('Atualizando dados da home', tag: 'HomeController');
+    
+    try {
+      // Executa sincronização completa
+      final sucesso = await _syncService.sincronizarTudo();
+
+      if (sucesso) {
+        AppLogger.i('Sincronização concluída com sucesso',
+            tag: 'HomeController');
+        Get.snackbar(
+          'Sincronização',
+          'Dados atualizados com sucesso!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.primaryContainer,
+          colorText: Get.theme.colorScheme.onPrimaryContainer,
+          duration: const Duration(seconds: 3),
+        );
+      } else {
+        AppLogger.w('Sincronização falhou', tag: 'HomeController');
+        Get.snackbar(
+          'Erro na Sincronização',
+          'Falha ao atualizar dados. Tente novamente.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.errorContainer,
+          colorText: Get.theme.colorScheme.onErrorContainer,
+          duration: const Duration(seconds: 4),
+        );
+      }
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro durante sincronização',
+          tag: 'HomeController', error: e, stackTrace: stackTrace);
+      Get.snackbar(
+        'Erro na Sincronização',
+        'Erro inesperado durante sincronização.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Get.theme.colorScheme.errorContainer,
+        colorText: Get.theme.colorScheme.onErrorContainer,
+        duration: const Duration(seconds: 4),
+      );
+    }
+
+    // Atualiza dados do turno após sincronização
     await turnoController.atualizar();
   }
 

@@ -121,11 +121,17 @@ class AbrirTurnoController extends GetxController {
     if (eletricistasSelecionados.isEmpty) {
       return 'Pelo menos 2 eletricistas são obrigatórios';
     }
-
+    
     if (eletricistasSelecionados.length < 2) {
       return 'Mínimo de 2 eletricistas necessários';
     }
-
+    
+    // Verifica se há pelo menos um motorista selecionado
+    final temMotorista = eletricistasSelecionados.any((e) => e.isMotorista);
+    if (!temMotorista) {
+      return 'É obrigatório marcar um motorista';
+    }
+    
     return null;
   }
 
@@ -190,6 +196,22 @@ class AbrirTurnoController extends GetxController {
   Future<void> abrirTurno() async {
     // Valida formulário
     if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Valida eletricistas (incluindo motorista obrigatório)
+    final erroEletricistas = validateEletricistas();
+    if (erroEletricistas != null) {
+      AppLogger.w('Erro na validação de eletricistas: $erroEletricistas',
+          tag: 'AbrirTurnoController');
+      Get.snackbar(
+        'Validação',
+        erroEletricistas,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Get.theme.colorScheme.errorContainer,
+        colorText: Get.theme.colorScheme.onErrorContainer,
+        duration: const Duration(seconds: 4),
+      );
       return;
     }
 

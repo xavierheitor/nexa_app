@@ -275,6 +275,45 @@ class AbrirTurnoPage extends StatelessWidget {
                               ),
                             ),
                           ),
+                        // Aviso sobre motorista obrigatório
+                        if (controller.eletricistasSelecionados.length >= 2 &&
+                            !controller.eletricistasSelecionados
+                                .any((e) => e.isMotorista))
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color:
+                                    colorScheme.errorContainer.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: colorScheme.error,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning,
+                                    color: colorScheme.error,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'É obrigatório marcar um motorista para abrir o turno',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: colorScheme.error,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
