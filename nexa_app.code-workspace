@@ -11,7 +11,23 @@
     ],
     "git.autoRepositoryDetection": "subFolders",
     "git.detectSubmodules": false,
-    "git.scmProviders": ["git"]
+    "git.scmProviders": [
+      "git"
+    ],
+    "editor.tokenColorCustomizations": {
+      "textMateRules": [
+        {
+          "name": "AppLogger Lines",
+          "scope": [
+            "support.function.dart"
+          ],
+          "settings": {
+            "foreground": "#8B5CF6",
+            "fontStyle": "bold"
+          }
+        }
+      ]
+    }
   },
   "extensions": {
     "recommendations": [

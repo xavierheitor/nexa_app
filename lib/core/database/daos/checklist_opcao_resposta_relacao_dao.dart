@@ -8,7 +8,7 @@ part 'checklist_opcao_resposta_relacao_dao.g.dart';
 @DriftAccessor(tables: [ChecklistOpcaoRespostaRelacaoTable])
 class ChecklistOpcaoRespostaRelacaoDao extends DatabaseAccessor<AppDatabase>
     with _$ChecklistOpcaoRespostaRelacaoDaoMixin {
-  ChecklistOpcaoRespostaRelacaoDao(AppDatabase db) : super(db);
+  ChecklistOpcaoRespostaRelacaoDao(super.db);
 
   Future<List<ChecklistOpcaoRespostaRelacaoTableDto>> listar() async {
     final result = await select(checklistOpcaoRespostaRelacaoTable).get();

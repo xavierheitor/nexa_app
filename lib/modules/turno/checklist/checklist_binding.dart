@@ -11,6 +11,17 @@ import 'package:nexa_app/modules/turno/checklist/checklist_service.dart';
 class ChecklistBinding extends Bindings {
   @override
   void dependencies() {
+
+    Get.lazyPut<ChecklistModeloRepo>(
+        () => ChecklistModeloRepo(dio: Get.find(), db: Get.find()));
+    Get.lazyPut<ChecklistPerguntaRepo>(
+        () => ChecklistPerguntaRepo(dio: Get.find(), db: Get.find()));
+    Get.lazyPut<ChecklistOpcaoRespostaRepo>(
+        () => ChecklistOpcaoRespostaRepo(dio: Get.find(), db: Get.find()));
+    Get.lazyPut<TurnoRepo>(() => TurnoRepo(dio: Get.find(), db: Get.find()));
+    Get.lazyPut<VeiculoRepo>(
+        () => VeiculoRepo(dio: Get.find(), db: Get.find()));
+
     // Service (singleton)
     Get.lazyPut<ChecklistService>(
       () => ChecklistService(

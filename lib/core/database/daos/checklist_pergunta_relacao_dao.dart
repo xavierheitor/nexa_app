@@ -8,7 +8,7 @@ part 'checklist_pergunta_relacao_dao.g.dart';
 @DriftAccessor(tables: [ChecklistPerguntaRelacaoTable])
 class ChecklistPerguntaRelacaoDao extends DatabaseAccessor<AppDatabase>
     with _$ChecklistPerguntaRelacaoDaoMixin {
-  ChecklistPerguntaRelacaoDao(AppDatabase db) : super(db);
+  ChecklistPerguntaRelacaoDao(super.db);
 
   // ============================================================================
   // LISTAR

@@ -8,7 +8,7 @@ part 'checklist_tipo_equipe_relacao_dao.g.dart';
 @DriftAccessor(tables: [ChecklistTipoEquipeRelacaoTable])
 class ChecklistTipoEquipeRelacaoDao extends DatabaseAccessor<AppDatabase>
     with _$ChecklistTipoEquipeRelacaoDaoMixin {
-  ChecklistTipoEquipeRelacaoDao(AppDatabase db) : super(db);
+  ChecklistTipoEquipeRelacaoDao(super.db);
 
   Future<List<ChecklistTipoEquipeRelacaoTableDto>> listar() async {
     final result = await select(checklistTipoEquipeRelacaoTable).get();
