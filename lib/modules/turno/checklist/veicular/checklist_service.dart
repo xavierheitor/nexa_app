@@ -5,6 +5,8 @@ import 'package:nexa_app/core/domain/models/checklist_model.dart';
 import 'package:nexa_app/core/domain/repositories/checklist_modelo_repo.dart';
 import 'package:nexa_app/core/domain/repositories/checklist_opcao_resposta_repo.dart';
 import 'package:nexa_app/core/domain/repositories/checklist_pergunta_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_preenchido_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_resposta_repo.dart';
 import 'package:nexa_app/core/domain/repositories/equipe_repo.dart';
 import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
 import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
@@ -30,6 +32,12 @@ class ChecklistService extends GetxService {
   /// Repositório responsável pelos dados das equipes vinculadas ao turno.
   final EquipeRepo _equipeRepo;
 
+  /// Repositório para persistir checklists preenchidos.
+  final ChecklistPreenchidoRepo _checklistPreenchidoRepo;
+
+  /// Repositório para persistir respostas individuais.
+  final ChecklistRespostaRepo _checklistRespostaRepo;
+
   // IDs remotos padrão dos modelos de checklist enquanto o vínculo por tipo de
   // equipe não é configurado dinamicamente.
   // ignore: unused_field
@@ -48,12 +56,16 @@ class ChecklistService extends GetxService {
     required TurnoRepo turnoRepo,
     required VeiculoRepo veiculoRepo,
     required EquipeRepo equipeRepo,
+    required ChecklistPreenchidoRepo checklistPreenchidoRepo,
+    required ChecklistRespostaRepo checklistRespostaRepo,
   })  : _checklistModeloRepo = checklistModeloRepo,
         _checklistPerguntaRepo = checklistPerguntaRepo,
         _checklistOpcaoRespostaRepo = checklistOpcaoRespostaRepo,
         _turnoRepo = turnoRepo,
         _veiculoRepo = veiculoRepo,
-        _equipeRepo = equipeRepo;
+        _equipeRepo = equipeRepo,
+        _checklistPreenchidoRepo = checklistPreenchidoRepo,
+        _checklistRespostaRepo = checklistRespostaRepo;
 
   /// Busca o checklist completo para um tipo de veículo específico.
   ///
@@ -238,6 +250,119 @@ class ChecklistService extends GetxService {
       AppLogger.e('❌ Erro ao buscar checklist por remoteId $remoteId',
           tag: 'ChecklistService', error: e, stackTrace: stackTrace);
       return null;
+    }
+  }
+
+  /// Persiste o checklist preenchido e suas respostas no banco local.
+  Future<bool> salvarChecklistPreenchido({
+    required ChecklistCompletoModel checklist,
+    required List<ChecklistPerguntaModel> perguntasRespondidas,
+    double? latitude,
+    double? longitude,
+  }) async {
+    AppLogger.d(
+        '💾 Salvando checklist preenchido (remoteId=${checklist.remoteId})',
+        tag: 'ChecklistService');
+
+    try {
+      final turnoAtivo = await _turnoRepo.buscarTurnoAtivo();
+
+      if (turnoAtivo == null) {
+        AppLogger.w('⚠️ Nenhum turno ativo encontrado para salvar checklist',
+            tag: 'ChecklistService');
+        return false;
+      }
+
+      final checklistPreenchidoId =
+          await _checklistPreenchidoRepo.salvarChecklistCompleto(
+        turnoId: turnoAtivo.id,
+        checklistModeloId: checklist.remoteId,
+        respostas: const [],
+        latitude: latitude,
+        longitude: longitude,
+      );
+
+      AppLogger.d(
+        '✅ Checklist preenchido salvo com ID local: $checklistPreenchidoId',
+        tag: 'ChecklistService',
+      );
+
+      final respostas = <Map<String, dynamic>>[];
+
+      for (final pergunta in perguntasRespondidas) {
+        final respostaSelecionada = pergunta.respostaSelecionada;
+        if (respostaSelecionada == null) {
+          continue;
+        }
+
+        ChecklistOpcaoRespostaModel? opcaoSelecionada;
+        for (final opcao in pergunta.opcoes) {
+          if (opcao.id == respostaSelecionada) {
+            opcaoSelecionada = opcao;
+            break;
+          }
+        }
+
+        final opcaoRemoteId = opcaoSelecionada?.remoteId ?? respostaSelecionada;
+
+        respostas.add({
+          'perguntaId': pergunta.remoteId,
+          'opcaoRespostaId': opcaoRemoteId,
+        });
+      }
+
+      if (respostas.isNotEmpty) {
+        await _checklistRespostaRepo.salvarRespostas(
+          checklistPreenchidoId: checklistPreenchidoId,
+          respostas: respostas,
+        );
+        AppLogger.d(
+          '✅ ${respostas.length} respostas persistidas para checklist $checklistPreenchidoId',
+          tag: 'ChecklistService',
+        );
+      }
+
+      AppLogger.i('✅ Checklist preenchido registrado com sucesso',
+          tag: 'ChecklistService');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao salvar checklist preenchido',
+          tag: 'ChecklistService', error: e, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
+  /// Verifica se um modelo de checklist já foi preenchido no turno atual.
+  Future<bool> checklistJaPreenchido(int checklistModeloRemoteId) async {
+    AppLogger.d(
+      '🔎 Verificando preenchimento prévio do checklist $checklistModeloRemoteId',
+      tag: 'ChecklistService',
+    );
+
+    try {
+      final turnoAtivo = await _turnoRepo.buscarTurnoAtivo();
+      if (turnoAtivo == null) {
+        AppLogger.w('⚠️ Nenhum turno ativo encontrado para validação',
+            tag: 'ChecklistService');
+        return false;
+      }
+
+      final preenchidos =
+          await _checklistPreenchidoRepo.buscarPorTurno(turnoAtivo.id);
+
+      final encontrado = preenchidos
+          .any((item) => item.checklistModeloId == checklistModeloRemoteId);
+
+      AppLogger.d(
+        '📌 Checklist $checklistModeloRemoteId já preenchido: $encontrado',
+        tag: 'ChecklistService',
+      );
+
+      return encontrado;
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao verificar checklist preenchido',
+          tag: 'ChecklistService', error: e, stackTrace: stackTrace);
+      return false;
     }
   }
 

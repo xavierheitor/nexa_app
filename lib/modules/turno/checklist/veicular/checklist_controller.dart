@@ -62,6 +62,28 @@ class ChecklistController extends GetxController {
         return;
       }
 
+      final jaPreenchido = await _checklistService
+          .checklistJaPreenchido(checklistCarregado.remoteId);
+
+      if (jaPreenchido) {
+        AppLogger.i(
+          '✅ Checklist ${checklistCarregado.nome} já preenchido anteriormente. Pulando etapa.',
+          tag: 'ChecklistController',
+        );
+
+        Get.snackbar(
+          'Checklist já realizado',
+          _isChecklistEPC
+              ? 'Checklist de EPC já registrado para este turno'
+              : 'Checklist veicular já registrado para este turno',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+        );
+
+        _navegarParaProximaEtapa();
+        return;
+      }
+
       checklist.value = checklistCarregado;
       perguntas.value = checklistCarregado.perguntas;
 
@@ -154,9 +176,35 @@ class ChecklistController extends GetxController {
         // TODO: Aqui você pode salvar as pendências no banco
       }
 
-      // TODO: Salvar respostas do checklist no banco
+      final checklistAtual = checklist.value;
+      if (checklistAtual == null) {
+        AppLogger.e('❌ Checklist atual não encontrado ao finalizar',
+            tag: 'ChecklistController');
+        Get.snackbar(
+          'Erro',
+          'Não foi possível finalizar o checklist atual',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
 
-      AppLogger.i('✅ Checklist finalizado com sucesso',
+      final perguntasRespondidas = perguntas.toList();
+
+      final sucesso = await _checklistService.salvarChecklistPreenchido(
+        checklist: checklistAtual,
+        perguntasRespondidas: perguntasRespondidas,
+      );
+
+      if (!sucesso) {
+        Get.snackbar(
+          'Erro',
+          'Não foi possível salvar o checklist. Tente novamente.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      AppLogger.i('✅ Checklist finalizado e salvo com sucesso',
           tag: 'ChecklistController');
 
       Get.snackbar(
@@ -167,11 +215,7 @@ class ChecklistController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      if (_isChecklistEPC) {
-        Get.offAllNamed(Routes.turnoServicos);
-      } else {
-        Get.offAllNamed(Routes.turnoChecklistEPC);
-      }
+      _navegarParaProximaEtapa();
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao finalizar checklist',
           tag: 'ChecklistController', error: e, stackTrace: stackTrace);
@@ -194,5 +238,13 @@ class ChecklistController extends GetxController {
   String get progressoTexto {
     final respondidas = perguntas.where((p) => p.foiRespondida).length;
     return '$respondidas/${perguntas.length}';
+  }
+
+  void _navegarParaProximaEtapa() {
+    if (_isChecklistEPC) {
+      Get.offAllNamed(Routes.turnoServicos);
+    } else {
+      Get.offAllNamed(Routes.turnoChecklistEPC);
+    }
   }
 }
