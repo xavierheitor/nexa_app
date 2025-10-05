@@ -3,8 +3,9 @@ import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/widgets/custom_searcheable_dropdown.dart';
-import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
+import 'package:nexa_app/core/domain/dto/equipe_table_dto.dart';
+import 'package:nexa_app/modules/turno/abrir/abrir_turno_service.dart';
 
 /// Controlador da tela de abrir turno.
 ///
@@ -18,8 +19,8 @@ class AbrirTurnoController extends GetxController {
   /// Controlador global de turno.
   final TurnoController _turnoController = Get.find<TurnoController>();
 
-  /// Instância do banco de dados.
-  final AppDatabase _db = Get.find<AppDatabase>();
+  /// Serviço para buscar dados de abertura de turno.
+  final AbrirTurnoService _abrirTurnoService = Get.find<AbrirTurnoService>();
 
   // ============================================================================
   // CONTROLADORES DE FORMULÁRIO
@@ -27,6 +28,9 @@ class AbrirTurnoController extends GetxController {
 
   /// Controlador do campo de prefixo.
   final prefixoController = TextEditingController();
+
+  /// Controlador do campo de KM inicial.
+  final kmInicialController = TextEditingController();
 
   /// Chave do formulário para validação.
   final formKey = GlobalKey<FormState>();
@@ -41,6 +45,10 @@ class AbrirTurnoController extends GetxController {
 
   /// Controlador do dropdown de prefixos.
   late final SearchableDropdownController<String> prefixoDropdownController;
+
+  /// Controlador do dropdown de equipes.
+  late final SearchableDropdownController<EquipeTableDto>
+      equipeDropdownController;
 
   // ============================================================================
   // ESTADO REATIVO
@@ -69,6 +77,36 @@ class AbrirTurnoController extends GetxController {
     return null;
   }
 
+  /// Valida seleção de equipe.
+  String? validateEquipe() {
+    if (equipeDropdownController.selected.value == null) {
+      return 'Equipe é obrigatória';
+    }
+    return null;
+  }
+
+  /// Valida campo de KM inicial.
+  String? validateKmInicial(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'KM inicial é obrigatório';
+    }
+
+    final km = int.tryParse(value.trim());
+    if (km == null) {
+      return 'KM deve ser um número válido';
+    }
+
+    if (km < 0) {
+      return 'KM não pode ser negativo';
+    }
+
+    if (km > 999999) {
+      return 'KM muito alto (máximo 999.999)';
+    }
+
+    return null;
+  }
+
   // ============================================================================
   // AÇÕES
   // ============================================================================
@@ -86,6 +124,8 @@ class AbrirTurnoController extends GetxController {
 
       final veiculoSelecionado = veiculoDropdownController.selected.value!;
       final prefixoSelecionado = prefixoDropdownController.selected.value!;
+      // Nota: equipe selecionada é validada mas não enviada para o TurnoController
+      // pois o método abrirTurno não aceita esse parâmetro ainda
 
       final sucesso = await _turnoController.abrirTurno(
         prefixo: prefixoSelecionado,
@@ -147,8 +187,13 @@ class AbrirTurnoController extends GetxController {
       itemLabel: (prefixo) => prefixo,
     );
 
-    // Carrega veículos iniciais
-    _carregarVeiculosIniciais();
+    equipeDropdownController = SearchableDropdownController<EquipeTableDto>(
+      itemLabel: (equipe) => equipe.nome,
+      remoteSearch: _buscarEquipes,
+    );
+
+    // Carrega dados iniciais
+    _carregarDadosIniciais();
     
     AppLogger.d('AbrirTurnoController inicializado',
         tag: 'AbrirTurnoController');
@@ -157,6 +202,7 @@ class AbrirTurnoController extends GetxController {
   @override
   void onClose() {
     prefixoController.dispose();
+    kmInicialController.dispose();
     AppLogger.d('AbrirTurnoController finalizado',
         tag: 'AbrirTurnoController');
     super.onClose();
@@ -184,15 +230,22 @@ class AbrirTurnoController extends GetxController {
     ];
   }
 
-  /// Carrega veículos iniciais do banco local.
-  Future<void> _carregarVeiculosIniciais() async {
+  /// Carrega dados iniciais usando o serviço.
+  Future<void> _carregarDadosIniciais() async {
     try {
-      final veiculos = await _db.veiculoDao.listar();
-      final veiculoDtos =
-          veiculos.map((v) => VeiculoTableDto.fromEntity(v)).toList();
-      veiculoDropdownController.setItems(veiculoDtos);
+      // Carrega veículos
+      final veiculos = await _abrirTurnoService.buscarVeiculos();
+      veiculoDropdownController.setItems(veiculos);
+
+      // Carrega equipes
+      final equipes = await _abrirTurnoService.buscarEquipes();
+      equipeDropdownController.setItems(equipes);
+
+      AppLogger.d(
+          'Dados iniciais carregados: ${veiculos.length} veículos, ${equipes.length} equipes',
+          tag: 'AbrirTurnoController');
     } catch (e) {
-      AppLogger.e('Erro ao carregar veículos iniciais',
+      AppLogger.e('Erro ao carregar dados iniciais', 
           tag: 'AbrirTurnoController', error: e);
     }
   }
@@ -203,16 +256,35 @@ class AbrirTurnoController extends GetxController {
       if (query.isEmpty) {
         return veiculoDropdownController.items;
       }
-
-      final veiculos = await _db.veiculoDao.listar();
+      
+      final veiculos = await _abrirTurnoService.buscarVeiculos();
       final veiculoDtos = veiculos
-          .map((v) => VeiculoTableDto.fromEntity(v))
           .where((v) => v.placa.toLowerCase().contains(query.toLowerCase()))
           .toList();
-
+      
       return veiculoDtos;
     } catch (e) {
-      AppLogger.e('Erro ao buscar veículos',
+      AppLogger.e('Erro ao buscar veículos', 
+          tag: 'AbrirTurnoController', error: e);
+      return [];
+    }
+  }
+
+  /// Busca equipes remotamente.
+  Future<List<EquipeTableDto>> _buscarEquipes(String query) async {
+    try {
+      if (query.isEmpty) {
+        return equipeDropdownController.items;
+      }
+
+      final equipes = await _abrirTurnoService.buscarEquipes();
+      final equipeDtos = equipes
+          .where((e) => e.nome.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+
+      return equipeDtos;
+    } catch (e) {
+      AppLogger.e('Erro ao buscar equipes',
           tag: 'AbrirTurnoController', error: e);
       return [];
     }

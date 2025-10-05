@@ -47,7 +47,7 @@ class AbrirTurnoPage extends StatelessWidget {
 
               /// Título.
               Text(
-                'Informações do Veículo',
+                'Informações do Turno',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -66,13 +66,12 @@ class AbrirTurnoPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 32),
-
-              /// Dropdown de Prefixo.
-              SearchableDropdown<String>(
-                controller: controller.prefixoDropdownController,
-                labelText: 'Prefixo',
-                hintText: 'Selecionar prefixo...',
-                leadingIcon: const Icon(Icons.tag),
+              /// Dropdown de Veículo.
+              SearchableDropdown(
+                controller: controller.veiculoDropdownController,
+                labelText: 'Veículo (Placa)',
+                hintText: 'Selecionar veículo...',
+                leadingIcon: const Icon(Icons.directions_car),
                 onChanged: (value) {
                   // Força revalidação quando o valor muda
                   controller.formKey.currentState?.validate();
@@ -81,12 +80,33 @@ class AbrirTurnoPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              /// Dropdown de Veículo.
+              /// Campo de KM Inicial.
+              TextFormField(
+                controller: controller.kmInicialController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'KM Inicial',
+                  hintText: 'Ex: 15000',
+                  prefixIcon: const Icon(Icons.speed),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(6),
+                ],
+                validator: controller.validateKmInicial,
+              ),
+
+              const SizedBox(height: 16),
+
+              /// Dropdown de Equipe.
               SearchableDropdown(
-                controller: controller.veiculoDropdownController,
-                labelText: 'Veículo (Placa)',
-                hintText: 'Selecionar veículo...',
-                leadingIcon: const Icon(Icons.directions_car),
+                controller: controller.equipeDropdownController,
+                labelText: 'Equipe',
+                hintText: 'Selecionar equipe...',
+                leadingIcon: const Icon(Icons.group),
                 onChanged: (value) {
                   // Força revalidação quando o valor muda
                   controller.formKey.currentState?.validate();
@@ -101,8 +121,14 @@ class AbrirTurnoPage extends StatelessWidget {
                     controller.veiculoDropdownController.selected.value;
                 final prefixoSelecionado =
                     controller.prefixoDropdownController.selected.value;
+                final equipeSelecionada =
+                    controller.equipeDropdownController.selected.value;
+                final kmInicial = controller.kmInicialController.text.trim();
 
-                if (veiculoSelecionado == null || prefixoSelecionado == null) {
+                if (veiculoSelecionado == null ||
+                    prefixoSelecionado == null ||
+                    equipeSelecionada == null ||
+                    kmInicial.isEmpty) {
                   return const SizedBox.shrink();
                 }
 
@@ -143,6 +169,12 @@ class AbrirTurnoPage extends StatelessWidget {
                         const SizedBox(height: 8),
                         _buildInfoRow(
                             'Placa', veiculoSelecionado.placa, Icons.badge),
+                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                            'Equipe', equipeSelecionada.nome, Icons.group),
+                        const SizedBox(height: 8),
+                        _buildInfoRow(
+                            'KM Inicial', '${kmInicial} km', Icons.speed),
                       ],
                     ),
                   ),
