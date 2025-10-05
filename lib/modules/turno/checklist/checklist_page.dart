@@ -185,21 +185,68 @@ class ChecklistPage extends GetView<ChecklistController> {
               const SizedBox(height: 16),
 
               // Opções de resposta
-              ...perguntaAtual.opcoes.map((opcao) {
-                final isSelected =
-                    perguntaAtual.respostaSelecionada == opcao.id;
-                return _buildOpcaoResposta(
-                  opcao: opcao,
-                  isSelected: isSelected,
-                  onTap: () => controller.selecionarResposta(
-                      perguntaAtual.id, opcao.id),
-                );
-              }),
+              _buildOpcoesResposta(perguntaAtual),
             ],
           ),
         ),
       );
     });
+  }
+
+  /// Constrói as opções de resposta distribuídas horizontalmente.
+  Widget _buildOpcoesResposta(ChecklistPerguntaModel pergunta) {
+    if (pergunta.opcoes.length <= 2) {
+      // Para 2 ou menos opções, usa Row com Expanded
+      return Row(
+        children: pergunta.opcoes.map((opcao) {
+          final isSelected = pergunta.respostaSelecionada == opcao.id;
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: _buildOpcaoResposta(
+                opcao: opcao,
+                isSelected: isSelected,
+                onTap: () =>
+                    controller.selecionarResposta(pergunta.id, opcao.id),
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    } else if (pergunta.opcoes.length <= 4) {
+      // Para 3-4 opções, usa Wrap com flexibilidade
+      return Wrap(
+        spacing: 8.0,
+        runSpacing: 8.0,
+        children: pergunta.opcoes.map((opcao) {
+          final isSelected = pergunta.respostaSelecionada == opcao.id;
+          return SizedBox(
+            width: (MediaQuery.of(Get.context!).size.width - 64) / 2 -
+                4, // Metade da largura menos padding
+            child: _buildOpcaoResposta(
+              opcao: opcao,
+              isSelected: isSelected,
+              onTap: () => controller.selecionarResposta(pergunta.id, opcao.id),
+            ),
+          );
+        }).toList(),
+      );
+    } else {
+      // Para mais de 4 opções, usa layout vertical
+      return Column(
+        children: pergunta.opcoes.map((opcao) {
+          final isSelected = pergunta.respostaSelecionada == opcao.id;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: _buildOpcaoResposta(
+              opcao: opcao,
+              isSelected: isSelected,
+              onTap: () => controller.selecionarResposta(pergunta.id, opcao.id),
+            ),
+          );
+        }).toList(),
+      );
+    }
   }
 
   /// Opção de resposta (botão).
@@ -226,61 +273,57 @@ class ChecklistPage extends GetView<ChecklistController> {
       return Icons.check_circle;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: getColor(),
+    return Material(
+      color: getColor(),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: isSelected
-                  ? Border.all(
-                      color: opcao.geraPendencia
-                          ? Colors.orange.shade700
-                          : Colors.green.shade700,
-                      width: 2,
-                    )
-                  : null,
-            ),
-            child: Row(
-              children: [
-                if (getIcon() != null) ...[
-                  Icon(
-                    getIcon(),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: isSelected
+                ? Border.all(
+                    color: opcao.geraPendencia
+                        ? Colors.orange.shade700
+                        : Colors.green.shade700,
+                    width: 2,
+                  )
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (getIcon() != null) ...[
+                Icon(
+                  getIcon(),
+                  color: getTextColor(),
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+              ],
+              Flexible(
+                child: Text(
+                  opcao.nome,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: getTextColor(),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: Text(
-                    opcao.nome,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                      color: getTextColor(),
-                    ),
                   ),
                 ),
-                if (isSelected)
-                  Icon(
-                    Icons.radio_button_checked,
-                    color: getTextColor(),
-                    size: 20,
-                  )
-                else
-                  Icon(
-                    Icons.radio_button_unchecked,
-                    color: Colors.grey.shade400,
-                    size: 20,
-                  ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                color: isSelected ? getTextColor() : Colors.grey.shade400,
+                size: 18,
+              ),
+            ],
           ),
         ),
       ),
