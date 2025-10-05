@@ -73,7 +73,7 @@ class TurnoServicosPage extends StatelessWidget {
     if (turno == null) return const SizedBox.shrink();
 
     final horaInicio = DateFormat('HH:mm').format(turno.horaInicio);
-    final duracao = turno.duracao;
+    final duracao = DateTime.now().difference(turno.horaInicio);
     final horas = duracao.inHours;
     final minutos = duracao.inMinutes.remainder(60);
 
@@ -103,7 +103,7 @@ class TurnoServicosPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${turno.prefixo} • ${turno.placa}',
+                  'A-${turno.id} • Veículo ${turno.veiculoId}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onPrimaryContainer,

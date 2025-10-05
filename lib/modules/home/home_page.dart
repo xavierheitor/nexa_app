@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/modules/home/home_controller.dart';
 import 'package:nexa_app/routes/routes.dart';
+import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart';
 import 'package:intl/intl.dart';
 
 /// Página principal da aplicação (Home).
@@ -89,7 +90,7 @@ class HomePage extends StatelessWidget {
   Widget _buildTurnoCard(HomeController controller, ColorScheme colorScheme) {
     final turno = controller.turnoController.turnoAtivo.value;
 
-    if (turno == null || !turno.estaAberto) {
+    if (turno == null || turno.situacaoTurno != SituacaoTurno.aberto) {
       return _buildSemTurnoCard(controller, colorScheme);
     }
 

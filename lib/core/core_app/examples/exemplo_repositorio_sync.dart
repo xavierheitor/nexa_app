@@ -128,7 +128,7 @@ class ExemploSyncRepo implements SyncableRepository<ExemploDto> {
       AppLogger.d('🔍 Buscando dados de exemplo da API',
           tag: 'ExemploSyncRepo');
 
-      // TODO: Implementar busca real na API
+      //  Implementar busca real na API
       // final response = await dio.get('/api/exemplos');
       // return (response.data as List)
       //     .map((json) => ExemploDto.fromJson(json))
@@ -166,7 +166,7 @@ class ExemploSyncRepo implements SyncableRepository<ExemploDto> {
       AppLogger.d('💾 Sincronizando ${itens.length} itens com banco local',
           tag: 'ExemploSyncRepo');
 
-      // TODO: Implementar sincronização real com banco
+      // Implementar sincronização real com banco
       // await dao.transaction(() async {
       //   // Limpar dados existentes
       //   await dao.limparTabela();
@@ -195,7 +195,7 @@ class ExemploSyncRepo implements SyncableRepository<ExemploDto> {
       AppLogger.d('🔍 Verificando se tabela $entidade está vazia',
           tag: 'ExemploSyncRepo');
 
-      // TODO: Implementar verificação real no banco
+      // Implementar verificação real no banco
       // final count = await dao.contar();
       // final vazio = count == 0;
 

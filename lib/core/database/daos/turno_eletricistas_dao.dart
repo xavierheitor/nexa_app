@@ -12,7 +12,7 @@ part 'turno_eletricistas_dao.g.dart';
 /// entre turnos e eletricistas, incluindo busca por turno e eletricista.
 @DriftAccessor(tables: [TurnoEletricistasTable])
 class TurnoEletricistasDao extends DatabaseAccessor<AppDatabase> with _$TurnoEletricistasDaoMixin {
-  TurnoEletricistasDao(AppDatabase db) : super(db);
+  TurnoEletricistasDao(super.db);
 
   /// Lista todos os relacionamentos turno-eletricista.
   Future<List<TurnoEletricistasTableDto>> listar() async {

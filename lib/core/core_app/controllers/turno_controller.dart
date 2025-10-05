@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:nexa_app/core/domain/models/turno_model.dart';
 import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
 import 'package:nexa_app/core/domain/dto/turno_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
@@ -40,10 +39,7 @@ class TurnoController extends GetxController {
   // ============================================================================
 
   /// Turno ativo atual (se houver).
-  final Rxn<TurnoModel> turnoAtivo = Rxn<TurnoModel>();
-
-  /// Dados completos do turno atual (incluindo eletricistas).
-  final Rxn<TurnoTableDto> turnoCompleto = Rxn<TurnoTableDto>();
+  final Rxn<TurnoTableDto> turnoAtivo = Rxn<TurnoTableDto>();
 
   /// Lista de eletricistas do turno atual.
   final RxList<EletricistaTableDto> eletricistas = <EletricistaTableDto>[].obs;
@@ -60,24 +56,21 @@ class TurnoController extends GetxController {
 
   /// Verifica se há turno aberto.
   bool get hasTurnoAberto =>
-      turnoCompleto.value?.situacaoTurno == SituacaoTurno.aberto;
+      turnoAtivo.value?.situacaoTurno == SituacaoTurno.aberto;
 
   /// Verifica se há turno em abertura.
   bool get hasTurnoEmAbertura =>
-      turnoCompleto.value?.situacaoTurno == SituacaoTurno.emAbertura;
+      turnoAtivo.value?.situacaoTurno == SituacaoTurno.emAbertura;
 
   /// Verifica se há turno fechado.
   bool get hasTurnoFechado =>
-      turnoCompleto.value?.situacaoTurno == SituacaoTurno.fechado;
+      turnoAtivo.value?.situacaoTurno == SituacaoTurno.fechado;
 
   /// Verifica se há algum turno (qualquer situação).
-  bool get hasTurno => turnoCompleto.value != null;
+  bool get hasTurno => turnoAtivo.value != null;
 
   /// Retorna o turno atual (se houver).
-  TurnoModel? get turno => turnoAtivo.value;
-
-  /// Retorna os dados completos do turno.
-  TurnoTableDto? get turnoCompletoData => turnoCompleto.value;
+  TurnoTableDto? get turno => turnoAtivo.value;
 
   /// Retorna a lista de eletricistas do turno.
   List<EletricistaTableDto> get eletricistasDoTurno => eletricistas;
@@ -86,10 +79,11 @@ class TurnoController extends GetxController {
   String get nomesEletricistas => eletricistas.map((e) => e.nome).join(', ');
 
   /// Retorna a placa do veículo do turno.
-  String? get placaVeiculo => turno?.placa;
+  String? get placaVeiculo =>
+      turno?.veiculoId.toString(); // TODO: Buscar placa real
 
   /// Retorna o prefixo do turno.
-  String? get prefixoTurno => turno?.prefixo;
+  String? get prefixoTurno => 'A-${turno?.id}'; // TODO: Buscar prefixo real
 
   // ============================================================================
   // INICIALIZAÇÃO
@@ -116,13 +110,11 @@ class TurnoController extends GetxController {
       final turnoAtivoDb = await _turnoRepo.buscarTurnoAtivo();
 
       if (turnoAtivoDb != null) {
-        turnoCompleto.value = turnoAtivoDb;
-
         // Carrega eletricistas do turno
         await _carregarEletricistasDoTurno(turnoAtivoDb.id);
 
-        // Converte para TurnoModel unificado
-        turnoAtivo.value = await _converterParaTurnoModelCompleto(turnoAtivoDb);
+        // Usa diretamente o TurnoTableDto
+        turnoAtivo.value = turnoAtivoDb;
 
         if (hasTurnoAberto) {
           await _carregarServicos();
@@ -148,7 +140,6 @@ class TurnoController extends GetxController {
 
   /// Limpa todo o estado do controller.
   void _limparEstado() {
-    turnoCompleto.value = null;
     turnoAtivo.value = null;
     eletricistas.clear();
     servicos.clear();
@@ -216,50 +207,6 @@ class TurnoController extends GetxController {
     }
   }
 
-  /// Converte TurnoTableDto para TurnoModel com dados completos.
-  Future<TurnoModel> _converterParaTurnoModelCompleto(
-      TurnoTableDto turnoDto) async {
-    // TODO: Buscar dados reais do veículo e prefixo
-    final prefixo = 'A-${turnoDto.id}';
-    final veiculo = 'Veículo ${turnoDto.veiculoId}';
-    final placa = 'PLACA-${turnoDto.veiculoId}';
-
-    return TurnoModel(
-      id: turnoDto.id.toString(),
-      prefixo: prefixo,
-      veiculo: veiculo,
-      placa: placa,
-      horaInicio: turnoDto.horaInicio,
-      horaFim: turnoDto.horaFim,
-      status: _converterSituacaoParaStatus(turnoDto.situacaoTurno),
-    );
-  }
-
-  /// Converte TurnoTableDto para TurnoModel (compatibilidade).
-  TurnoModel _converterParaTurnoModel(TurnoTableDto turnoDto) {
-    return TurnoModel(
-      id: turnoDto.id.toString(),
-      prefixo: 'A-${turnoDto.id}', // TODO: Buscar prefixo real
-      veiculo:
-          'Veículo ${turnoDto.veiculoId}', // TODO: Buscar nome real do veículo
-      placa: 'PLACA-${turnoDto.veiculoId}', // TODO: Buscar placa real
-      horaInicio: turnoDto.horaInicio,
-      horaFim: turnoDto.horaFim,
-      status: _converterSituacaoParaStatus(turnoDto.situacaoTurno),
-    );
-  }
-
-  /// Converte SituacaoTurno para StatusTurno.
-  StatusTurno _converterSituacaoParaStatus(SituacaoTurno situacao) {
-    switch (situacao) {
-      case SituacaoTurno.aberto:
-        return StatusTurno.aberto;
-      case SituacaoTurno.fechado:
-        return StatusTurno.fechado;
-      case SituacaoTurno.emAbertura:
-        return StatusTurno.aberto; // Considera em abertura como aberto
-    }
-  }
 
   // ============================================================================
   // NAVEGAÇÃO E FLUXO
@@ -327,10 +274,10 @@ class TurnoController extends GetxController {
         'mensagem': 'Nenhum turno ativo',
       };
     }
-
-    final turno = turnoCompletoData!;
+    
+    final turno = turnoAtivo.value!;
     final situacao = turno.situacaoTurno.name;
-
+    
     String mensagem;
     switch (turno.situacaoTurno) {
       case SituacaoTurno.emAbertura:
@@ -343,7 +290,7 @@ class TurnoController extends GetxController {
         mensagem = 'Turno finalizado';
         break;
     }
-
+    
     return {
       'temTurno': true,
       'situacao': situacao,
@@ -377,14 +324,9 @@ class TurnoController extends GetxController {
       // TODO: Salvar turno no banco/API
       await Future.delayed(const Duration(seconds: 1));
 
-      turnoAtivo.value = TurnoModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        prefixo: prefixo,
-        veiculo: veiculo,
-        placa: placa,
-        horaInicio: DateTime.now(),
-        status: StatusTurno.aberto,
-      );
+      // TODO: Implementar abertura real de turno usando TurnoRepo
+      // Por enquanto, apenas limpa o estado
+      turnoAtivo.value = null;
 
       servicos.clear();
 
@@ -408,15 +350,14 @@ class TurnoController extends GetxController {
       }
 
       isLoading.value = true;
-      AppLogger.i('Fechando turno: ${turno?.prefixo}', tag: 'TurnoController');
+      AppLogger.i('Fechando turno: ${turno?.id}', tag: 'TurnoController');
 
       // TODO: Atualizar turno no banco/API
       await Future.delayed(const Duration(seconds: 1));
 
-      turnoAtivo.value = turno?.copyWith(
-        horaFim: DateTime.now(),
-        status: StatusTurno.fechado,
-      );
+      // TODO: Implementar fechamento real de turno usando TurnoRepo
+      // Por enquanto, apenas limpa o estado
+      turnoAtivo.value = null;
 
       AppLogger.i('Turno fechado com sucesso', tag: 'TurnoController');
       return true;

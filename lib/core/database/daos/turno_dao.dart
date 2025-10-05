@@ -13,7 +13,7 @@ part 'turno_dao.g.dart';
 /// incluindo busca por situações, turnos ativos, e relacionamentos.
 @DriftAccessor(tables: [TurnoTable])
 class TurnoDao extends DatabaseAccessor<AppDatabase> with _$TurnoDaoMixin {
-  TurnoDao(AppDatabase db) : super(db);
+  TurnoDao(super.db);
 
   /// Lista todos os turnos.
   Future<List<TurnoTableDto>> listar() async {
