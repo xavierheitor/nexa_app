@@ -34,7 +34,7 @@ class ChecklistOpcaoRespostaRelacaoTableDto {
   /// Converte para Companion (para inserção/atualização).
   ChecklistOpcaoRespostaRelacaoTableCompanion toCompanion() {
     return ChecklistOpcaoRespostaRelacaoTableCompanion(
-      id: Value(id),
+      id: id == 0 ? const Value.absent() : Value(id), // Autoincrement se for 0
       remoteId: remoteId != null ? Value(remoteId!) : const Value.absent(),
       checklistOpcaoRespostaId: Value(checklistOpcaoRespostaId),
       checklistModeloId: Value(checklistModeloId),

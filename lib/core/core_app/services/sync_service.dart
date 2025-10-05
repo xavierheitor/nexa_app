@@ -1,5 +1,12 @@
+import 'package:nexa_app/core/domain/repositories/checklist_modelo_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_opcao_resposta_relacao_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_opcao_resposta_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_pergunta_relacao_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_pergunta_repo.dart';
 import 'package:nexa_app/core/domain/repositories/eletricista_repo.dart';
 import 'package:nexa_app/core/domain/repositories/equipe_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_tipo_equipe_relacao_repo.dart';
+import 'package:nexa_app/core/domain/repositories/checklist_tipo_veiculo_relacao_repo.dart';
 import 'package:nexa_app/core/domain/repositories/tipo_equipe_repo.dart';
 import 'package:nexa_app/core/sync/sync_manager.dart';
 import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
@@ -108,6 +115,20 @@ class SyncService {
     _syncManager.registrar(TipoEquipeRepo(dio: Get.find(), db: Get.find()));
     _syncManager.registrar(EquipeRepo(dio: Get.find(), db: Get.find()));
     _syncManager.registrar(EletricistaRepo(dio: Get.find(), db: Get.find()));
+    _syncManager
+        .registrar(ChecklistModeloRepo(dio: Get.find(), db: Get.find()));
+    _syncManager
+        .registrar(ChecklistPerguntaRepo(dio: Get.find(), db: Get.find()));
+    _syncManager
+        .registrar(ChecklistOpcaoRespostaRepo(dio: Get.find(), db: Get.find()));
+    _syncManager.registrar(
+        ChecklistOpcaoRespostaRelacaoRepo(dio: Get.find(), db: Get.find()));
+    _syncManager.registrar(
+        ChecklistPerguntaRelacaoRepo(dio: Get.find(), db: Get.find()));
+    _syncManager.registrar(
+        ChecklistTipoEquipeRelacaoRepo(dio: Get.find(), db: Get.find()));
+    _syncManager.registrar(
+        ChecklistTipoVeiculoRelacaoRepo(dio: Get.find(), db: Get.find()));
 
     AppLogger.i(
         'SyncService inicializado com ${_syncManager.modulosDisponiveis.length} módulos: ${_syncManager.modulosDisponiveis}',

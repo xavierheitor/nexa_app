@@ -12,4 +12,16 @@ abstract class ApiConstants {
   static const tiposEquipe = '/tipo-equipe/sync';
   static const eletricistas = '/eletricistas/sync';
 
+  // Checklist
+  static const checklistModelo = '/checklist/sync/modelos';
+  static const checklistPergunta = '/checklist/sync/perguntas';
+  static const checklistOpcaoResposta = '/checklist/sync/opcoes-resposta';
+  static const checklistPerguntaRelacao = '/checklist/sync/perguntas/relacoes';
+  static const checklistOpcaoRespostaRelacao =
+      '/checklist/sync/opcoes-resposta/relacoes';
+  static const checklistTipoEquipeRelacao =
+      '/checklist/sync/tipos-equipe/relacoes';
+  static const checklistTipoVeiculoRelacao =
+      '/checklist/sync/tipos-veiculo/relacoes';
+
 }

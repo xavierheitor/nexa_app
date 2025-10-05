@@ -420,7 +420,10 @@ class LoginController extends GetxController {
       AppLogger.i('Usuário já está logado, redirecionando para splash...',
           tag: 'LoginController');
       /// Redireciona para splash para fazer sincronização antes de ir para home.
-      Get.offAllNamed(Routes.splash);
+      /// Agenda a navegação para após o build atual para evitar erros.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(Routes.splash);
+      });
     }
   }
 

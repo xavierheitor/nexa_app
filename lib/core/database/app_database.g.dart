@@ -5743,6 +5743,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       ChecklistPerguntaDao(this as AppDatabase);
   late final ChecklistOpcaoRespostaDao checklistOpcaoRespostaDao =
       ChecklistOpcaoRespostaDao(this as AppDatabase);
+  late final ChecklistPerguntaRelacaoDao checklistPerguntaRelacaoDao =
+      ChecklistPerguntaRelacaoDao(this as AppDatabase);
+  late final ChecklistOpcaoRespostaRelacaoDao checklistOpcaoRespostaRelacaoDao =
+      ChecklistOpcaoRespostaRelacaoDao(this as AppDatabase);
+  late final ChecklistTipoEquipeRelacaoDao checklistTipoEquipeRelacaoDao =
+      ChecklistTipoEquipeRelacaoDao(this as AppDatabase);
+  late final ChecklistTipoVeiculoRelacaoDao checklistTipoVeiculoRelacaoDao =
+      ChecklistTipoVeiculoRelacaoDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

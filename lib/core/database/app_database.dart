@@ -28,6 +28,10 @@ import 'package:nexa_app/core/database/daos/turno_eletricistas_dao.dart';
 import 'package:nexa_app/core/database/daos/checklist_modelo_dao.dart';
 import 'package:nexa_app/core/database/daos/checklist_pergunta_dao.dart';
 import 'package:nexa_app/core/database/daos/checklist_opcao_resposta_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_pergunta_relacao_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_opcao_resposta_relacao_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_tipo_equipe_relacao_dao.dart';
+import 'package:nexa_app/core/database/daos/checklist_tipo_veiculo_relacao_dao.dart';
 import 'package:nexa_app/core/database/logging_executor.dart';
 import 'package:nexa_app/core/database/models/eletricista_table.dart';
 import 'package:nexa_app/core/database/models/equipe_table.dart';
@@ -94,6 +98,10 @@ LazyDatabase _openConnection() {
     ChecklistModeloDao,
     ChecklistPerguntaDao,
     ChecklistOpcaoRespostaDao,
+    ChecklistPerguntaRelacaoDao,
+    ChecklistOpcaoRespostaRelacaoDao,
+    ChecklistTipoEquipeRelacaoDao,
+    ChecklistTipoVeiculoRelacaoDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
