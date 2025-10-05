@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
+import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/widgets/custom_searcheable_dropdown.dart';
 import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
@@ -23,6 +24,9 @@ class AbrirTurnoController extends GetxController {
 
   /// Serviço para buscar dados de abertura de turno.
   final AbrirTurnoService _abrirTurnoService = Get.find<AbrirTurnoService>();
+
+  /// Repositório de turno para operações de banco.
+  final TurnoRepo _turnoRepo = Get.find<TurnoRepo>();
 
   // ============================================================================
   // CONTROLADORES DE FORMULÁRIO
@@ -179,36 +183,59 @@ class AbrirTurnoController extends GetxController {
       AppLogger.i('Abrindo novo turno...', tag: 'AbrirTurnoController');
 
       final veiculoSelecionado = veiculoDropdownController.selected.value!;
-      // Nota: prefixo foi removido da interface, usando valor padrão
-      // Nota: equipe selecionada é validada mas não enviada para o TurnoController
-      // pois o método abrirTurno não aceita esse parâmetro ainda
+      final equipeSelecionada = equipeDropdownController.selected.value!;
+      final kmInicial = int.tryParse(kmInicialController.text) ?? 0;
 
-      final sucesso = await _turnoController.abrirTurno(
-        prefixo: 'A-001', // Prefixo padrão temporário
-        veiculo:
-            'Veículo ${veiculoSelecionado.placa}', // Usando placa como identificador
-        placa: veiculoSelecionado.placa,
+      // Prepara lista de IDs dos eletricistas
+      final eletricistaIds = eletricistasSelecionados
+          .map((e) => int.parse(e.eletricista.id))
+          .toList();
+
+      // Encontra o motorista (eletricista com isMotorista = true)
+      final motoristaSelecionado =
+          eletricistasSelecionados.where((e) => e.isMotorista).firstOrNull;
+
+      final motoristaId = motoristaSelecionado != null
+          ? int.parse(motoristaSelecionado.eletricista.id)
+          : null;
+
+      AppLogger.d('Dados do turno:', tag: 'AbrirTurnoController');
+      AppLogger.d(
+          '- Veículo: ${veiculoSelecionado.placa} (ID: ${veiculoSelecionado.id})',
+          tag: 'AbrirTurnoController');
+      AppLogger.d(
+          '- Equipe: ${equipeSelecionada.nome} (ID: ${equipeSelecionada.id})',
+          tag: 'AbrirTurnoController');
+      AppLogger.d('- KM Inicial: $kmInicial', tag: 'AbrirTurnoController');
+      AppLogger.d('- Eletricistas: ${eletricistaIds.length}',
+          tag: 'AbrirTurnoController');
+      AppLogger.d(
+          '- Motorista: ${motoristaId != null ? 'ID $motoristaId' : 'Nenhum'}',
+          tag: 'AbrirTurnoController');
+
+      // Abre o turno usando TurnoRepo
+      final turnoId = await _turnoRepo.abrirTurno(
+        veiculoId: int.parse(veiculoSelecionado.id),
+        equipeId: int.parse(equipeSelecionada.id),
+        kmInicial: kmInicial,
+        eletricistaIds: eletricistaIds,
+        motoristaId: motoristaId,
       );
 
-      if (sucesso) {
-        AppLogger.i('Turno aberto com sucesso', tag: 'AbrirTurnoController');
+      AppLogger.i('Turno $turnoId aberto com sucesso',
+          tag: 'AbrirTurnoController');
 
-        Get.back(); // Volta para home
+      // Atualiza o TurnoController global
+      await _turnoController.carregarTurnoAtivo();
 
-        Get.snackbar(
-          'Sucesso',
-          'Turno aberto com sucesso!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.colorScheme.primaryContainer,
-        );
-      } else {
-        Get.snackbar(
-          'Erro',
-          'Erro ao abrir turno. Tente novamente.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.colorScheme.errorContainer,
-        );
-      }
+      Get.back(); // Volta para home
+
+      Get.snackbar(
+        'Sucesso',
+        'Turno aberto com sucesso!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Get.theme.colorScheme.primaryContainer,
+      );
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao abrir turno',
           tag: 'AbrirTurnoController', error: e, stackTrace: stackTrace);

@@ -97,6 +97,7 @@ class TurnoEletricistasDao extends DatabaseAccessor<AppDatabase> with _$TurnoEle
         id: dto.id > 0 ? Value(dto.id) : const Value.absent(),
         turnoId: Value(dto.turnoId),
         eletricistaId: Value(dto.eletricistaId),
+        motorista: Value(dto.motorista),
       );
 
       final id = await into(db.turnoEletricistasTable).insert(relacionamentoCompanion);
@@ -117,6 +118,7 @@ class TurnoEletricistasDao extends DatabaseAccessor<AppDatabase> with _$TurnoEle
         id: dto.id > 0 ? Value(dto.id) : const Value.absent(),
         turnoId: Value(dto.turnoId),
         eletricistaId: Value(dto.eletricistaId),
+                motorista: Value(dto.motorista),
       )).toList();
 
       final ids = <int>[];
@@ -249,6 +251,93 @@ class TurnoEletricistasDao extends DatabaseAccessor<AppDatabase> with _$TurnoEle
       return result ?? 0;
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao contar turnos do eletricista', tag: 'TurnoEletricistasDao', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  // ============================================================================
+  // MÉTODOS ESPECÍFICOS PARA MOTORISTA
+  // ============================================================================
+
+  /// Busca o motorista de um turno.
+  Future<TurnoEletricistasTableData?> buscarMotoristaPorTurno(
+      int turnoId) async {
+    try {
+      AppLogger.d('Buscando motorista do turno: $turnoId',
+          tag: 'TurnoEletricistasDao');
+      final query = select(db.turnoEletricistasTable)
+        ..where((tbl) => tbl.turnoId.equals(turnoId))
+        ..where((tbl) => tbl.motorista.equals(true));
+      return await query.getSingleOrNull();
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao buscar motorista do turno',
+          tag: 'TurnoEletricistasDao', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Define um eletricista como motorista de um turno.
+  /// Remove a flag de motorista dos outros eletricistas do mesmo turno.
+  Future<void> definirMotorista(int turnoId, int eletricistaId) async {
+    try {
+      AppLogger.d(
+          'Definindo eletricista $eletricistaId como motorista do turno $turnoId',
+          tag: 'TurnoEletricistasDao');
+
+      await transaction(() async {
+        // Primeiro, remove a flag de motorista de todos os eletricistas do turno
+        await (update(db.turnoEletricistasTable)
+              ..where((tbl) => tbl.turnoId.equals(turnoId)))
+            .write(
+                const TurnoEletricistasTableCompanion(motorista: Value(false)));
+
+        // Depois, marca o eletricista especificado como motorista
+        await (update(db.turnoEletricistasTable)
+              ..where((tbl) => tbl.turnoId.equals(turnoId))
+              ..where((tbl) => tbl.eletricistaId.equals(eletricistaId)))
+            .write(
+                const TurnoEletricistasTableCompanion(motorista: Value(true)));
+      });
+
+      AppLogger.i('Motorista definido com sucesso',
+          tag: 'TurnoEletricistasDao');
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao definir motorista',
+          tag: 'TurnoEletricistasDao', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Remove a flag de motorista de todos os eletricistas de um turno.
+  Future<void> removerMotorista(int turnoId) async {
+    try {
+      AppLogger.d('Removendo motorista do turno: $turnoId',
+          tag: 'TurnoEletricistasDao');
+      await (update(db.turnoEletricistasTable)
+            ..where((tbl) => tbl.turnoId.equals(turnoId)))
+          .write(
+              const TurnoEletricistasTableCompanion(motorista: Value(false)));
+      AppLogger.i('Motorista removido com sucesso',
+          tag: 'TurnoEletricistasDao');
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao remover motorista',
+          tag: 'TurnoEletricistasDao', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Verifica se um eletricista é o motorista de um turno.
+  Future<bool> ehMotorista(int turnoId, int eletricistaId) async {
+    try {
+      final query = select(db.turnoEletricistasTable)
+        ..where((tbl) => tbl.turnoId.equals(turnoId))
+        ..where((tbl) => tbl.eletricistaId.equals(eletricistaId))
+        ..where((tbl) => tbl.motorista.equals(true));
+      final result = await query.getSingleOrNull();
+      return result != null;
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao verificar se é motorista',
+          tag: 'TurnoEletricistasDao', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }

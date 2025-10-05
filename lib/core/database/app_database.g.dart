@@ -2738,8 +2738,18 @@ class $TurnoEletricistasTableTable extends TurnoEletricistasTable
   late final GeneratedColumn<int> eletricistaId = GeneratedColumn<int>(
       'eletricista_id', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _motoristaMeta =
+      const VerificationMeta('motorista');
   @override
-  List<GeneratedColumn> get $columns => [id, turnoId, eletricistaId];
+  late final GeneratedColumn<bool> motorista = GeneratedColumn<bool>(
+      'motorista', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("motorista" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [id, turnoId, eletricistaId, motorista];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2768,6 +2778,10 @@ class $TurnoEletricistasTableTable extends TurnoEletricistasTable
     } else if (isInserting) {
       context.missing(_eletricistaIdMeta);
     }
+    if (data.containsKey('motorista')) {
+      context.handle(_motoristaMeta,
+          motorista.isAcceptableOrUnknown(data['motorista']!, _motoristaMeta));
+    }
     return context;
   }
 
@@ -2784,6 +2798,8 @@ class $TurnoEletricistasTableTable extends TurnoEletricistasTable
           .read(DriftSqlType.int, data['${effectivePrefix}turno_id'])!,
       eletricistaId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}eletricista_id'])!,
+      motorista: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}motorista'])!,
     );
   }
 
@@ -2798,14 +2814,19 @@ class TurnoEletricistasTableData extends DataClass
   final int id;
   final int turnoId;
   final int eletricistaId;
+  final bool motorista;
   const TurnoEletricistasTableData(
-      {required this.id, required this.turnoId, required this.eletricistaId});
+      {required this.id,
+      required this.turnoId,
+      required this.eletricistaId,
+      required this.motorista});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['turno_id'] = Variable<int>(turnoId);
     map['eletricista_id'] = Variable<int>(eletricistaId);
+    map['motorista'] = Variable<bool>(motorista);
     return map;
   }
 
@@ -2814,6 +2835,7 @@ class TurnoEletricistasTableData extends DataClass
       id: Value(id),
       turnoId: Value(turnoId),
       eletricistaId: Value(eletricistaId),
+      motorista: Value(motorista),
     );
   }
 
@@ -2824,6 +2846,7 @@ class TurnoEletricistasTableData extends DataClass
       id: serializer.fromJson<int>(json['id']),
       turnoId: serializer.fromJson<int>(json['turnoId']),
       eletricistaId: serializer.fromJson<int>(json['eletricistaId']),
+      motorista: serializer.fromJson<bool>(json['motorista']),
     );
   }
   @override
@@ -2833,15 +2856,17 @@ class TurnoEletricistasTableData extends DataClass
       'id': serializer.toJson<int>(id),
       'turnoId': serializer.toJson<int>(turnoId),
       'eletricistaId': serializer.toJson<int>(eletricistaId),
+      'motorista': serializer.toJson<bool>(motorista),
     };
   }
 
   TurnoEletricistasTableData copyWith(
-          {int? id, int? turnoId, int? eletricistaId}) =>
+          {int? id, int? turnoId, int? eletricistaId, bool? motorista}) =>
       TurnoEletricistasTableData(
         id: id ?? this.id,
         turnoId: turnoId ?? this.turnoId,
         eletricistaId: eletricistaId ?? this.eletricistaId,
+        motorista: motorista ?? this.motorista,
       );
   TurnoEletricistasTableData copyWithCompanion(
       TurnoEletricistasTableCompanion data) {
@@ -2851,6 +2876,7 @@ class TurnoEletricistasTableData extends DataClass
       eletricistaId: data.eletricistaId.present
           ? data.eletricistaId.value
           : this.eletricistaId,
+      motorista: data.motorista.present ? data.motorista.value : this.motorista,
     );
   }
 
@@ -2859,20 +2885,22 @@ class TurnoEletricistasTableData extends DataClass
     return (StringBuffer('TurnoEletricistasTableData(')
           ..write('id: $id, ')
           ..write('turnoId: $turnoId, ')
-          ..write('eletricistaId: $eletricistaId')
+          ..write('eletricistaId: $eletricistaId, ')
+          ..write('motorista: $motorista')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, turnoId, eletricistaId);
+  int get hashCode => Object.hash(id, turnoId, eletricistaId, motorista);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TurnoEletricistasTableData &&
           other.id == this.id &&
           other.turnoId == this.turnoId &&
-          other.eletricistaId == this.eletricistaId);
+          other.eletricistaId == this.eletricistaId &&
+          other.motorista == this.motorista);
 }
 
 class TurnoEletricistasTableCompanion
@@ -2880,35 +2908,44 @@ class TurnoEletricistasTableCompanion
   final Value<int> id;
   final Value<int> turnoId;
   final Value<int> eletricistaId;
+  final Value<bool> motorista;
   const TurnoEletricistasTableCompanion({
     this.id = const Value.absent(),
     this.turnoId = const Value.absent(),
     this.eletricistaId = const Value.absent(),
+    this.motorista = const Value.absent(),
   });
   TurnoEletricistasTableCompanion.insert({
     this.id = const Value.absent(),
     required int turnoId,
     required int eletricistaId,
+    this.motorista = const Value.absent(),
   })  : turnoId = Value(turnoId),
         eletricistaId = Value(eletricistaId);
   static Insertable<TurnoEletricistasTableData> custom({
     Expression<int>? id,
     Expression<int>? turnoId,
     Expression<int>? eletricistaId,
+    Expression<bool>? motorista,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (turnoId != null) 'turno_id': turnoId,
       if (eletricistaId != null) 'eletricista_id': eletricistaId,
+      if (motorista != null) 'motorista': motorista,
     });
   }
 
   TurnoEletricistasTableCompanion copyWith(
-      {Value<int>? id, Value<int>? turnoId, Value<int>? eletricistaId}) {
+      {Value<int>? id,
+      Value<int>? turnoId,
+      Value<int>? eletricistaId,
+      Value<bool>? motorista}) {
     return TurnoEletricistasTableCompanion(
       id: id ?? this.id,
       turnoId: turnoId ?? this.turnoId,
       eletricistaId: eletricistaId ?? this.eletricistaId,
+      motorista: motorista ?? this.motorista,
     );
   }
 
@@ -2924,6 +2961,9 @@ class TurnoEletricistasTableCompanion
     if (eletricistaId.present) {
       map['eletricista_id'] = Variable<int>(eletricistaId.value);
     }
+    if (motorista.present) {
+      map['motorista'] = Variable<bool>(motorista.value);
+    }
     return map;
   }
 
@@ -2932,7 +2972,8 @@ class TurnoEletricistasTableCompanion
     return (StringBuffer('TurnoEletricistasTableCompanion(')
           ..write('id: $id, ')
           ..write('turnoId: $turnoId, ')
-          ..write('eletricistaId: $eletricistaId')
+          ..write('eletricistaId: $eletricistaId, ')
+          ..write('motorista: $motorista')
           ..write(')'))
         .toString();
   }
@@ -7158,12 +7199,14 @@ typedef $$TurnoEletricistasTableTableCreateCompanionBuilder
   Value<int> id,
   required int turnoId,
   required int eletricistaId,
+  Value<bool> motorista,
 });
 typedef $$TurnoEletricistasTableTableUpdateCompanionBuilder
     = TurnoEletricistasTableCompanion Function({
   Value<int> id,
   Value<int> turnoId,
   Value<int> eletricistaId,
+  Value<bool> motorista,
 });
 
 class $$TurnoEletricistasTableTableFilterComposer
@@ -7183,6 +7226,9 @@ class $$TurnoEletricistasTableTableFilterComposer
 
   ColumnFilters<int> get eletricistaId => $composableBuilder(
       column: $table.eletricistaId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get motorista => $composableBuilder(
+      column: $table.motorista, builder: (column) => ColumnFilters(column));
 }
 
 class $$TurnoEletricistasTableTableOrderingComposer
@@ -7203,6 +7249,9 @@ class $$TurnoEletricistasTableTableOrderingComposer
   ColumnOrderings<int> get eletricistaId => $composableBuilder(
       column: $table.eletricistaId,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get motorista => $composableBuilder(
+      column: $table.motorista, builder: (column) => ColumnOrderings(column));
 }
 
 class $$TurnoEletricistasTableTableAnnotationComposer
@@ -7222,6 +7271,9 @@ class $$TurnoEletricistasTableTableAnnotationComposer
 
   GeneratedColumn<int> get eletricistaId => $composableBuilder(
       column: $table.eletricistaId, builder: (column) => column);
+
+  GeneratedColumn<bool> get motorista =>
+      $composableBuilder(column: $table.motorista, builder: (column) => column);
 }
 
 class $$TurnoEletricistasTableTableTableManager extends RootTableManager<
@@ -7258,21 +7310,25 @@ class $$TurnoEletricistasTableTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<int> turnoId = const Value.absent(),
             Value<int> eletricistaId = const Value.absent(),
+            Value<bool> motorista = const Value.absent(),
           }) =>
               TurnoEletricistasTableCompanion(
             id: id,
             turnoId: turnoId,
             eletricistaId: eletricistaId,
+            motorista: motorista,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required int turnoId,
             required int eletricistaId,
+            Value<bool> motorista = const Value.absent(),
           }) =>
               TurnoEletricistasTableCompanion.insert(
             id: id,
             turnoId: turnoId,
             eletricistaId: eletricistaId,
+            motorista: motorista,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

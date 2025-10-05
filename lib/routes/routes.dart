@@ -77,4 +77,10 @@ abstract class Routes {
   ///
   /// Tela para iniciar um novo turno, selecionando veículo e outros dados.
   static const String turnoAbrir = '/turno/abrir';
+
+  /// Rota da tela de checklist veicular.
+  ///
+  /// Tela para realizar o checklist do veículo antes de iniciar o turno.
+  /// Exibe perguntas e opções de resposta baseadas no tipo de veículo.
+  static const String turnoChecklist = '/turno/checklist';
 }

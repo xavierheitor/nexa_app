@@ -288,17 +288,78 @@ class TurnoRepo {
   }
 
   // ============================================================================
+  // OPERAÇÕES DE MOTORISTA
+  // ============================================================================
+
+  /// Busca o motorista de um turno.
+  Future<TurnoEletricistasTableDto?> buscarMotoristaDoTurno(int turnoId) async {
+    try {
+      AppLogger.d('Buscando motorista do turno: $turnoId', tag: 'TurnoRepo');
+      final result =
+          await _turnoEletricistasDao.buscarMotoristaPorTurno(turnoId);
+      return result != null
+          ? TurnoEletricistasTableDto.fromTable(result)
+          : null;
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao buscar motorista do turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Define um eletricista como motorista de um turno.
+  /// Remove a flag de motorista dos outros eletricistas do mesmo turno.
+  Future<void> definirMotorista(int turnoId, int eletricistaId) async {
+    try {
+      AppLogger.d('Definindo motorista $eletricistaId para turno $turnoId',
+          tag: 'TurnoRepo');
+      await _turnoEletricistasDao.definirMotorista(turnoId, eletricistaId);
+      AppLogger.i('Motorista definido com sucesso', tag: 'TurnoRepo');
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao definir motorista',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Remove a flag de motorista de todos os eletricistas de um turno.
+  Future<void> removerMotorista(int turnoId) async {
+    try {
+      AppLogger.d('Removendo motorista do turno: $turnoId', tag: 'TurnoRepo');
+      await _turnoEletricistasDao.removerMotorista(turnoId);
+      AppLogger.i('Motorista removido com sucesso', tag: 'TurnoRepo');
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao remover motorista',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Verifica se um eletricista é o motorista de um turno.
+  Future<bool> ehMotorista(int turnoId, int eletricistaId) async {
+    try {
+      return await _turnoEletricistasDao.ehMotorista(turnoId, eletricistaId);
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao verificar se é motorista',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  // ============================================================================
   // OPERAÇÕES COMPOSTAS (TURNO + ELETRICISTAS)
   // ============================================================================
 
   /// Abre um novo turno com eletricistas.
   ///
   /// Cria um turno e adiciona os eletricistas especificados em uma transação.
+  /// Se `motoristaId` for fornecido, marca esse eletricista como motorista.
   Future<int> abrirTurno({
     required int veiculoId,
     required int equipeId,
     required int kmInicial,
     required List<int> eletricistaIds,
+    int? motoristaId,
     String? latitude,
     String? longitude,
   }) async {
@@ -322,6 +383,13 @@ class TurnoRepo {
       // Adiciona os eletricistas
       if (eletricistaIds.isNotEmpty) {
         await adicionarEletricistasAoTurno(turnoId, eletricistaIds);
+      }
+      
+      // Define o motorista, se fornecido
+      if (motoristaId != null) {
+        await definirMotorista(turnoId, motoristaId);
+        AppLogger.d('Motorista $motoristaId definido para turno $turnoId',
+            tag: 'TurnoRepo');
       }
       
       AppLogger.d('Turno $turnoId aberto com sucesso', tag: 'TurnoRepo');

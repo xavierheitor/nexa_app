@@ -110,7 +110,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -121,6 +121,11 @@ class AppDatabase extends _$AppDatabase {
           if (from == 5 && to == 6) {
             // Migration: adicionar tabelas de checklist
             await m.createAll();
+          }
+          if (from == 6 && to == 7) {
+            // Migration: adicionar campo motorista em turno_eletricistas_table
+            await m.addColumn(
+                turnoEletricistasTable, turnoEletricistasTable.motorista);
           }
           // versões futuras aqui
         },

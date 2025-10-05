@@ -8,6 +8,8 @@ import 'package:nexa_app/modules/splash/splash_binding.dart';
 import 'package:nexa_app/modules/splash/splash_page.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_binding.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_page.dart';
+import 'package:nexa_app/modules/turno/checklist/checklist_binding.dart';
+import 'package:nexa_app/modules/turno/checklist/checklist_page.dart';
 import 'package:nexa_app/modules/turno/servicos/turno_servicos_binding.dart';
 import 'package:nexa_app/modules/turno/servicos/turno_servicos_page.dart';
 import 'package:nexa_app/routes/routes.dart';
@@ -149,6 +151,21 @@ class AppPages {
       name: Routes.turnoAbrir,
       page: () => const AbrirTurnoPage(),
       binding: AbrirTurnoBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    /// Configuração da página de checklist veicular.
+    ///
+    /// Tela para realizar o checklist do veículo antes de iniciar o turno.
+    ///
+    /// **Características:**
+    /// - Protegida por `AuthMiddleware`
+    /// - Perguntas baseadas no tipo de veículo
+    /// - Opções de resposta com indicação de pendências
+    GetPage(
+      name: Routes.turnoChecklist,
+      page: () => const ChecklistPage(),
+      binding: ChecklistBinding(),
       middlewares: [AuthMiddleware()],
     ),
 

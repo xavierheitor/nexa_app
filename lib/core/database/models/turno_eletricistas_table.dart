@@ -4,4 +4,5 @@ class TurnoEletricistasTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get turnoId => integer()();
   IntColumn get eletricistaId => integer()();
+  BoolColumn get motorista => boolean().withDefault(const Constant(false))();
 }

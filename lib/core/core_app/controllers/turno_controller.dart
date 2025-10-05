@@ -4,6 +4,7 @@ import 'package:nexa_app/core/domain/dto/turno_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
 import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/routes/routes.dart';
 
 /// Controlador global responsável pelo gerenciamento de turnos.
 ///
@@ -94,13 +95,13 @@ class TurnoController extends GetxController {
     super.onInit();
     _turnoRepo = Get.find<TurnoRepo>();
     AppLogger.i('TurnoController inicializado', tag: 'TurnoController');
-    _carregarTurnoAtivo();
+    carregarTurnoAtivo();
   }
 
   /// Carrega turno ativo do banco local.
   ///
   /// SEMPRE busca do banco para garantir dados atualizados.
-  Future<void> _carregarTurnoAtivo() async {
+  Future<void> carregarTurnoAtivo() async {
     try {
       isLoading.value = true;
       AppLogger.d('🔄 Carregando turno ativo do banco...',
@@ -228,13 +229,13 @@ class TurnoController extends GetxController {
     if (hasTurnoEmAbertura) {
       AppLogger.d('Turno em abertura - redirecionando para checklists',
           tag: 'TurnoController');
-      return '/checklists';
+      return Routes.turnoChecklist;
     }
 
     if (hasTurnoAberto) {
       AppLogger.d('Turno aberto - redirecionando para serviços',
           tag: 'TurnoController');
-      return '/servicos';
+      return Routes.turnoServicos;
     }
 
     if (hasTurnoFechado) {
@@ -436,13 +437,13 @@ class TurnoController extends GetxController {
   /// Atualiza dados do turno e serviços.
   Future<void> atualizar() async {
     AppLogger.d('Atualizando turno...', tag: 'TurnoController');
-    await _carregarTurnoAtivo();
+    await carregarTurnoAtivo();
   }
 
   /// Força recarregamento completo dos dados.
   Future<void> recarregar() async {
     AppLogger.d('🔄 Recarregando dados do turno...', tag: 'TurnoController');
-    await _carregarTurnoAtivo();
+    await carregarTurnoAtivo();
   }
 
   /// Método chamado pelo pull-to-refresh da home.
@@ -454,7 +455,7 @@ class TurnoController extends GetxController {
 
     try {
       // Força recarregamento do banco
-      await _carregarTurnoAtivo();
+      await carregarTurnoAtivo();
 
       AppLogger.i('✅ Turno atualizado após sincronização',
           tag: 'TurnoController');
