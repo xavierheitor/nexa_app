@@ -6,6 +6,7 @@ import 'package:nexa_app/core/domain/repositories/eletricista_repo.dart';
 import 'package:nexa_app/core/domain/repositories/equipe_repo.dart';
 import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/modules/turno/abrir/models/abrir_turno_dados.dart';
 
 /// Serviço responsável por buscar dados necessários para abertura de turno.
 ///
@@ -23,129 +24,168 @@ class AbrirTurnoService extends GetxService {
   // DEPENDÊNCIAS
   // ============================================================================
 
-  /// Repositório de veículos.
-  final VeiculoRepo _veiculoRepo = Get.find<VeiculoRepo>();
+  /// Repositório de veículos disponível para consultas.
+  final VeiculoRepo _veiculoRepo;
 
-  /// Repositório de eletricistas.
-  final EletricistaRepo _eletricistaRepo = Get.find<EletricistaRepo>();
+  /// Repositório responsável pelas informações dos eletricistas.
+  final EletricistaRepo _eletricistaRepo;
 
-  /// Repositório de equipes.
-  final EquipeRepo _equipeRepo = Get.find<EquipeRepo>();
+  /// Repositório com os dados de equipes persistidos localmente.
+  final EquipeRepo _equipeRepo;
+
+  // ============================================================================
+  // CACHE EM MEMÓRIA
+  // ============================================================================
+
+  /// Cache imutável utilizado para reaproveitar a última carga de veículos.
+  List<VeiculoTableDto>? _veiculosCache;
+
+  /// Cache imutável utilizado para reaproveitar a última carga de eletricistas.
+  List<EletricistaTableDto>? _eletricistasCache;
+
+  /// Cache imutável utilizado para reaproveitar a última carga de equipes.
+  List<EquipeTableDto>? _equipesCache;
+
+  // ============================================================================
+  // CONSTRUTOR
+  // ============================================================================
+
+  /// Injeta explicitamente os repositórios necessários para abertura de turno.
+  ///
+  /// Essa abordagem facilita a reutilização do serviço em testes e em outros
+  /// módulos, uma vez que dependências podem ser substituídas por fakes sem
+  /// acoplamento a chamadas diretas de `Get.find()`.
+  AbrirTurnoService({
+    required VeiculoRepo veiculoRepo,
+    required EletricistaRepo eletricistaRepo,
+    required EquipeRepo equipeRepo,
+  })  : _veiculoRepo = veiculoRepo,
+        _eletricistaRepo = eletricistaRepo,
+        _equipeRepo = equipeRepo;
 
   // ============================================================================
   // MÉTODOS PÚBLICOS
   // ============================================================================
 
-  /// Busca veículos disponíveis para abertura de turno.
+  /// Busca veículos disponíveis para abertura de turno com suporte a cache.
   ///
-  /// ## Retorno:
-  /// - `Future<List<VeiculoTableDto>>`: Lista de veículos disponíveis
-  ///
-  /// ## Exceções:
-  /// - Propaga erros dos repositórios com logs detalhados
-  Future<List<VeiculoTableDto>> buscarVeiculos() async {
-    try {
-      AppLogger.d('Buscando veículos para abertura de turno',
-          tag: 'AbrirTurnoService');
-
-      final veiculos = await _veiculoRepo.listar();
-
-      AppLogger.d('${veiculos.length} veículos encontrados',
-          tag: 'AbrirTurnoService');
-      return veiculos;
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar veículos',
-          tag: 'AbrirTurnoService', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+  /// Defina [forceRefresh] como `true` para obrigar uma nova consulta aos
+  /// repositórios ignorando os dados mantidos em memória.
+  Future<List<VeiculoTableDto>> buscarVeiculos({
+    bool forceRefresh = false,
+  }) async {
+    return _carregarLista<VeiculoTableDto>(
+      entidade: 'veículos',
+      cache: _veiculosCache,
+      forceRefresh: forceRefresh,
+      loader: _veiculoRepo.listar,
+      cacheSetter: (dados) => _veiculosCache = dados,
+    );
   }
 
-  /// Busca eletricistas disponíveis para abertura de turno.
-  ///
-  /// ## Retorno:
-  /// - `Future<List<EletricistaTableDto>>`: Lista de eletricistas disponíveis
-  ///
-  /// ## Exceções:
-  /// - Propaga erros dos repositórios com logs detalhados
-  Future<List<EletricistaTableDto>> buscarEletricistas() async {
-    try {
-      AppLogger.d('Buscando eletricistas para abertura de turno',
-          tag: 'AbrirTurnoService');
-
-      final eletricistas = await _eletricistaRepo.listar();
-
-      AppLogger.d('${eletricistas.length} eletricistas encontrados',
-          tag: 'AbrirTurnoService');
-      return eletricistas;
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar eletricistas',
-          tag: 'AbrirTurnoService', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+  /// Busca eletricistas elegíveis para abertura de turno, reutilizando cache
+  /// quando disponível.
+  Future<List<EletricistaTableDto>> buscarEletricistas({
+    bool forceRefresh = false,
+  }) async {
+    return _carregarLista<EletricistaTableDto>(
+      entidade: 'eletricistas',
+      cache: _eletricistasCache,
+      forceRefresh: forceRefresh,
+      loader: _eletricistaRepo.listar,
+      cacheSetter: (dados) => _eletricistasCache = dados,
+    );
   }
 
-  /// Busca equipes disponíveis para abertura de turno.
-  ///
-  /// ## Retorno:
-  /// - `Future<List<EquipeTableDto>>`: Lista de equipes disponíveis
-  ///
-  /// ## Exceções:
-  /// - Propaga erros dos repositórios com logs detalhados
-  Future<List<EquipeTableDto>> buscarEquipes() async {
-    try {
-      AppLogger.d('Buscando equipes para abertura de turno',
-          tag: 'AbrirTurnoService');
-
-      final equipes = await _equipeRepo.listar();
-
-      AppLogger.d('${equipes.length} equipes encontradas',
-          tag: 'AbrirTurnoService');
-      return equipes;
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar equipes',
-          tag: 'AbrirTurnoService', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+  /// Busca equipes disponíveis, reaproveitando a última carga sempre que
+  /// possível.
+  Future<List<EquipeTableDto>> buscarEquipes({
+    bool forceRefresh = false,
+  }) async {
+    return _carregarLista<EquipeTableDto>(
+      entidade: 'equipes',
+      cache: _equipesCache,
+      forceRefresh: forceRefresh,
+      loader: _equipeRepo.listar,
+      cacheSetter: (dados) => _equipesCache = dados,
+    );
   }
 
-  /// Busca todos os dados necessários para abertura de turno.
-  ///
-  /// Método de conveniência que busca veículos, eletricistas e equipes
-  /// em uma única operação, útil para carregamento inicial da tela.
-  ///
-  /// ## Retorno:
-  /// - `Future<Map<String, dynamic>>`: Mapa com todos os dados
-  ///
-  /// ## Estrutura do Retorno:
-  /// ```dart
-  /// {
-  ///   'veiculos': List<VeiculoTableDto>,
-  ///   'eletricistas': List<EletricistaTableDto>,
-  ///   'equipes': List<EquipeTableDto>,
-  /// }
-  /// ```
-  Future<Map<String, dynamic>> buscarTodosDados() async {
+  /// Recupera todos os dados necessários para abertura de turno em uma única
+  /// chamada, garantindo consistência entre as listas utilizadas na UI.
+  Future<AbrirTurnoDados> buscarDadosIniciais({
+    bool forceRefresh = false,
+  }) async {
     try {
-      AppLogger.d('Buscando todos os dados para abertura de turno',
+      AppLogger.d('Buscando pacote completo de dados para abertura de turno',
           tag: 'AbrirTurnoService');
 
-      final futures = await Future.wait([
-        buscarVeiculos(),
-        buscarEletricistas(),
-        buscarEquipes(),
+      final resultados = await Future.wait([
+        buscarVeiculos(forceRefresh: forceRefresh),
+        buscarEletricistas(forceRefresh: forceRefresh),
+        buscarEquipes(forceRefresh: forceRefresh),
       ]);
 
-      final resultado = {
-        'veiculos': futures[0] as List<VeiculoTableDto>,
-        'eletricistas': futures[1] as List<EletricistaTableDto>,
-        'equipes': futures[2] as List<EquipeTableDto>,
-      };
+      final dados = AbrirTurnoDados(
+        veiculos: resultados[0] as List<VeiculoTableDto>,
+        eletricistas: resultados[1] as List<EletricistaTableDto>,
+        equipes: resultados[2] as List<EquipeTableDto>,
+      );
 
-      AppLogger.d('Todos os dados carregados com sucesso',
-          tag: 'AbrirTurnoService');
-      return resultado;
+      AppLogger.d('Pacote carregado com sucesso', tag: 'AbrirTurnoService');
+      return dados;
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar todos os dados',
+      AppLogger.e('Erro ao buscar dados iniciais',
+          tag: 'AbrirTurnoService', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Limpa o cache em memória, útil em fluxos que exigem refetch explícito.
+  void limparCache() {
+    AppLogger.d('Limpando cache do AbrirTurnoService',
+        tag: 'AbrirTurnoService');
+    _veiculosCache = null;
+    _eletricistasCache = null;
+    _equipesCache = null;
+  }
+
+  // ============================================================================
+  // MÉTODOS PRIVADOS
+  // ============================================================================
+
+  /// Carrega uma lista do repositório associado, reaproveitando o cache local.
+  ///
+  /// A função recebe um loader tipado que será executado apenas quando não
+  /// houver cache disponível ou quando [forceRefresh] estiver habilitado.
+  Future<List<T>> _carregarLista<T>({
+    required String entidade,
+    required List<T>? cache,
+    required bool forceRefresh,
+    required Future<List<T>> Function() loader,
+    required void Function(List<T>) cacheSetter,
+  }) async {
+    if (!forceRefresh && cache != null) {
+      AppLogger.d(
+        'Reutilizando cache de $entidade (${cache.length} itens)',
+        tag: 'AbrirTurnoService',
+      );
+      return cache;
+    }
+
+    try {
+      AppLogger.d('Buscando $entidade para abertura de turno',
+          tag: 'AbrirTurnoService');
+
+      final dados = await loader();
+      final listaImutavel = List<T>.unmodifiable(dados);
+      cacheSetter(listaImutavel);
+
+      AppLogger.d('${listaImutavel.length} $entidade encontrados',
+          tag: 'AbrirTurnoService');
+      return listaImutavel;
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao buscar $entidade',
           tag: 'AbrirTurnoService', error: e, stackTrace: stackTrace);
       rethrow;
     }
