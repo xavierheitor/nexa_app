@@ -127,8 +127,11 @@ class ChecklistController extends GetxController {
                   ? 'Checklist de EPC já registrado para este turno'
                   : 'Checklist veicular já registrado para este turno',
           snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 2),
         );
+
+        // Pequeno delay para o usuário ver a mensagem e o loading
+        await Future.delayed(const Duration(milliseconds: 800));
 
         _navegarParaProximaEtapa();
         return;
