@@ -97,17 +97,8 @@ class _EletricistaCard extends StatelessWidget {
     final concluido = item.concluido;
     final disabled = item.remoteId == null || concluido;
 
-    final statusText = disabled
-        ? 'Dados incompletos'
-        : concluido
-            ? 'Concluído'
-            : 'Pendente';
-
-    final statusColor = disabled
-        ? Colors.grey
-        : concluido
-            ? Colors.green
-            : Colors.orange;
+    final statusText = concluido ? 'Concluído' : 'Pendente';
+    final statusColor = concluido ? Colors.green : Colors.orange;
 
     return Card(
       elevation: 2,
