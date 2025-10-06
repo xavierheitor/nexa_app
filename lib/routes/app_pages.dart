@@ -8,6 +8,8 @@ import 'package:nexa_app/modules/splash/splash_binding.dart';
 import 'package:nexa_app/modules/splash/splash_page.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_binding.dart';
 import 'package:nexa_app/modules/turno/abrir/abrir_turno_page.dart';
+import 'package:nexa_app/modules/turno/abrindo/abrindo_turno_binding.dart';
+import 'package:nexa_app/modules/turno/abrindo/abrindo_turno_page.dart';
 import 'package:nexa_app/modules/turno/checklist/epi/checklist_eletricistas_binding.dart';
 import 'package:nexa_app/modules/turno/checklist/epi/checklist_eletricistas_page.dart';
 import 'package:nexa_app/modules/turno/checklist/veicular/checklist_binding.dart';
@@ -214,6 +216,14 @@ class AppPages {
       name: Routes.turnoServicos,
       page: () => const TurnoServicosPage(),
       binding: TurnoServicosBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    /// Rota da tela de abertura de turno (splash de processamento).
+    GetPage(
+      name: Routes.turnoAbrindo,
+      page: () => const AbrindoTurnoPage(),
+      binding: AbrindoTurnoBinding(),
       middlewares: [AuthMiddleware()],
     ),
   ];

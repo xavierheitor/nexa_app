@@ -1,3 +1,4 @@
+import 'package:nexa_app/core/constants/api_constants.dart';
 import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/database/daos/turno_dao.dart';
 import 'package:nexa_app/core/database/daos/turno_eletricistas_dao.dart';
@@ -483,6 +484,115 @@ class TurnoRepo {
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao verificar turno ativo', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
+    }
+  }
+
+  /// Abre o turno remotamente enviando todos os dados para a API.
+  ///
+  /// Este método:
+  /// 1. Busca o turno ativo em abertura
+  /// 2. Coleta todos os checklists preenchidos
+  /// 3. Empacota tudo em um payload
+  /// 4. Envia para a API
+  /// 5. Atualiza o status do turno para "aberto"
+  /// 6. Salva o remoteId retornado pela API
+  Future<bool> abrirTurnoRemoto() async {
+    try {
+      AppLogger.d('🚀 [ABERTURA REMOTA] Iniciando abertura de turno remoto',
+          tag: 'TurnoRepo');
+
+      // 1. Buscar turno em abertura
+      final turnoAtivo = await buscarTurnoAtivo();
+      if (turnoAtivo == null) {
+        AppLogger.e('❌ [ABERTURA REMOTA] Nenhum turno em abertura encontrado',
+            tag: 'TurnoRepo');
+        throw Exception('Nenhum turno em abertura encontrado');
+      }
+
+      if (turnoAtivo.situacaoTurno != SituacaoTurno.emAbertura) {
+        AppLogger.e(
+            '❌ [ABERTURA REMOTA] Turno não está em situação de abertura',
+            tag: 'TurnoRepo');
+        throw Exception('Turno não está em situação de abertura');
+      }
+
+      AppLogger.d('📦 [ABERTURA REMOTA] Turno encontrado: ${turnoAtivo.id}',
+          tag: 'TurnoRepo');
+
+      // 2. Buscar eletricistas do turno
+      final eletricistas = await buscarEletricistasDoTurno(turnoAtivo.id);
+      AppLogger.d(
+          '👷 [ABERTURA REMOTA] ${eletricistas.length} eletricistas encontrados',
+          tag: 'TurnoRepo');
+
+      // 3. TODO: Buscar checklists preenchidos do turno
+      // final checklists = await buscarChecklistsDoTurno(turnoAtivo.id);
+
+      // 4. Montar payload
+      final payload = {
+        'turno': {
+          'veiculoId': turnoAtivo.veiculoId,
+          'equipeId': turnoAtivo.equipeId,
+          'kmInicial': turnoAtivo.kmInicial,
+          'horaInicio': turnoAtivo.horaInicio.toIso8601String(),
+        },
+        'eletricistas': eletricistas
+            .map((e) => {
+                  'eletricistaId': e.eletricistaId,
+                  'motorista': e.motorista,
+                })
+            .toList(),
+        // 'checklists': checklists.map((c) => c.toJson()).toList(),
+      };
+
+      AppLogger.d('📤 [ABERTURA REMOTA] Enviando payload para API...',
+          tag: 'TurnoRepo');
+
+      // 5. Enviar para API
+      final response = await _dio.post(ApiConstants.turnoAbrir, data: payload);
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        AppLogger.e(
+            '❌ [ABERTURA REMOTA] Erro na resposta da API: ${response.statusCode}',
+            tag: 'TurnoRepo');
+        throw Exception('Erro ao abrir turno na API');
+      }
+
+      final remoteId = response.data['id'] as int?;
+      if (remoteId == null) {
+        AppLogger.e('❌ [ABERTURA REMOTA] API não retornou ID do turno',
+            tag: 'TurnoRepo');
+        throw Exception('API não retornou ID do turno');
+      }
+
+      AppLogger.d('✅ [ABERTURA REMOTA] Turno criado na API com ID: $remoteId',
+          tag: 'TurnoRepo');
+
+      // 6. Atualizar turno no banco
+      final turnoAtualizado = TurnoTableDto(
+        id: turnoAtivo.id,
+        remoteId: remoteId,
+        veiculoId: turnoAtivo.veiculoId,
+        equipeId: turnoAtivo.equipeId,
+        horaInicio: turnoAtivo.horaInicio,
+        horaFim: turnoAtivo.horaFim,
+        kmInicial: turnoAtivo.kmInicial,
+        kmFinal: turnoAtivo.kmFinal,
+        latitude: turnoAtivo.latitude,
+        longitude: turnoAtivo.longitude,
+        situacaoTurno: SituacaoTurno.aberto,
+      );
+
+      await _turnoDao.atualizar(turnoAtualizado);
+
+      AppLogger.i(
+          '✅ [ABERTURA REMOTA] Turno aberto com sucesso! RemoteID: $remoteId',
+          tag: 'TurnoRepo');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ [ABERTURA REMOTA] Erro ao abrir turno remotamente',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      return false;
     }
   }
 }

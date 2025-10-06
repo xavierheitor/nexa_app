@@ -138,43 +138,18 @@ class ChecklistEletricistasController extends GetxController {
     try {
       isAbrindoTurno.value = true;
 
-      final turnoAtivo = await _turnoRepo.buscarTurnoAtivo();
-      if (turnoAtivo == null) {
-        Get.snackbar(
-          'Turno não encontrado',
-          'Nenhum turno em abertura foi identificado. Reabra o processo.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        return;
-      }
+      AppLogger.d('🚀 Iniciando processo de abertura de turno',
+          tag: 'ChecklistEletricistasController');
 
-      final podeAbrir = await _turnoRepo.validarAberturaTurnoOnline(
-        turnoId: turnoAtivo.id,
-        turnoRemoteId: turnoAtivo.remoteId,
-      );
+      // Navegar para a splash de abertura de turno
+      Get.offAllNamed(Routes.turnoAbrindo);
 
-      if (!podeAbrir) {
-        Get.snackbar(
-          'Abertura bloqueada',
-          'O backend não liberou a abertura do turno. Tente novamente mais tarde.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        return;
-      }
-
-      Get.snackbar(
-        'Turno liberado',
-        'Checklist de EPI concluído para toda a equipe.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-
-      Get.offAllNamed(Routes.turnoServicos);
     } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao validar abertura do turno',
+      AppLogger.e('❌ Erro ao iniciar abertura do turno',
           tag: 'ChecklistEletricistasController', error: e, stackTrace: stackTrace);
       Get.snackbar(
         'Erro',
-        'Não foi possível validar a abertura do turno. Tente novamente.',
+        'Não foi possível iniciar a abertura do turno. Tente novamente.',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {

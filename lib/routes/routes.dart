@@ -96,4 +96,7 @@ abstract class Routes {
 
   /// Rota da tela de checklist EPI (por eletricista).
   static const String turnoChecklistEPI = '/turno/checklist/epi';
+
+  /// Rota da tela de abertura de turno (splash de processamento).
+  static const String turnoAbrindo = '/turno/abrindo';
 }
