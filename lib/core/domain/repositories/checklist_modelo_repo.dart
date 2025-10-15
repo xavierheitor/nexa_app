@@ -94,6 +94,22 @@ class ChecklistModeloRepo implements SyncableRepository<ChecklistModeloTableDto>
     }
   }
 
+  /// Busca modelos por tipo de checklist e tipo de equipe.
+  Future<List<ChecklistModeloTableDto>> buscarPorTipoChecklistETipoEquipe(
+      int tipoChecklistId, int tipoEquipeId) async {
+    try {
+      return await _dao.buscarPorTipoChecklistETipoEquipe(
+          tipoChecklistId, tipoEquipeId);
+    } catch (e, stackTrace) {
+      AppLogger.e(
+          'Erro ao buscar modelos por tipo de checklist e tipo de equipe',
+          tag: 'ChecklistModeloRepo',
+          error: e,
+          stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
   /// Busca modelos por nome (busca parcial).
   Future<List<ChecklistModeloTableDto>> buscarPorNome(String nome) async {
     try {

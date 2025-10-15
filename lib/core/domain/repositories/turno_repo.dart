@@ -37,7 +37,8 @@ class TurnoRepo {
       AppLogger.d('Listando todos os turnos', tag: 'TurnoRepo');
       return await _turnoDao.listar();
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao listar turnos', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao listar turnos',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -48,7 +49,8 @@ class TurnoRepo {
       AppLogger.d('Buscando turno por ID: $id', tag: 'TurnoRepo');
       return await _turnoDao.buscarPorId(id);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar turno por ID', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar turno por ID',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -59,7 +61,8 @@ class TurnoRepo {
       AppLogger.d('Buscando turno por remote ID: $remoteId', tag: 'TurnoRepo');
       return await _turnoDao.buscarPorRemoteId(remoteId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar turno por remote ID', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar turno por remote ID',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -70,18 +73,22 @@ class TurnoRepo {
       AppLogger.d('Buscando turno ativo', tag: 'TurnoRepo');
       return await _turnoDao.buscarTurnoAtivo();
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar turno ativo', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar turno ativo',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
 
   /// Busca turnos por situação.
-  Future<List<TurnoTableDto>> buscarTurnosPorSituacao(SituacaoTurno situacao) async {
+  Future<List<TurnoTableDto>> buscarTurnosPorSituacao(
+      SituacaoTurno situacao) async {
     try {
-      AppLogger.d('Buscando turnos por situação: ${situacao.name}', tag: 'TurnoRepo');
+      AppLogger.d('Buscando turnos por situação: ${situacao.name}',
+          tag: 'TurnoRepo');
       return await _turnoDao.buscarPorSituacao(situacao);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar turnos por situação', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar turnos por situação',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -92,7 +99,8 @@ class TurnoRepo {
       AppLogger.d('Buscando turnos por veículo: $veiculoId', tag: 'TurnoRepo');
       return await _turnoDao.buscarPorVeiculo(veiculoId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar turnos por veículo', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar turnos por veículo',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -103,7 +111,8 @@ class TurnoRepo {
       AppLogger.d('Buscando turnos por equipe: $equipeId', tag: 'TurnoRepo');
       return await _turnoDao.buscarPorEquipe(equipeId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar turnos por equipe', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar turnos por equipe',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -114,7 +123,8 @@ class TurnoRepo {
       AppLogger.d('Salvando turno', tag: 'TurnoRepo');
       return await _turnoDao.inserirOuAtualizar(turno);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao salvar turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao salvar turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -125,7 +135,8 @@ class TurnoRepo {
       AppLogger.d('Atualizando turno: ${turno.id}', tag: 'TurnoRepo');
       return await _turnoDao.atualizar(turno);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao atualizar turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao atualizar turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -136,7 +147,8 @@ class TurnoRepo {
       AppLogger.d('Deletando turno: $turnoId', tag: 'TurnoRepo');
       return await _turnoDao.deletar(turnoId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao deletar turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao deletar turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -147,7 +159,8 @@ class TurnoRepo {
       AppLogger.d('Contando turnos', tag: 'TurnoRepo');
       return await _turnoDao.contar();
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao contar turnos', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao contar turnos',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -155,10 +168,12 @@ class TurnoRepo {
   /// Conta turnos por situação.
   Future<int> contarTurnosPorSituacao(SituacaoTurno situacao) async {
     try {
-      AppLogger.d('Contando turnos por situação: ${situacao.name}', tag: 'TurnoRepo');
+      AppLogger.d('Contando turnos por situação: ${situacao.name}',
+          tag: 'TurnoRepo');
       return await _turnoDao.contarPorSituacao(situacao);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao contar turnos por situação', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao contar turnos por situação',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -168,23 +183,28 @@ class TurnoRepo {
   // ============================================================================
 
   /// Busca eletricistas de um turno específico.
-  Future<List<TurnoEletricistasTableDto>> buscarEletricistasDoTurno(int turnoId) async {
+  Future<List<TurnoEletricistasTableDto>> buscarEletricistasDoTurno(
+      int turnoId) async {
     try {
       AppLogger.d('Buscando eletricistas do turno: $turnoId', tag: 'TurnoRepo');
       return await _turnoEletricistasDao.buscarPorTurno(turnoId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar eletricistas do turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar eletricistas do turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
 
   /// Busca turnos de um eletricista específico.
-  Future<List<TurnoEletricistasTableDto>> buscarTurnosDoEletricista(int eletricistaId) async {
+  Future<List<TurnoEletricistasTableDto>> buscarTurnosDoEletricista(
+      int eletricistaId) async {
     try {
-      AppLogger.d('Buscando turnos do eletricista: $eletricistaId', tag: 'TurnoRepo');
+      AppLogger.d('Buscando turnos do eletricista: $eletricistaId',
+          tag: 'TurnoRepo');
       return await _turnoEletricistasDao.buscarPorEletricista(eletricistaId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar turnos do eletricista', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar turnos do eletricista',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -192,10 +212,14 @@ class TurnoRepo {
   /// Verifica se um eletricista está em um turno específico.
   Future<bool> eletricistaEstaNoTurno(int turnoId, int eletricistaId) async {
     try {
-      AppLogger.d('Verificando se eletricista $eletricistaId está no turno $turnoId', tag: 'TurnoRepo');
-      return await _turnoEletricistasDao.eletricistaEstaNoTurno(turnoId, eletricistaId);
+      AppLogger.d(
+          'Verificando se eletricista $eletricistaId está no turno $turnoId',
+          tag: 'TurnoRepo');
+      return await _turnoEletricistasDao.eletricistaEstaNoTurno(
+          turnoId, eletricistaId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao verificar se eletricista está no turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao verificar se eletricista está no turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -220,38 +244,76 @@ class TurnoRepo {
     }
   }
 
-  /// Adiciona um eletricista a um turno.
-  Future<int> adicionarEletricistaAoTurno(int turnoId, int eletricistaId) async {
+  /// Envia o payload completo de abertura de turno para a API e retorna o
+  /// identificador remoto atribuído ao turno.
+  Future<int> enviarAberturaTurno(Map<String, dynamic> payload) async {
     try {
-      AppLogger.d('Adicionando eletricista $eletricistaId ao turno $turnoId', tag: 'TurnoRepo');
-      
+      AppLogger.d('📡 Enviando abertura de turno para API', tag: 'TurnoRepo');
+      final response = await _dio.post(ApiConstants.turnoAbrir, data: payload);
+
+      final status = response.statusCode ?? 0;
+      if (status != 200 && status != 201) {
+        throw Exception('Erro ao enviar abertura do turno. Status $status');
+      }
+
+      final data = response.data;
+      if (data is Map && data['id'] != null) {
+        final remoteId = data['id'] as int;
+        AppLogger.d(
+            '✅ Abertura de turno registrada na API com remoteId=$remoteId',
+            tag: 'TurnoRepo');
+        return remoteId;
+      }
+
+      throw Exception('Resposta da API não contém o identificador do turno');
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao enviar abertura de turno para API',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Adiciona um eletricista a um turno.
+  Future<int> adicionarEletricistaAoTurno(
+      int turnoId, int eletricistaId) async {
+    try {
+      AppLogger.d('Adicionando eletricista $eletricistaId ao turno $turnoId',
+          tag: 'TurnoRepo');
+
       final relacionamento = TurnoEletricistasTableDto(
         id: 0, // Será gerado automaticamente
         turnoId: turnoId,
         eletricistaId: eletricistaId,
       );
-      
+
       return await _turnoEletricistasDao.inserir(relacionamento);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao adicionar eletricista ao turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao adicionar eletricista ao turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
 
   /// Adiciona múltiplos eletricistas a um turno.
-  Future<void> adicionarEletricistasAoTurno(int turnoId, List<int> eletricistaIds) async {
+  Future<void> adicionarEletricistasAoTurno(
+      int turnoId, List<int> eletricistaIds) async {
     try {
-      AppLogger.d('Adicionando ${eletricistaIds.length} eletricistas ao turno $turnoId', tag: 'TurnoRepo');
-      
-      final relacionamentos = eletricistaIds.map((eletricistaId) => TurnoEletricistasTableDto(
-        id: 0, // Será gerado automaticamente
-        turnoId: turnoId,
-        eletricistaId: eletricistaId,
-      )).toList();
-      
+      AppLogger.d(
+          'Adicionando ${eletricistaIds.length} eletricistas ao turno $turnoId',
+          tag: 'TurnoRepo');
+
+      final relacionamentos = eletricistaIds
+          .map((eletricistaId) => TurnoEletricistasTableDto(
+                id: 0, // Será gerado automaticamente
+                turnoId: turnoId,
+                eletricistaId: eletricistaId,
+              ))
+          .toList();
+
       await _turnoEletricistasDao.inserirMultiplos(relacionamentos);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao adicionar eletricistas ao turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao adicionar eletricistas ao turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -259,18 +321,21 @@ class TurnoRepo {
   /// Remove um eletricista de um turno.
   Future<bool> removerEletricistaDoTurno(int turnoId, int eletricistaId) async {
     try {
-      AppLogger.d('Removendo eletricista $eletricistaId do turno $turnoId', tag: 'TurnoRepo');
-      
+      AppLogger.d('Removendo eletricista $eletricistaId do turno $turnoId',
+          tag: 'TurnoRepo');
+
       // Busca o relacionamento específico
-      final relacionamentos = await _turnoEletricistasDao.buscarPorTurno(turnoId);
+      final relacionamentos =
+          await _turnoEletricistasDao.buscarPorTurno(turnoId);
       final relacionamento = relacionamentos.firstWhere(
         (r) => r.eletricistaId == eletricistaId,
         orElse: () => throw Exception('Eletricista não encontrado no turno'),
       );
-      
+
       return await _turnoEletricistasDao.deletar(relacionamento.id);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao remover eletricista do turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao remover eletricista do turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -278,10 +343,12 @@ class TurnoRepo {
   /// Remove todos os eletricistas de um turno.
   Future<int> removerTodosEletricistasDoTurno(int turnoId) async {
     try {
-      AppLogger.d('Removendo todos os eletricistas do turno $turnoId', tag: 'TurnoRepo');
+      AppLogger.d('Removendo todos os eletricistas do turno $turnoId',
+          tag: 'TurnoRepo');
       return await _turnoEletricistasDao.deletarPorTurno(turnoId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao remover todos os eletricistas do turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao remover todos os eletricistas do turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -292,7 +359,8 @@ class TurnoRepo {
       AppLogger.d('Contando eletricistas do turno: $turnoId', tag: 'TurnoRepo');
       return await _turnoEletricistasDao.contarPorTurno(turnoId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao contar eletricistas do turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao contar eletricistas do turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -300,10 +368,12 @@ class TurnoRepo {
   /// Conta turnos de um eletricista.
   Future<int> contarTurnosDoEletricista(int eletricistaId) async {
     try {
-      AppLogger.d('Contando turnos do eletricista: $eletricistaId', tag: 'TurnoRepo');
+      AppLogger.d('Contando turnos do eletricista: $eletricistaId',
+          tag: 'TurnoRepo');
       return await _turnoEletricistasDao.contarPorEletricista(eletricistaId);
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao contar turnos do eletricista', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao contar turnos do eletricista',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -385,8 +455,10 @@ class TurnoRepo {
     String? longitude,
   }) async {
     try {
-      AppLogger.d('Abrindo novo turno com ${eletricistaIds.length} eletricistas', tag: 'TurnoRepo');
-      
+      AppLogger.d(
+          'Abrindo novo turno com ${eletricistaIds.length} eletricistas',
+          tag: 'TurnoRepo');
+
       // Cria o turno
       final turno = TurnoTableDto(
         id: 0, // Será gerado automaticamente
@@ -398,25 +470,26 @@ class TurnoRepo {
         latitude: latitude,
         longitude: longitude,
       );
-      
+
       final turnoId = await salvarTurno(turno);
-      
+
       // Adiciona os eletricistas
       if (eletricistaIds.isNotEmpty) {
         await adicionarEletricistasAoTurno(turnoId, eletricistaIds);
       }
-      
+
       // Define o motorista, se fornecido
       if (motoristaId != null) {
         await definirMotorista(turnoId, motoristaId);
         AppLogger.d('Motorista $motoristaId definido para turno $turnoId',
             tag: 'TurnoRepo');
       }
-      
+
       AppLogger.d('Turno $turnoId aberto com sucesso', tag: 'TurnoRepo');
       return turnoId;
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao abrir turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao abrir turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -427,27 +500,28 @@ class TurnoRepo {
   Future<bool> fecharTurno(int turnoId, {int? kmFinal}) async {
     try {
       AppLogger.d('Fechando turno: $turnoId', tag: 'TurnoRepo');
-      
+
       final turno = await buscarTurnoPorId(turnoId);
       if (turno == null) {
         throw Exception('Turno não encontrado');
       }
-      
+
       final turnoAtualizado = turno.copyWith(
         situacaoTurno: SituacaoTurno.fechado,
         horaFim: DateTime.now(),
         kmFinal: kmFinal,
       );
-      
+
       final sucesso = await atualizarTurno(turnoAtualizado);
-      
+
       if (sucesso) {
         AppLogger.d('Turno $turnoId fechado com sucesso', tag: 'TurnoRepo');
       }
-      
+
       return sucesso;
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao fechar turno', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao fechar turno',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -458,19 +532,20 @@ class TurnoRepo {
   Future<Map<String, dynamic>?> buscarTurnoCompleto(int turnoId) async {
     try {
       AppLogger.d('Buscando turno completo: $turnoId', tag: 'TurnoRepo');
-      
+
       final turno = await buscarTurnoPorId(turnoId);
       if (turno == null) return null;
-      
+
       final eletricistas = await buscarEletricistasDoTurno(turnoId);
       final eletricistaIds = eletricistas.map((e) => e.eletricistaId).toList();
-      
+
       return {
         'turno': turno,
         'eletricistaIds': eletricistaIds,
       };
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar turno completo', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao buscar turno completo',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -482,7 +557,8 @@ class TurnoRepo {
       final turnoAtivo = await buscarTurnoAtivo();
       return turnoAtivo != null;
     } catch (e, stackTrace) {
-      AppLogger.e('Erro ao verificar turno ativo', tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
+      AppLogger.e('Erro ao verificar turno ativo',
+          tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }

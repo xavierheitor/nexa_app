@@ -10,6 +10,7 @@ import 'package:nexa_app/core/domain/repositories/equipe_repo.dart';
 import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
 import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
 import 'package:nexa_app/modules/turno/checklist/epi/checklist_eletricistas_controller.dart';
+import 'package:nexa_app/modules/turno/checklist/services/turno_abertura_orchestrator_service.dart';
 import 'package:nexa_app/modules/turno/checklist/veicular/checklist_service.dart';
 
 /// Binding responsável por preparar as dependências da listagem de eletricistas
@@ -80,6 +81,16 @@ class ChecklistEletricistasBinding extends Bindings {
         fenix: true,
       );
     }
+
+    Get.lazyPut<TurnoAberturaOrchestratorService>(
+        () => TurnoAberturaOrchestratorService(
+              turnoRepo: Get.find<TurnoRepo>(),
+              eletricistaRepo: Get.find<EletricistaRepo>(),
+              checklistPreenchidoRepo: Get.find<ChecklistPreenchidoRepo>(),
+              checklistRespostaRepo: Get.find<ChecklistRespostaRepo>(),
+              checklistModeloRepo: Get.find<ChecklistModeloRepo>(),
+            ),
+        fenix: true);
 
     Get.lazyPut<ChecklistEletricistasController>(
         () => ChecklistEletricistasController());

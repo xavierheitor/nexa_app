@@ -4,12 +4,15 @@ import 'package:nexa_app/core/domain/repositories/eletricista_repo.dart';
 import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/modules/turno/checklist/veicular/checklist_service.dart';
+import 'package:nexa_app/modules/turno/checklist/services/turno_abertura_orchestrator_service.dart';
 import 'package:nexa_app/routes/routes.dart';
 
 class ChecklistEletricistasController extends GetxController {
   final TurnoRepo _turnoRepo = Get.find<TurnoRepo>();
   final EletricistaRepo _eletricistaRepo = Get.find<EletricistaRepo>();
   final ChecklistService _checklistService = Get.find<ChecklistService>();
+  final TurnoAberturaOrchestratorService _turnoAberturaService =
+      Get.find<TurnoAberturaOrchestratorService>();
 
   final RxBool isLoading = false.obs;
   final RxList<EletricistaChecklistStatus> eletricistas =
@@ -138,18 +141,35 @@ class ChecklistEletricistasController extends GetxController {
     try {
       isAbrindoTurno.value = true;
 
-      AppLogger.d('🚀 Iniciando processo de abertura de turno',
+      AppLogger.d('🚀 Enviando abertura do turno para a API',
           tag: 'ChecklistEletricistasController');
 
-      // Navegar para a splash de abertura de turno
-      Get.offAllNamed(Routes.turnoAbrindo);
+      final sucesso = await _turnoAberturaService.enviarAberturaDoTurno();
 
+      if (!sucesso) {
+        Get.snackbar(
+          'Erro',
+          'Não foi possível abrir o turno no momento. Tente novamente.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      Get.snackbar(
+        'Turno liberado',
+        'Checklist de EPI concluído e enviado para a API.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
+      Get.offAllNamed(Routes.turnoServicos);
     } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao iniciar abertura do turno',
-          tag: 'ChecklistEletricistasController', error: e, stackTrace: stackTrace);
+      AppLogger.e('❌ Erro ao abrir turno remotamente',
+          tag: 'ChecklistEletricistasController',
+          error: e,
+          stackTrace: stackTrace);
       Get.snackbar(
         'Erro',
-        'Não foi possível iniciar a abertura do turno. Tente novamente.',
+        'Falha ao enviar dados para abertura do turno. Tente novamente.',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -157,9 +177,6 @@ class ChecklistEletricistasController extends GetxController {
     }
   }
 
-  void _irParaServicos() {
-    Get.offAllNamed(Routes.turnoServicos);
-  }
 }
 
 class EletricistaChecklistStatus {

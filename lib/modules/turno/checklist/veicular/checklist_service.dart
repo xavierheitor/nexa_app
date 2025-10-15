@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:nexa_app/core/constants/api_constants.dart';
 import 'package:nexa_app/core/domain/dto/checklist_modelo_table_dto.dart';
 import 'package:nexa_app/core/domain/dto/veiculo_table_dto.dart';
 import 'package:nexa_app/core/domain/models/checklist_model.dart';
@@ -38,11 +39,12 @@ class ChecklistService extends GetxService {
   /// Repositório para persistir respostas individuais.
   final ChecklistRespostaRepo _checklistRespostaRepo;
 
-  // IDs remotos padrão dos modelos de checklist enquanto o vínculo por tipo de
-  // equipe não é configurado dinamicamente.
-  // ignore: unused_field
-  static const int _fallbackChecklistEpiRemoteId = 2;
-  static const int _fallbackChecklistEpcRemoteId = 3;
+  // CONFIGURAÇÃO DE IDs DE TIPO DE CHECKLIST
+  // ============================================
+  // Os IDs de tipo de checklist agora estão centralizados no ApiConstants
+  // para permitir reutilização em outros services.
+  // O sistema busca dinamicamente o modelo correto baseado no tipo de checklist + tipo de equipe.
+  // Se não encontrar, usa fallback para o método antigo (tipo de veículo/equipe).
 
   /// Construtor com injeção explícita de dependências utilizadas pelo serviço.
   ///
@@ -147,6 +149,36 @@ class ChecklistService extends GetxService {
     }
   }
 
+  /// Busca checklist por tipo de checklist e tipo de equipe.
+  Future<ChecklistCompletoModel?> _buscarChecklistPorTipoChecklistETipoEquipe(
+      int tipoChecklistId, int tipoEquipeId) async {
+    try {
+      AppLogger.d(
+          '🔍 Buscando checklist para tipoChecklistId: $tipoChecklistId e tipoEquipeId: $tipoEquipeId',
+          tag: 'ChecklistService');
+
+      final modelos = await _checklistModeloRepo
+          .buscarPorTipoChecklistETipoEquipe(tipoChecklistId, tipoEquipeId);
+
+      AppLogger.d(
+          '🔍 Resultado da busca: ${modelos.length} modelos encontrados',
+          tag: 'ChecklistService');
+
+      if (modelos.isEmpty) {
+        AppLogger.w(
+            '⚠️ Nenhum checklist encontrado para tipoChecklistId: $tipoChecklistId e tipoEquipeId: $tipoEquipeId',
+            tag: 'ChecklistService');
+        return null;
+      }
+
+      return await _montarChecklistCompleto(modelos.first);
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao buscar checklist por tipo e equipe',
+          tag: 'ChecklistService', error: e, stackTrace: stackTrace);
+      return null;
+    }
+  }
+
   /// Busca o checklist EPI aplicado individualmente por eletricista.
   Future<ChecklistCompletoModel?> buscarChecklistEPIParaEletricista(
       int eletricistaRemoteId) async {
@@ -155,20 +187,44 @@ class ChecklistService extends GetxService {
       tag: 'ChecklistService',
     );
 
-    final checklist =
-        await _buscarChecklistPorRemoteId(_fallbackChecklistEpiRemoteId);
+    // Primeiro tenta buscar pelo tipo de checklist EPI e tipo de equipe do turno ativo
+    try {
+      final turnoAtivo = await _turnoRepo.buscarTurnoAtivo();
+      if (turnoAtivo != null) {
+        final equipe =
+            await _equipeRepo.buscarPorId(turnoAtivo.equipeId.toString());
+        if (equipe != null) {
+          AppLogger.d(
+              '🔍 Tentando buscar checklist EPI para tipoEquipeId: ${equipe.tipoEquipeId}',
+              tag: 'ChecklistService');
 
-    if (checklist == null) {
-      AppLogger.w(
-        '⚠️ Checklist EPI (remoteId=$_fallbackChecklistEpiRemoteId) não encontrado',
-        tag: 'ChecklistService',
-      );
+          final checklist = await _buscarChecklistPorTipoChecklistETipoEquipe(
+              ApiConstants.tipoChecklistEpiId, equipe.tipoEquipeId);
+
+          if (checklist != null) {
+            AppLogger.d('✅ Checklist EPI encontrado por tipo de equipe',
+                tag: 'ChecklistService');
+            return checklist;
+          }
+        }
+      }
+    } catch (e, stackTrace) {
+      AppLogger.e(
+          '⚠️ Erro ao buscar checklist EPI por tipo de equipe, usando fallback',
+          tag: 'ChecklistService',
+          error: e,
+          stackTrace: stackTrace);
     }
 
-    return checklist;
+    // Se chegou até aqui, não foi possível encontrar o checklist EPI
+    AppLogger.w(
+        '⚠️ Checklist EPI não encontrado para tipo de checklist ${ApiConstants.tipoChecklistEpiId} e tipo de equipe do turno ativo',
+        tag: 'ChecklistService');
+
+    return null;
   }
 
-  int get checklistEpiModeloRemoteId => _fallbackChecklistEpiRemoteId;
+  int get checklistEpiModeloRemoteId => ApiConstants.tipoChecklistEpiId;
 
   Future<ChecklistCompletoModel?> _montarChecklistCompleto(
       ChecklistModeloTableDto modelo) async {
@@ -451,9 +507,39 @@ class ChecklistService extends GetxService {
           '✅ Veículo encontrado: ${veiculo.placa} (Tipo: ${veiculo.tipoVeiculoId})',
           tag: 'ChecklistService');
 
-      // 3. Buscar checklist diretamente pelo tipoVeiculoId do veículo
+      // 3. Buscar a equipe para obter o tipo de equipe
+      ChecklistCompletoModel? checklist;
+
+      try {
+        final equipe =
+            await _equipeRepo.buscarPorId(turnoAtivo.equipeId.toString());
+        if (equipe != null) {
+          AppLogger.d(
+              '🔍 Tentando buscar checklist veicular para tipoEquipeId: ${equipe.tipoEquipeId}',
+              tag: 'ChecklistService');
+
+          // Primeiro tenta buscar pelo tipo de checklist veicular + tipo de equipe
+          checklist = await _buscarChecklistPorTipoChecklistETipoEquipe(
+              ApiConstants.tipoChecklistVeicularId, equipe.tipoEquipeId);
+
+          if (checklist != null) {
+            AppLogger.d(
+                '✅ Checklist veicular encontrado por tipo de checklist e equipe',
+                tag: 'ChecklistService');
+            return checklist;
+          }
+        }
+      } catch (e, stackTrace) {
+        AppLogger.e(
+            '⚠️ Erro ao buscar checklist veicular por tipo de equipe, usando método antigo',
+            tag: 'ChecklistService',
+            error: e,
+            stackTrace: stackTrace);
+      }
+
+      // Fallback: buscar diretamente pelo tipo de veículo (método antigo)
       AppLogger.d(
-          '🔍 [SIMPLIFICADO] Buscando checklist para tipoVeiculoId: ${veiculo.tipoVeiculoId}',
+          '🔍 Fallback: Buscando checklist para tipoVeiculoId: ${veiculo.tipoVeiculoId}',
           tag: 'ChecklistService');
 
       return await buscarChecklistPorTipoVeiculo(veiculo.tipoVeiculoId);
@@ -508,17 +594,36 @@ class ChecklistService extends GetxService {
 
       ChecklistCompletoModel? checklist;
 
+      // Primeiro tenta buscar pelo tipo de checklist EPC e tipo de equipe específicos
       if (tipoEquipeId != null) {
+        AppLogger.d(
+          '🔍 Tentando buscar checklist EPC para tipoEquipeId: $tipoEquipeId',
+          tag: 'ChecklistService',
+        );
+
+        checklist = await _buscarChecklistPorTipoChecklistETipoEquipe(
+            ApiConstants.tipoChecklistEpcId, tipoEquipeId);
+
+        if (checklist != null) {
+          AppLogger.d(
+              '✅ Checklist EPC encontrado por tipo de checklist e equipe',
+              tag: 'ChecklistService');
+        }
+      }
+
+      // Se não encontrou, tenta buscar apenas por tipo de equipe (método antigo)
+      if (checklist == null && tipoEquipeId != null) {
+        AppLogger.d('🔍 Tentando busca genérica por tipo de equipe',
+            tag: 'ChecklistService');
         checklist = await buscarChecklistPorTipoEquipe(tipoEquipeId);
       }
 
+      // Se não encontrou nenhum checklist EPC
       if (checklist == null) {
         AppLogger.w(
-          '⚠️ Checklist EPC não encontrado pelo tipo de equipe. Aplicando fallback remoto $_fallbackChecklistEpcRemoteId',
+          '⚠️ Checklist EPC não encontrado para tipo de checklist ${ApiConstants.tipoChecklistEpcId} e tipo de equipe $tipoEquipeId',
           tag: 'ChecklistService',
         );
-        checklist =
-            await _buscarChecklistPorRemoteId(_fallbackChecklistEpcRemoteId);
       }
 
       return checklist;

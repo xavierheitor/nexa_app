@@ -172,6 +172,45 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
   }
 
 
+  /// Busca modelos por tipo de checklist e tipo de equipe.
+  Future<List<ChecklistModeloTableDto>> buscarPorTipoChecklistETipoEquipe(
+      int tipoChecklistId, int tipoEquipeId) async {
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Buscando checklist para tipoChecklistId: $tipoChecklistId e tipoEquipeId: $tipoEquipeId',
+        tag: 'ChecklistModeloDao');
+
+    // JOIN entre modelos de checklist e relações tipo de equipe
+    final query = select(db.checklistModeloTable).join([
+      leftOuterJoin(
+        db.checklistTipoEquipeRelacaoTable,
+        db.checklistTipoEquipeRelacaoTable.checklistModeloId
+            .equalsExp(db.checklistModeloTable.remoteId),
+      )
+    ])
+      ..where(db.checklistModeloTable.tipoChecklistId.equals(tipoChecklistId) &
+          db.checklistTipoEquipeRelacaoTable.tipoEquipeId.equals(tipoEquipeId))
+      ..orderBy([OrderingTerm.asc(db.checklistModeloTable.nome)]);
+
+    AppLogger.d('🔍 [DIAGNÓSTICO DAO] Executando query com JOIN...',
+        tag: 'ChecklistModeloDao');
+
+    final results = await query.get();
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Query executada. ${results.length} resultados encontrados',
+        tag: 'ChecklistModeloDao');
+
+    final dtos = results
+        .map((row) => ChecklistModeloTableDto.fromTable(
+            row.readTable(db.checklistModeloTable)))
+        .toList();
+
+    AppLogger.d(
+        '🔍 [DIAGNÓSTICO DAO] Convertidos para DTOs: ${dtos.length} modelos',
+        tag: 'ChecklistModeloDao');
+
+    return dtos;
+  }
+
   /// Busca modelos por nome (busca parcial).
   Future<List<ChecklistModeloTableDto>> buscarPorNome(String nome) async {
     return await (select(db.checklistModeloTable)
