@@ -29,6 +29,11 @@ class HomePage extends StatelessWidget {
               /// Card de informações do turno.
               Obx(() => _buildTurnoCard(controller, colorScheme)),
 
+              /// Card de erro de abertura de turno (se houver)
+              Obx(() => controller.temErroAberturaTurno
+                  ? _buildErroCard(controller, colorScheme)
+                  : const SizedBox.shrink()),
+
               const SizedBox(height: 24),
 
               /// Título da seção de funcionalidades.
@@ -673,6 +678,76 @@ class HomePage extends StatelessWidget {
             child: const Text('Sair'),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Constrói o card de erro de abertura de turno.
+  Widget _buildErroCard(HomeController controller, ColorScheme colorScheme) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.errorContainer.withOpacity(0.3),
+              colorScheme.errorContainer.withOpacity(0.1),
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 32,
+                  color: colorScheme.error,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Erro ao Abrir Turno',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.error,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        controller.mensagemErroAberturaTurno ??
+                            'Erro desconhecido',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: controller.limparErroAberturaTurno,
+                  icon: Icon(
+                    Icons.close,
+                    color: colorScheme.onErrorContainer,
+                  ),
+                  tooltip: 'Fechar',
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

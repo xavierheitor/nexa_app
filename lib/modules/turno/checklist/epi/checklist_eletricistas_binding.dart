@@ -89,6 +89,8 @@ class ChecklistEletricistasBinding extends Bindings {
               checklistPreenchidoRepo: Get.find<ChecklistPreenchidoRepo>(),
               checklistRespostaRepo: Get.find<ChecklistRespostaRepo>(),
               checklistModeloRepo: Get.find<ChecklistModeloRepo>(),
+              veiculoRepo: Get.find<VeiculoRepo>(),
+              equipeRepo: Get.find<EquipeRepo>(),
             ),
         fenix: true);
 

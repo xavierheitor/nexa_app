@@ -1,6 +1,6 @@
 abstract class ApiConstants {
   static const int maxRefreshAttempts = 3;
-  static const baseUrl = 'http://192.168.1.211:3001/api';
+  static const baseUrl = 'http://192.168.1.200:3001/api';
 
   static const login = '/auth/login';
   static const refreshToken = '/auth/refresh';
@@ -12,13 +12,13 @@ abstract class ApiConstants {
   // não de modelos específicos. Configure conforme sua base de dados.
 
   /// ID do tipo de checklist EPI
-  static const int tipoChecklistEpiId = 1;
+  static const int tipoChecklistEpiId = 3;
 
   /// ID do tipo de checklist EPC
   static const int tipoChecklistEpcId = 2;
 
   /// ID do tipo de checklist Veicular
-  static const int tipoChecklistVeicularId = 3;
+  static const int tipoChecklistVeicularId = 1;
 
   static const veiculos = '/veiculos/sync';
   static const tiposVeiculo = '/tipo-veiculo/sync';

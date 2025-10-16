@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:nexa_app/core/core_app/services/error_message_service.dart';
 import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
 import 'package:nexa_app/core/domain/repositories/eletricista_repo.dart';
 import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
@@ -13,6 +14,8 @@ class ChecklistEletricistasController extends GetxController {
   final ChecklistService _checklistService = Get.find<ChecklistService>();
   final TurnoAberturaOrchestratorService _turnoAberturaService =
       Get.find<TurnoAberturaOrchestratorService>();
+  final ErrorMessageService _errorMessageService =
+      Get.find<ErrorMessageService>();
 
   final RxBool isLoading = false.obs;
   final RxList<EletricistaChecklistStatus> eletricistas =
@@ -141,37 +144,81 @@ class ChecklistEletricistasController extends GetxController {
     try {
       isAbrindoTurno.value = true;
 
-      AppLogger.d('🚀 Enviando abertura do turno para a API',
+      AppLogger.d('🚀 [ABERTURA TURNO] Iniciando processo de abertura',
           tag: 'ChecklistEletricistasController');
 
-      final sucesso = await _turnoAberturaService.enviarAberturaDoTurno();
+      // Enviar dados completos para API (viatura, equipe, eletricistas, checklists)
+      final resultado = await _turnoAberturaService.enviarAberturaDoTurno();
+
+      final sucesso = resultado['success'] as bool;
+      final mensagem = resultado['message'] as String;
 
       if (!sucesso) {
-        Get.snackbar(
-          'Erro',
-          'Não foi possível abrir o turno no momento. Tente novamente.',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        AppLogger.e('❌ [ABERTURA TURNO] Falha: $mensagem',
+            tag: 'ChecklistEletricistasController');
+
+        // Extrai informações específicas do erro
+        final statusCode = resultado['statusCode'] as int?;
+        final isConflictError = resultado['isConflictError'] as bool? ?? false;
+        final isValidationError =
+            resultado['isValidationError'] as bool? ?? false;
+        final isServerError = resultado['isServerError'] as bool? ?? false;
+
+        // Define tipo de erro específico no serviço
+        if (isConflictError) {
+          _errorMessageService.definirErroConflito(mensagem);
+        } else if (isValidationError) {
+          _errorMessageService.definirErroValidacao(mensagem);
+        } else if (isServerError) {
+          _errorMessageService.definirErroServidor(mensagem);
+        } else {
+          _errorMessageService.definirErroAberturaTurno(
+            mensagem: mensagem,
+            statusCode: statusCode,
+          );
+        }
+
+        // Em caso de erro, volta para home onde o erro será exibido
+        await Future.delayed(const Duration(seconds: 1));
+        Get.offAllNamed(Routes.home);
         return;
       }
 
+      // Sucesso - turno aberto
+      final remoteId = resultado['remoteId'];
+      AppLogger.i('✅ [ABERTURA TURNO] Sucesso! RemoteID: $remoteId',
+          tag: 'ChecklistEletricistasController');
+
+      // Limpa qualquer erro anterior
+      _errorMessageService.limparErro();
+
       Get.snackbar(
-        'Turno liberado',
-        'Checklist de EPI concluído e enviado para a API.',
+        'Turno aberto com sucesso!',
+        'Todos os dados foram enviados para a API. Turno liberado para execução.',
         snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
       );
 
+      // Navegar para tela de serviços do turno
+      await Future.delayed(const Duration(seconds: 2));
       Get.offAllNamed(Routes.turnoServicos);
+      
     } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao abrir turno remotamente',
+      AppLogger.e('❌ [ABERTURA TURNO] Erro inesperado',
           tag: 'ChecklistEletricistasController',
           error: e,
           stackTrace: stackTrace);
-      Get.snackbar(
-        'Erro',
-        'Falha ao enviar dados para abertura do turno. Tente novamente.',
-        snackPosition: SnackPosition.BOTTOM,
+      
+      // Define erro genérico no serviço
+      _errorMessageService.definirErroAberturaTurno(
+        mensagem: 'Erro inesperado ao abrir turno. Tente novamente.',
+        statusCode: 0,
+        tipo: 'unexpected',
       );
+      
+      // Em caso de erro inesperado, volta para home
+      await Future.delayed(const Duration(seconds: 1));
+      Get.offAllNamed(Routes.home);
     } finally {
       isAbrindoTurno.value = false;
     }

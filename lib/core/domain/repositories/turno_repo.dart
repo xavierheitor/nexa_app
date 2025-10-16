@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:nexa_app/core/constants/api_constants.dart';
 import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/database/daos/turno_dao.dart';
@@ -257,19 +258,150 @@ class TurnoRepo {
       }
 
       final data = response.data;
-      if (data is Map && data['id'] != null) {
-        final remoteId = data['id'] as int;
-        AppLogger.d(
-            '✅ Abertura de turno registrada na API com remoteId=$remoteId',
-            tag: 'TurnoRepo');
-        return remoteId;
+      if (data is Map<String, dynamic>) {
+        // A API pode retornar o ID em diferentes locais na resposta
+        int? remoteId;
+
+        // 1. Tenta data.remoteId (campo direto)
+        if (data['remoteId'] != null) {
+          remoteId = data['remoteId'] as int?;
+        }
+        // 2. Tenta data.data.id (dentro do objeto data)
+        else if (data['data'] is Map<String, dynamic>) {
+          final dataObj = data['data'] as Map<String, dynamic>;
+          if (dataObj['id'] != null) {
+            remoteId = dataObj['id'] as int?;
+          }
+        }
+        // 3. Tenta data.id (campo direto na raiz)
+        else if (data['id'] != null) {
+          remoteId = data['id'] as int?;
+        }
+
+        if (remoteId != null) {
+          AppLogger.d(
+              '✅ Abertura de turno registrada na API com remoteId=$remoteId',
+              tag: 'TurnoRepo');
+          return remoteId;
+        }
       }
 
+      AppLogger.e('❌ Estrutura da resposta não reconhecida: $data',
+          tag: 'TurnoRepo');
       throw Exception('Resposta da API não contém o identificador do turno');
+    } on DioException catch (dioError) {
+      // Captura erros específicos do Dio para extrair informações detalhadas
+      final httpStatus = dioError.response?.statusCode ?? 0;
+      final responseData = dioError.response?.data;
+
+      AppLogger.e(
+          '❌ Erro Dio ao enviar abertura de turno - HTTP Status: $httpStatus',
+          tag: 'TurnoRepo',
+          error: dioError);
+
+      // Log da resposta completa da API para debugging
+      if (responseData != null) {
+        AppLogger.v('📋 Resposta completa da API: $responseData',
+            tag: 'TurnoRepo');
+      }
+
+      // Tenta extrair statusCode da resposta da API, senão usa o HTTP status
+      int statusCode = httpStatus;
+      if (responseData is Map<String, dynamic> &&
+          responseData['statusCode'] != null) {
+        statusCode = responseData['statusCode'] as int;
+        AppLogger.d('📋 StatusCode da API: $statusCode (HTTP: $httpStatus)',
+            tag: 'TurnoRepo');
+      }
+
+      // Cria uma exceção customizada com informações detalhadas
+      final errorMessage = _extrairMensagemErro(statusCode, responseData);
+      throw TurnoAberturaException(
+        statusCode: statusCode,
+        message: errorMessage,
+        originalError: dioError,
+        responseData: responseData,
+      );
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao enviar abertura de turno para API',
           tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       rethrow;
+    }
+  }
+
+  /// Extrai mensagem de erro personalizada baseada no status e resposta da API
+  String _extrairMensagemErro(int statusCode, dynamic responseData) {
+    // Tenta extrair mensagem específica da resposta da API
+    if (responseData is Map<String, dynamic>) {
+      // Estrutura possível: { "message": "...", "error": "...", "statusCode": 422, "data": {...} }
+      // Ou: { "statusCode": 400, "message": { "message": [...], "error": "..." } }
+
+      String? extractedMessage;
+
+      // 1. Tenta extrair 'error' direto (string)
+      final directError = responseData['error'];
+      if (directError is String && directError.isNotEmpty) {
+        extractedMessage = directError;
+      }
+
+      // 2. Tenta extrair 'message' - pode ser string ou objeto
+      final messageField = responseData['message'];
+      if (messageField is String && messageField.isNotEmpty) {
+        extractedMessage = messageField;
+      } else if (messageField is Map<String, dynamic>) {
+        // Estrutura aninhada: message.message pode ser uma lista ou string, message.error é string
+        final nestedError = messageField['error'] as String?;
+        final nestedMessage = messageField['message'];
+        final nestedMessageList = nestedMessage is List ? nestedMessage : null;
+
+        if (nestedError != null && nestedError.isNotEmpty) {
+          extractedMessage = nestedError;
+        } else if (nestedMessageList != null && nestedMessageList.isNotEmpty) {
+          // Pega o primeiro erro da lista de validação
+          final firstError = nestedMessageList.first;
+          if (firstError is String) {
+            extractedMessage = firstError;
+          } else {
+            // Se for lista de strings, junta todas
+            final errorStrings = nestedMessageList
+                .where((e) => e is String)
+                .cast<String>()
+                .toList();
+            if (errorStrings.isNotEmpty) {
+              extractedMessage = errorStrings.join('; ');
+            }
+          }
+        }
+      }
+
+      // 3. Fallback para 'detail'
+      if (extractedMessage == null) {
+        final detailMessage = responseData['detail'] as String?;
+        if (detailMessage != null && detailMessage.isNotEmpty) {
+          extractedMessage = detailMessage;
+        }
+      }
+
+      // Se conseguiu extrair uma mensagem, retorna
+      if (extractedMessage != null && extractedMessage.isNotEmpty) {
+        return extractedMessage;
+      }
+    }
+
+    // Fallback para mensagens baseadas no status code
+    switch (statusCode) {
+      case 400:
+        return 'Erro de validação: Verifique os dados enviados';
+      case 409:
+        return 'Conflito: Já existe turno aberto com este veículo, equipe ou eletricista';
+      case 422:
+        return 'Dados inválidos: Verifique as informações do turno';
+      case 500:
+        return 'Erro interno do servidor. Tente novamente mais tarde';
+      case 503:
+        return 'Serviço temporariamente indisponível';
+      default:
+        return 'Erro ao abrir turno. Status: $statusCode';
     }
   }
 
@@ -670,5 +802,51 @@ class TurnoRepo {
           tag: 'TurnoRepo', error: e, stackTrace: stackTrace);
       return false;
     }
+  }
+}
+
+/// Exceção customizada para erros específicos de abertura de turno
+class TurnoAberturaException implements Exception {
+  final int statusCode;
+  final String message;
+  final DioException? originalError;
+  final dynamic responseData;
+
+  TurnoAberturaException({
+    required this.statusCode,
+    required this.message,
+    this.originalError,
+    this.responseData,
+  });
+
+  @override
+  String toString() {
+    return 'TurnoAberturaException(statusCode: $statusCode, message: $message)';
+  }
+
+  /// Verifica se é um erro de conflito (409) - turno já existe
+  bool get isConflictError => statusCode == 409;
+
+  /// Verifica se é um erro de validação (400/422)
+  bool get isValidationError => statusCode == 400 || statusCode == 422;
+
+  /// Verifica se é um erro de servidor (5xx)
+  bool get isServerError => statusCode >= 500 && statusCode < 600;
+
+  /// Obtém dados extras da resposta da API (ex: turnoLocalId, timestamp)
+  Map<String, dynamic>? get apiData {
+    if (responseData is Map<String, dynamic>) {
+      return responseData['data'] as Map<String, dynamic>?;
+    }
+    return null;
+  }
+
+  /// Obtém o ID do turno local dos dados da API
+  int? get turnoLocalId {
+    final data = apiData;
+    if (data != null && data['turnoLocalId'] != null) {
+      return data['turnoLocalId'] as int?;
+    }
+    return null;
   }
 }

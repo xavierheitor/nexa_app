@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/core_app/services/auth_service.dart';
+import 'package:nexa_app/core/core_app/services/error_message_service.dart';
 import 'package:nexa_app/core/core_app/services/sync_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
 import 'package:nexa_app/core/database/app_database.dart';
@@ -32,6 +33,7 @@ class InitialBinding extends Bindings {
     // Lógica de negócio centralizada
     Get.lazyPut(() => AuthService(usuarioRepo: Get.find()), fenix: true);
     Get.lazyPut(() => SyncService(), fenix: true);
+    Get.put(ErrorMessageService(), permanent: true);
 
     // === Session Manager ===
     // Gerenciador centralizado de sessão

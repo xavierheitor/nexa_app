@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/core_app/services/auth_service.dart';
+import 'package:nexa_app/core/core_app/services/error_message_service.dart';
 import 'package:nexa_app/core/core_app/services/sync_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
@@ -20,6 +21,10 @@ class HomeController extends GetxController {
 
   /// Serviço de sincronização para atualização de dados.
   final SyncService _syncService;
+
+  /// Serviço de mensagens de erro.
+  final ErrorMessageService _errorMessageService =
+      Get.find<ErrorMessageService>();
 
   /// Controlador global de turno.
   final TurnoController turnoController = Get.find<TurnoController>();
@@ -52,6 +57,12 @@ class HomeController extends GetxController {
 
   /// Verifica se há turno aberto.
   bool get hasTurnoAberto => turnoController.hasTurnoAberto;
+
+  /// Verifica se há erro de abertura de turno
+  bool get temErroAberturaTurno => _errorMessageService.temErro;
+
+  /// Mensagem de erro de abertura de turno
+  String? get mensagemErroAberturaTurno => _errorMessageService.mensagemErro;
 
   // ============================================================================
   // MÉTODOS DE INICIALIZAÇÃO
@@ -198,6 +209,11 @@ class HomeController extends GetxController {
 
     // Atualiza dados do turno após sincronização
     await turnoController.atualizar();
+  }
+
+  /// Limpa a mensagem de erro de abertura de turno
+  void limparErroAberturaTurno() {
+    _errorMessageService.limparErro();
   }
 
   // ============================================================================
