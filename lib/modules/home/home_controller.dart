@@ -96,18 +96,21 @@ class HomeController extends GetxController {
   // ============================================================================
 
   /// Ação do botão Turno.
-  /// - Se turno fechado: Abre tela de abrir turno
-  /// - Se turno aberto: Abre tela de serviços executados
+  ///
+  /// **NOVO FLUXO INTELIGENTE:**
+  /// - Navega para tela de loading que analisa o estado do turno
+  /// - A tela de loading decide automaticamente para onde ir:
+  ///   - Nenhum turno → Abrir turno
+  ///   - Turno em abertura → Próximo checklist pendente
+  ///   - Turno aberto → Lista de serviços
+  ///
+  /// Isso evita abrir múltiplas telas desnecessariamente.
   void abrirTurno() {
-    AppLogger.i('Ação botão Turno', tag: 'HomeController');
+    AppLogger.i('🧭 [HOME] Navegando para decisão inteligente de turno',
+        tag: 'HomeController');
 
-    if (turnoController.hasTurnoAberto) {
-      // Turno aberto → Abre lista de serviços
-      Get.toNamed(Routes.turnoServicos);
-    } else {
-      // Turno fechado → Abre tela para abrir turno
-      Get.toNamed(Routes.turnoAbrir);
-    }
+    // Navega para a tela que decide automaticamente o próximo passo
+    Get.toNamed(Routes.turnoNavigationLoading);
   }
 
   /// Navega para tela de APR (Análise Preliminar de Risco).

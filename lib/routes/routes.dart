@@ -99,4 +99,10 @@ abstract class Routes {
 
   /// Rota da tela de abertura de turno (splash de processamento).
   static const String turnoAbrindo = '/turno/abrindo';
+
+  /// Rota da tela de loading/decisão de navegação do turno.
+  ///
+  /// Tela intermediária que analisa o estado do turno e decide
+  /// automaticamente para qual tela navegar (checklist, serviços, etc).
+  static const String turnoNavigationLoading = '/turno/navigation/loading';
 }

@@ -16,6 +16,8 @@ import 'package:nexa_app/modules/turno/checklist/veicular/checklist_binding.dart
 import 'package:nexa_app/modules/turno/checklist/veicular/checklist_page.dart';
 import 'package:nexa_app/modules/turno/servicos/turno_servicos_binding.dart';
 import 'package:nexa_app/modules/turno/servicos/turno_servicos_page.dart';
+import 'package:nexa_app/modules/turno/navigation/turno_navigation_loading_binding.dart';
+import 'package:nexa_app/modules/turno/navigation/turno_navigation_loading_page.dart';
 import 'package:nexa_app/routes/routes.dart';
 
 /// Classe responsável pela configuração e gerenciamento das páginas da aplicação.
@@ -224,6 +226,23 @@ class AppPages {
       name: Routes.turnoAbrindo,
       page: () => const AbrindoTurnoPage(),
       binding: AbrindoTurnoBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    /// Rota da tela de loading/decisão de navegação do turno.
+    ///
+    /// Tela intermediária que analisa o estado do turno e decide
+    /// automaticamente para qual tela navegar.
+    ///
+    /// **Características:**
+    /// - Protegida por `AuthMiddleware`
+    /// - Mostra loading durante verificações
+    /// - Navega automaticamente para a rota correta
+    /// - Trata erros de navegação
+    GetPage(
+      name: Routes.turnoNavigationLoading,
+      page: () => const TurnoNavigationLoadingPage(),
+      binding: TurnoNavigationLoadingBinding(),
       middlewares: [AuthMiddleware()],
     ),
   ];
