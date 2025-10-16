@@ -72,6 +72,23 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     AppLogger.i('HomeController inicializado', tag: 'HomeController');
+    // Garante que o turno seja carregado quando a home for inicializada
+    _carregarTurnoSeNecessario();
+  }
+
+  /// Carrega o turno ativo se ainda não foi carregado
+  Future<void> _carregarTurnoSeNecessario() async {
+    try {
+      // Se o turnoController não tem turno carregado, força o carregamento
+      if (!turnoController.hasTurno && !turnoController.isLoading.value) {
+        AppLogger.d('Forçando carregamento do turno ativo na home',
+            tag: 'HomeController');
+        await turnoController.carregarTurnoAtivo();
+      }
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao carregar turno na inicialização da home',
+          tag: 'HomeController', error: e, stackTrace: stackTrace);
+    }
   }
 
   // ============================================================================

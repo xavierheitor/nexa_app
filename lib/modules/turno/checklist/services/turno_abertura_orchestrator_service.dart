@@ -282,12 +282,12 @@ class TurnoAberturaOrchestratorService extends GetxService {
       if (eletricistaRemoteId != null && eletricistaRemoteId > 0) {
         checklistMap['eletricistaRemoteId'] = eletricistaRemoteId;
         AppLogger.d(
-          'Checklist ${checklistIdLocal} associado ao eletricista $eletricistaRemoteId',
+          'Checklist $checklistIdLocal associado ao eletricista $eletricistaRemoteId',
           tag: 'TurnoAberturaService',
         );
       } else {
         AppLogger.d(
-          'Checklist ${checklistIdLocal} sem eletricistaRemoteId válido - API aplicará fallback',
+          'Checklist $checklistIdLocal sem eletricistaRemoteId válido - API aplicará fallback',
           tag: 'TurnoAberturaService',
         );
       }

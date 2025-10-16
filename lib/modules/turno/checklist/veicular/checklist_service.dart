@@ -311,6 +311,7 @@ class ChecklistService extends GetxService {
     );
   }
 
+  // ignore: unused_element
   Future<ChecklistCompletoModel?> _buscarChecklistPorRemoteId(
       int remoteId) async {
     try {

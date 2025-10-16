@@ -175,7 +175,7 @@ class TurnoServicosPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  servico.tipo.nome,
+                  _getTipoNome(servico.tipo),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -239,6 +239,22 @@ class TurnoServicosPage extends StatelessWidget {
         return Icons.build;
       default:
         return Icons.work_outline;
+    }
+  }
+
+  /// Obtém nome legível do tipo de serviço.
+  String _getTipoNome(dynamic tipo) {
+    switch (tipo.toString()) {
+      case 'TipoServico.coleta':
+        return 'Coleta';
+      case 'TipoServico.limpeza':
+        return 'Limpeza';
+      case 'TipoServico.manutencao':
+        return 'Manutenção';
+      case 'TipoServico.outro':
+        return 'Outro';
+      default:
+        return 'Desconhecido';
     }
   }
 

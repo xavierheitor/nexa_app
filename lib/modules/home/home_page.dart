@@ -305,7 +305,11 @@ class HomePage extends StatelessWidget {
   Widget _buildTurnoAtivoCard(
       HomeController controller, dynamic turno, ColorScheme colorScheme) {
     final horaInicio = DateFormat('HH:mm').format(turno.horaInicio);
-    final duracao = turno.duracao;
+    
+    // Calcula a duração do turno
+    final agora = DateTime.now();
+    final horaFim = turno.horaFim ?? agora;
+    final duracao = horaFim.difference(turno.horaInicio);
     final horas = duracao.inHours;
     final minutos = duracao.inMinutes.remainder(60);
 
@@ -313,7 +317,8 @@ class HomePage extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () => _showFecharTurnoDialog(controller),
+        onTap: () => controller
+            .abrirTurno(), // Navega para tela de serviços quando turno aberto
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(20),
@@ -407,18 +412,20 @@ class HomePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            /// Informações do veículo.
+              /// Informações da equipe e veículo.
             _buildInfoRow(
-              icon: Icons.directions_car_outlined,
-              label: 'Prefixo',
-              value: turno.prefixo,
+                icon: Icons.group_outlined,
+                label: 'Equipe',
+                value:
+                    'Equipe ${turno.equipeId}', // TODO: Buscar nome real da equipe
               colorScheme: colorScheme,
             ),
             const SizedBox(height: 12),
             _buildInfoRow(
-              icon: Icons.local_shipping_outlined,
+                icon: Icons.directions_car_outlined,
               label: 'Placa',
-              value: turno.placa,
+                value:
+                    'Veículo ${turno.veiculoId}', // TODO: Buscar placa real do veículo
               colorScheme: colorScheme,
             ),
           ],

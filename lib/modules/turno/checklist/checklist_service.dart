@@ -63,7 +63,9 @@ class ChecklistService {
     final turnoDao = _db.turnoDao;
     final turnos = await turnoDao.listar();
     final turnoAtivo =
-        turnos.where((t) => t.situacaoTurno == 'em_abertura').firstOrNull;
+        turnos
+        .where((t) => t.situacaoTurno == SituacaoTurno.emAbertura)
+        .firstOrNull;
 
     if (turnoAtivo == null) {
       AppLogger.w('⚠️ Nenhum turno em abertura encontrado',

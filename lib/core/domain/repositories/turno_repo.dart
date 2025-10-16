@@ -364,7 +364,7 @@ class TurnoRepo {
           } else {
             // Se for lista de strings, junta todas
             final errorStrings = nestedMessageList
-                .where((e) => e is String)
+                .whereType<String>()
                 .cast<String>()
                 .toList();
             if (errorStrings.isNotEmpty) {

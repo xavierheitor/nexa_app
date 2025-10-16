@@ -77,15 +77,34 @@ class TurnoDao extends DatabaseAccessor<AppDatabase> with _$TurnoDaoMixin {
     }
   }
 
-  /// Busca turno ativo (em abertura).
+  /// Busca turno ativo (em abertura ou aberto).
   Future<TurnoTableDto?> buscarTurnoAtivo() async {
     try {
-      AppLogger.d('Buscando turno ativo', tag: 'TurnoDao');
-      final turno = await (select(db.turnoTable)..where((t) => t.situacaoTurno.equals(SituacaoTurno.emAbertura.name))).getSingleOrNull();
+      AppLogger.d('Buscando turno ativo (emAbertura ou aberto)',
+          tag: 'TurnoDao');
+
+      // Primeiro tenta buscar turno em abertura
+      var turno = await (select(db.turnoTable)
+            ..where(
+                (t) => t.situacaoTurno.equals(SituacaoTurno.emAbertura.name))
+            ..orderBy([(t) => OrderingTerm.desc(t.id)]))
+          .getSingleOrNull();
+
+      // Se não encontrar, busca turno aberto
+      if (turno == null) {
+        turno = await (select(db.turnoTable)
+              ..where((t) => t.situacaoTurno.equals(SituacaoTurno.aberto.name))
+              ..orderBy([(t) => OrderingTerm.desc(t.id)]))
+            .getSingleOrNull();
+      }
+      
       if (turno != null) {
-        AppLogger.d('Turno ativo encontrado: ${turno.id}', tag: 'TurnoDao');
+        AppLogger.d(
+            'Turno ativo encontrado: ${turno.id} (${turno.situacaoTurno})',
+            tag: 'TurnoDao');
         return TurnoTableDto.fromTable(turno);
       }
+      
       AppLogger.d('Nenhum turno ativo encontrado', tag: 'TurnoDao');
       return null;
     } catch (e, stackTrace) {
