@@ -181,4 +181,29 @@ class SplashController extends GetxController {
       await Get.offAllNamed(Routes.login);
     }
   }
+
+  // ============================================================================
+  // CICLO DE VIDA
+  // ============================================================================
+
+  /// Limpeza do controlador.
+  ///
+  /// Executado quando controlador é removido da memória,
+  /// liberando recursos e fazendo limpeza necessária para evitar memory leaks.
+  ///
+  /// ## Recursos Liberados:
+  /// - Estados reativos (statusMessage, isSyncing)
+  /// - Qualquer listener ou subscription ativa
+  @override
+  void onClose() {
+    /// Limpa estados reativos.
+    statusMessage.value = '';
+    isSyncing.value = false;
+
+    /// Registra finalização do controlador.
+    AppLogger.d('SplashController finalizado e recursos liberados',
+        tag: 'SplashController');
+
+    super.onClose();
+  }
 }

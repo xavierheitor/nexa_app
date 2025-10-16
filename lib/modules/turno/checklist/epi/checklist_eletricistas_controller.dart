@@ -224,6 +224,35 @@ class ChecklistEletricistasController extends GetxController {
     }
   }
 
+  // ============================================================================
+  // CICLO DE VIDA
+  // ============================================================================
+
+  /// Limpeza do controlador.
+  ///
+  /// Executado quando controlador é removido da memória,
+  /// liberando recursos e fazendo limpeza necessária para evitar memory leaks.
+  ///
+  /// ## Recursos Liberados:
+  /// - Listas observáveis (eletricistas)
+  /// - Estados reativos (isLoading, erro, isAbrindoTurno)
+  @override
+  void onClose() {
+    /// Limpa listas observáveis.
+    eletricistas.clear();
+
+    /// Reseta estados reativos.
+    isLoading.value = false;
+    erro.value = null;
+    isAbrindoTurno.value = false;
+
+    /// Registra finalização do controlador.
+    AppLogger.d(
+        'ChecklistEletricistasController finalizado e recursos liberados',
+        tag: 'ChecklistEletricistasController');
+
+    super.onClose();
+  }
 }
 
 class EletricistaChecklistStatus {

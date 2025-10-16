@@ -314,4 +314,33 @@ class ChecklistController extends GetxController {
       Get.offAllNamed(Routes.turnoChecklistEPC);
     }
   }
+
+  // ============================================================================
+  // CICLO DE VIDA
+  // ============================================================================
+
+  /// Limpeza do controlador.
+  ///
+  /// Executado quando controlador é removido da memória,
+  /// liberando recursos e fazendo limpeza necessária para evitar memory leaks.
+  ///
+  /// ## Recursos Liberados:
+  /// - Listas observáveis (perguntas)
+  /// - Estados reativos (isLoading, checklist)
+  /// - Referências a objetos pesados
+  @override
+  void onClose() {
+    /// Limpa listas observáveis.
+    perguntas.clear();
+
+    /// Reseta estados reativos.
+    isLoading.value = false;
+    checklist.value = null;
+
+    /// Registra finalização do controlador.
+    AppLogger.d('ChecklistController finalizado e recursos liberados',
+        tag: 'ChecklistController');
+
+    super.onClose();
+  }
 }

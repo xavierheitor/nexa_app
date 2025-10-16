@@ -237,9 +237,24 @@ class HomeController extends GetxController {
   // CICLO DE VIDA
   // ============================================================================
 
+  /// Limpeza do controlador.
+  ///
+  /// Executado quando controlador é removido da memória,
+  /// liberando recursos e fazendo limpeza necessária para evitar memory leaks.
+  ///
+  /// ## Recursos Liberados:
+  /// - Estados reativos (isLoading)
+  /// - Qualquer listener ou subscription ativa
+  /// - Referências a serviços (já gerenciados pelo GetX)
   @override
   void onClose() {
-    AppLogger.d('HomeController finalizado', tag: 'HomeController');
+    /// Limpa estados reativos.
+    isLoading.value = false;
+
+    /// Registra finalização do controlador.
+    AppLogger.d('HomeController finalizado e recursos liberados',
+        tag: 'HomeController');
+
     super.onClose();
   }
 }

@@ -67,4 +67,28 @@ class AbrindoTurnoController extends GetxController {
   void voltar() {
     Get.offAllNamed(Routes.home);
   }
+
+  // ============================================================================
+  // CICLO DE VIDA
+  // ============================================================================
+
+  /// Limpeza do controlador.
+  ///
+  /// Executado quando controlador é removido da memória,
+  /// liberando recursos e fazendo limpeza necessária para evitar memory leaks.
+  ///
+  /// ## Recursos Liberados:
+  /// - Estados reativos (statusMensagem, erro)
+  @override
+  void onClose() {
+    /// Limpa estados reativos.
+    statusMensagem.value = '';
+    erro.value = null;
+
+    /// Registra finalização do controlador.
+    AppLogger.d('AbrindoTurnoController finalizado e recursos liberados',
+        tag: 'AbrindoTurnoController');
+
+    super.onClose();
+  }
 }

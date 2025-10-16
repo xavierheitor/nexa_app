@@ -430,18 +430,29 @@ class LoginController extends GetxController {
   /// Limpeza do controlador.
   ///
   /// Executado quando controlador é removido da memória,
-  /// liberando recursos e fazendo limpeza necessária.
+  /// liberando recursos e fazendo limpeza necessária para evitar memory leaks.
+  ///
+  /// ## Recursos Liberados:
+  /// - Campos de texto (matrícula e senha)
+  /// - Estados reativos (loading, password visibility, error message)
+  /// - Qualquer listener ou subscription ativa
   ///
   /// NOTA: Este método não deve ser chamado durante logout automático,
   /// apenas quando o controller é realmente removido do GetX.
   @override
   void onClose() {
-    /// Limpa os valores dos campos.
+    /// Limpa os valores dos campos para evitar dados residuais em memória.
     matricula.value = '';
     senha.value = '';
 
+    /// Limpa estados reativos.
+    _isLoading.value = false;
+    _isPasswordVisible.value = false;
+    _errorMessage.value = '';
+
     /// Registra finalização do controlador.
-    AppLogger.d('LoginController finalizado', tag: 'LoginController');
+    AppLogger.d('LoginController finalizado e recursos liberados',
+        tag: 'LoginController');
 
     super.onClose();
   }

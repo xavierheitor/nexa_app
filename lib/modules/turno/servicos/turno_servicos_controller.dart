@@ -231,11 +231,27 @@ class TurnoServicosController extends GetxController {
         tag: 'TurnoServicosController');
   }
 
+  /// Limpeza do controlador.
+  ///
+  /// Executado quando controlador é removido da memória,
+  /// liberando recursos e fazendo limpeza necessária para evitar memory leaks.
+  ///
+  /// ## Recursos Liberados:
+  /// - TextEditingController (descricao)
+  /// - Estados reativos (tipoSelecionado, isLoading)
   @override
   void onClose() {
+    /// Dispose de TextEditingController.
     descricaoController.dispose();
-    AppLogger.d('TurnoServicosController finalizado',
+
+    /// Reseta estados reativos.
+    isLoading.value = false;
+    tipoSelecionado.value = TipoServico.coleta;
+
+    /// Registra finalização do controlador.
+    AppLogger.d('TurnoServicosController finalizado e recursos liberados',
         tag: 'TurnoServicosController');
+
     super.onClose();
   }
 }

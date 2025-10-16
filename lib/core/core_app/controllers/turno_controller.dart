@@ -471,9 +471,35 @@ class TurnoController extends GetxController {
   // CICLO DE VIDA
   // ============================================================================
 
+  /// Limpeza do controlador.
+  ///
+  /// **NOTA IMPORTANTE**: Este controller é **permanent**, portanto este método
+  /// raramente será chamado (apenas quando o app for completamente fechado).
+  /// No entanto, mantemos a limpeza adequada para casos edge e boa prática.
+  ///
+  /// ## Recursos Liberados:
+  /// - Estados reativos (turnoAtivo, eletricistas, servicos, isLoading)
+  /// - Qualquer listener ou subscription ativa
+  /// - Limpeza de referências para facilitar garbage collection
+  ///
+  /// ## Comportamento:
+  /// - Não afeta a lógica do turno durante uso normal
+  /// - Apenas limpa memória quando controller é realmente destruído
   @override
   void onClose() {
-    AppLogger.d('TurnoController finalizado', tag: 'TurnoController');
+    /// Limpa listas observáveis para liberar memória.
+    eletricistas.clear();
+    servicos.clear();
+
+    /// Reseta estados reativos.
+    turnoAtivo.value = null;
+    isLoading.value = false;
+
+    /// Registra finalização do controlador.
+    AppLogger.d(
+        'TurnoController finalizado e recursos liberados (permanent controller)',
+        tag: 'TurnoController');
+
     super.onClose();
   }
 }

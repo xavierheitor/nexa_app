@@ -304,11 +304,41 @@ class AbrirTurnoController extends GetxController {
         tag: 'AbrirTurnoController');
   }
 
+  /// Limpeza do controlador.
+  ///
+  /// Executado quando controlador é removido da memória,
+  /// liberando recursos e fazendo limpeza necessária para evitar memory leaks.
+  ///
+  /// ## Recursos Liberados:
+  /// - TextEditingControllers (prefixo, kmInicial)
+  /// - SearchableDropdownControllers (veículo, equipe, eletricista)
+  /// - Listas observáveis (eletricistasSelecionados)
+  /// - Estados reativos (isLoading)
+  /// - Cache de dados (_dadosCarregados)
   @override
   void onClose() {
+    /// Dispose de TextEditingControllers.
     prefixoController.dispose();
     kmInicialController.dispose();
-    AppLogger.d('AbrirTurnoController finalizado', tag: 'AbrirTurnoController');
+
+    /// Dispose de SearchableDropdownControllers.
+    veiculoDropdownController.dispose();
+    equipeDropdownController.dispose();
+    eletricistaDropdownController.dispose();
+
+    /// Limpa listas observáveis.
+    eletricistasSelecionados.clear();
+
+    /// Reseta estados reativos.
+    isLoading.value = false;
+
+    /// Limpa cache de dados.
+    _dadosCarregados = null;
+
+    /// Registra finalização do controlador.
+    AppLogger.d('AbrirTurnoController finalizado e recursos liberados',
+        tag: 'AbrirTurnoController');
+
     super.onClose();
   }
 
