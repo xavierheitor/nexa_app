@@ -20,6 +20,11 @@ class TurnoServicosPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Serviços do Turno'),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.home),
+          tooltip: 'Voltar para Home',
+          onPressed: () => Get.offAllNamed('/home'),
+        ),
       ),
       body: Column(
         children: [
