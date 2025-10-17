@@ -17,22 +17,41 @@ class ChecklistBinding extends Bindings {
   void dependencies() {
     final db = Get.find<AppDatabase>();
 
+    // Repositórios com fenix: true para não serem deletados da memória
     Get.lazyPut<ChecklistModeloRepo>(
-        () => ChecklistModeloRepo(dio: Get.find(), db: Get.find()));
+      () => ChecklistModeloRepo(dio: Get.find(), db: Get.find()),
+      fenix: true,
+    );
     Get.lazyPut<ChecklistPerguntaRepo>(
-        () => ChecklistPerguntaRepo(dio: Get.find(), db: Get.find()));
+      () => ChecklistPerguntaRepo(dio: Get.find(), db: Get.find()),
+      fenix: true,
+    );
     Get.lazyPut<ChecklistOpcaoRespostaRepo>(
-        () => ChecklistOpcaoRespostaRepo(dio: Get.find(), db: Get.find()));
-    Get.lazyPut<TurnoRepo>(() => TurnoRepo(dio: Get.find(), db: Get.find()));
+      () => ChecklistOpcaoRespostaRepo(dio: Get.find(), db: Get.find()),
+      fenix: true,
+    );
+    Get.lazyPut<TurnoRepo>(
+      () => TurnoRepo(dio: Get.find(), db: Get.find()),
+      fenix: true,
+    );
     Get.lazyPut<VeiculoRepo>(
-        () => VeiculoRepo(dio: Get.find(), db: Get.find()));
-    Get.lazyPut<EquipeRepo>(() => EquipeRepo(dio: Get.find(), db: Get.find()));
+      () => VeiculoRepo(dio: Get.find(), db: Get.find()),
+      fenix: true,
+    );
+    Get.lazyPut<EquipeRepo>(
+      () => EquipeRepo(dio: Get.find(), db: Get.find()),
+      fenix: true,
+    );
     Get.lazyPut<ChecklistPreenchidoRepo>(
-        () => ChecklistPreenchidoRepo(db.checklistPreenchidoDao));
+      () => ChecklistPreenchidoRepo(db.checklistPreenchidoDao),
+      fenix: true,
+    );
     Get.lazyPut<ChecklistRespostaRepo>(
-        () => ChecklistRespostaRepo(db.checklistRespostaDao));
+      () => ChecklistRespostaRepo(db.checklistRespostaDao),
+      fenix: true,
+    );
 
-    // Service (singleton)
+    // Service (singleton com fenix: true)
     Get.lazyPut<ChecklistService>(
       () => ChecklistService(
         checklistModeloRepo: Get.find<ChecklistModeloRepo>(),
@@ -47,7 +66,7 @@ class ChecklistBinding extends Bindings {
       fenix: true,
     );
 
-    // Controller
+    // Controller (sem fenix - pode ser recriado a cada vez)
     Get.lazyPut<ChecklistController>(() => ChecklistController());
   }
 }

@@ -8,11 +8,10 @@ import 'package:nexa_app/routes/routes.dart';
 class ChecklistController extends GetxController {
   final ChecklistService _checklistService = Get.find<ChecklistService>();
 
-  bool _forcarChecklistEPI = false;
-
-  bool get _isChecklistEPC => Get.currentRoute == Routes.turnoChecklistEPC;
-  bool get _isChecklistEPI =>
-      _forcarChecklistEPI || Get.currentRoute == Routes.turnoChecklistEPI;
+  // Flags para determinar tipo de checklist (baseado em argumentos, não em rota)
+  bool _isChecklistEPC = false;
+  bool _isChecklistEPI = false;
+  
   int? get _eletricistaRemoteIdOrNull =>
       _isChecklistEPI ? _eletricistaRemoteId : null;
 
@@ -25,6 +24,15 @@ class ChecklistController extends GetxController {
   /// Estado de carregamento.
   final RxBool isLoading = false.obs;
 
+  /// Indica se este checklist já foi preenchido anteriormente.
+  final RxBool jaFoiPreenchido = false.obs;
+
+  /// Indica se está finalizando o checklist (para desabilitar botão).
+  final RxBool isFinalizando = false.obs;
+
+  /// Flag para evitar navegação dupla
+  bool _jaNavegou = false;
+
   /// Lista de perguntas (para facilitar o acesso reativo).
   final RxList<ChecklistPerguntaModel> perguntas =
       <ChecklistPerguntaModel>[].obs;
@@ -33,11 +41,32 @@ class ChecklistController extends GetxController {
   void onInit() {
     super.onInit();
 
+    // Determina tipo de checklist baseado na ROTA ATUAL (mais confiável)
+    final rota = Get.currentRoute;
+    AppLogger.d('🔍 [INIT] Rota atual: $rota', tag: 'ChecklistController');
+
+    if (rota == Routes.turnoChecklistEPC) {
+      _isChecklistEPC = true;
+      AppLogger.d('✅ [INIT] Tipo: EPC', tag: 'ChecklistController');
+    } else if (rota == Routes.turnoChecklistEPI) {
+      _isChecklistEPI = true;
+      AppLogger.d('✅ [INIT] Tipo: EPI', tag: 'ChecklistController');
+    } else {
+      AppLogger.d('✅ [INIT] Tipo: Veicular (padrão)',
+          tag: 'ChecklistController');
+    }
+
+    // Processa argumentos (para EPI)
     final args = Get.arguments as Map<String, dynamic>?;
-    if (args != null && args.containsKey('eletricistaRemoteId')) {
-      _forcarChecklistEPI = true;
-      _eletricistaRemoteId = args['eletricistaRemoteId'] as int?;
-      _eletricistaNome = args['eletricistaNome'] as String?;
+    if (args != null) {
+      if (args.containsKey('eletricistaRemoteId')) {
+        _isChecklistEPI = true;
+        _eletricistaRemoteId = args['eletricistaRemoteId'] as int?;
+        _eletricistaNome = args['eletricistaNome'] as String?;
+        AppLogger.d(
+            '✅ [INIT] EPI para eletricista: $_eletricistaNome (ID: $_eletricistaRemoteId)',
+            tag: 'ChecklistController');
+      }
     }
 
     _carregarChecklist();
@@ -49,6 +78,7 @@ class ChecklistController extends GetxController {
       isLoading.value = true;
       checklist.value = null;
       perguntas.clear();
+      jaFoiPreenchido.value = false;
 
       final tipoChecklistDescricao =
           _isChecklistEPI ? 'EPI' : (_isChecklistEPC ? 'EPC' : 'veicular');
@@ -86,25 +116,29 @@ class ChecklistController extends GetxController {
       if (checklistCarregado == null) {
         AppLogger.w('⚠️ Nenhum checklist encontrado',
             tag: 'ChecklistController');
+        
+        // Define estado vazio ANTES do snackbar
+        checklist.value = null;
+        perguntas.clear();
+        isLoading.value = false; // ← Importante! Seta false ANTES do return
+        
         final mensagem = _isChecklistEPI
             ? 'Nenhum checklist de EPI encontrado para este eletricista'
             : _isChecklistEPC
                 ? 'Nenhum checklist de EPC encontrado para esta equipe'
                 : 'Nenhum checklist encontrado para este veículo';
+        
         Get.snackbar(
           'Atenção',
           mensagem,
           snackPosition: SnackPosition.BOTTOM,
         );
 
-        if (_isChecklistEPI) {
-          Get.back();
-        } else if (_isChecklistEPC) {
-          Get.offAllNamed(Routes.turnoServicos);
-        } else {
-          // Volta para a home se não encontrar checklist veicular
-          Get.offAllNamed(Routes.home);
-        }
+        AppLogger.d('🔙 Estado vazio configurado - botão Voltar disponível',
+            tag: 'ChecklistController');
+
+        // NÃO navegar automaticamente - deixar a UI mostrar a mensagem
+        // e o botão "Voltar" funcionar corretamente
         return;
       }
 
@@ -113,28 +147,29 @@ class ChecklistController extends GetxController {
         eletricistaRemoteId: _eletricistaRemoteIdOrNull,
       );
 
+      // Define se já foi preenchido
+      jaFoiPreenchido.value = jaPreenchido;
+
       if (jaPreenchido) {
         AppLogger.i(
-          '✅ Checklist ${checklistCarregado.nome} já preenchido anteriormente. Pulando etapa.',
+          '✅ Checklist ${checklistCarregado.nome} já preenchido anteriormente.',
           tag: 'ChecklistController',
         );
 
+        // Mostra snackbar informativo
         Get.snackbar(
           'Checklist já realizado',
           _isChecklistEPI
-              ? 'Checklist de EPI já registrado para ${_eletricistaNome ?? 'este eletricista'}'
+              ? 'Checklist de EPI já registrado para ${_eletricistaNome ?? 'este eletricista'}.'
               : _isChecklistEPC
-                  ? 'Checklist de EPC já registrado para este turno'
-                  : 'Checklist veicular já registrado para este turno',
+                  ? 'Checklist de EPC já registrado para este turno.'
+                  : 'Checklist veicular já registrado para este turno.',
           snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 3),
         );
 
-        // Pequeno delay para o usuário ver a mensagem e o loading
-        await Future.delayed(const Duration(milliseconds: 800));
-
-        _navegarParaProximaEtapa();
-        return;
+        // NÃO NAVEGAR MAIS AUTOMATICAMENTE!
+        // Carrega o checklist mesmo assim para permitir visualização/edição
       }
 
       checklist.value = checklistCarregado;
@@ -191,11 +226,25 @@ class ChecklistController extends GetxController {
 
   /// Valida se todas as perguntas foram respondidas.
   bool validarRespostas() {
+    AppLogger.d('🔍 [VALIDAÇÃO] Validando ${perguntas.length} perguntas...',
+        tag: 'ChecklistController');
+    
     final naoRespondidas = perguntas.where((p) => !p.foiRespondida).toList();
 
+    AppLogger.d('🔍 [VALIDAÇÃO] Não respondidas: ${naoRespondidas.length}',
+        tag: 'ChecklistController');
+
     if (naoRespondidas.isNotEmpty) {
-      AppLogger.w('⚠️ ${naoRespondidas.length} perguntas não respondidas',
+      AppLogger.w(
+          '❌ [VALIDAÇÃO] ${naoRespondidas.length} perguntas não respondidas',
           tag: 'ChecklistController');
+      
+      // Log das perguntas não respondidas
+      for (final p in naoRespondidas) {
+        AppLogger.d('  - Pergunta não respondida: ${p.nome}',
+            tag: 'ChecklistController');
+      }
+      
       Get.snackbar(
         'Atenção',
         'Por favor, responda todas as perguntas antes de continuar',
@@ -204,6 +253,8 @@ class ChecklistController extends GetxController {
       return false;
     }
 
+    AppLogger.i('✅ [VALIDAÇÃO] Todas as perguntas foram respondidas!',
+        tag: 'ChecklistController');
     return true;
   }
 
@@ -215,11 +266,30 @@ class ChecklistController extends GetxController {
 
   /// Finaliza o checklist e avança para a próxima etapa.
   Future<void> finalizarChecklist() async {
+    // Evita cliques duplos
+    if (isFinalizando.value) {
+      AppLogger.w('⚠️ [FINALIZAR] Já está finalizando - ignorando clique',
+          tag: 'ChecklistController');
+      return;
+    }
+
+    AppLogger.d('🎬 [FINALIZAR] Método finalizarChecklist() INICIADO',
+        tag: 'ChecklistController');
+    
     try {
+      isFinalizando.value = true;
+
+      AppLogger.d('🔍 [FINALIZAR] Validando respostas...',
+          tag: 'ChecklistController');
+      
       if (!validarRespostas()) {
+        AppLogger.w('❌ [FINALIZAR] Validação falhou - abortando',
+            tag: 'ChecklistController');
         return;
       }
 
+      AppLogger.i('✅ [FINALIZAR] Validação OK - prosseguindo',
+          tag: 'ChecklistController');
       AppLogger.d('💾 Finalizando checklist...', tag: 'ChecklistController');
 
       final temPendencias = hasPendencias();
@@ -243,13 +313,24 @@ class ChecklistController extends GetxController {
 
       final perguntasRespondidas = perguntas.toList();
 
+      AppLogger.d('💾 [FINALIZAR] Salvando checklist no banco...',
+          tag: 'ChecklistController');
+      AppLogger.d(
+          '💾 [FINALIZAR] ChecklistAtual: id=${checklistAtual.id}, remoteId=${checklistAtual.remoteId}, nome=${checklistAtual.nome}',
+          tag: 'ChecklistController');
+      
       final sucesso = await _checklistService.salvarChecklistPreenchido(
         checklist: checklistAtual,
         perguntasRespondidas: perguntasRespondidas,
         eletricistaRemoteId: _eletricistaRemoteIdOrNull,
       );
 
+      AppLogger.d('💾 [FINALIZAR] Resultado do salvamento: $sucesso',
+          tag: 'ChecklistController');
+
       if (!sucesso) {
+        AppLogger.e('❌ [FINALIZAR] Falha ao salvar - abortando',
+            tag: 'ChecklistController');
         Get.snackbar(
           'Erro',
           'Não foi possível salvar o checklist. Tente novamente.',
@@ -258,7 +339,7 @@ class ChecklistController extends GetxController {
         return;
       }
 
-      AppLogger.i('✅ Checklist finalizado e salvo com sucesso',
+      AppLogger.i('✅ [FINALIZAR] Checklist finalizado e salvo com sucesso',
           tag: 'ChecklistController');
 
       final tituloSnack = _isChecklistEPI ? 'Checklist EPI' : 'Sucesso';
@@ -274,6 +355,10 @@ class ChecklistController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
+      AppLogger.d(
+          '🔍 [FINALIZAR] Tipo checklist: EPC=$_isChecklistEPC, EPI=$_isChecklistEPI, Veicular=${!_isChecklistEPC && !_isChecklistEPI}',
+          tag: 'ChecklistController');
+
       _navegarParaProximaEtapa();
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao finalizar checklist',
@@ -283,6 +368,8 @@ class ChecklistController extends GetxController {
         'Erro ao finalizar checklist',
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      isFinalizando.value = false;
     }
   }
 
@@ -300,19 +387,79 @@ class ChecklistController extends GetxController {
   }
 
   void _navegarParaProximaEtapa() {
-    if (_isChecklistEPI) {
-      AppLogger.d(
-          '🚀 [NAVEGAÇÃO] EPI concluído → indo para lista de eletricistas',
+    // Evita navegação dupla
+    if (_jaNavegou) {
+      AppLogger.w(
+          '⚠️ [NAVEGAÇÃO] Navegação já realizada - bloqueando chamada duplicada',
           tag: 'ChecklistController');
-      Get.offAllNamed(
-        Routes.turnoChecklistEletricistas,
-        arguments: {'refresh': true},
-      );
-    } else if (_isChecklistEPC) {
-      Get.offAllNamed(Routes.turnoChecklistEletricistas);
-    } else {
-      Get.offAllNamed(Routes.turnoChecklistEPC);
+      return;
     }
+
+    AppLogger.i('🧭 [NAVEGAÇÃO] ========================================',
+        tag: 'ChecklistController');
+    AppLogger.i('🧭 [NAVEGAÇÃO] Método _navegarParaProximaEtapa() INICIADO',
+        tag: 'ChecklistController');
+    AppLogger.i(
+        '🧭 [NAVEGAÇÃO] Flags: EPC=$_isChecklistEPC, EPI=$_isChecklistEPI',
+        tag: 'ChecklistController');
+
+    _jaNavegou = true; // Marca que já navegou
+    
+    if (_isChecklistEPI) {
+      AppLogger.i('🚀 [NAVEGAÇÃO] → TIPO: EPI concluído',
+          tag: 'ChecklistController');
+      AppLogger.i(
+          '🚀 [NAVEGAÇÃO] → AÇÃO: VOLTANDO para lista de eletricistas (Get.back)',
+          tag: 'ChecklistController');
+      AppLogger.i(
+          '🔍 [NAVEGAÇÃO] → Rota atual antes do back: ${Get.currentRoute}',
+          tag: 'ChecklistController');
+      AppLogger.i(
+          '🔍 [NAVEGAÇÃO] → Pode voltar? ${Get.key.currentState?.canPop()}',
+          tag: 'ChecklistController');
+
+      // Usa Get.back com closeOverlays para garantir que fecha tudo
+      Get.back(result: true, closeOverlays: true);
+
+      AppLogger.i('✅ [NAVEGAÇÃO] Get.back() executado',
+          tag: 'ChecklistController');
+      AppLogger.i(
+          '🔍 [NAVEGAÇÃO] → Rota atual depois do back: ${Get.currentRoute}',
+          tag: 'ChecklistController');
+    } else if (_isChecklistEPC) {
+      AppLogger.i('🚀 [NAVEGAÇÃO] → TIPO: EPC concluído',
+          tag: 'ChecklistController');
+      AppLogger.i(
+          '🚀 [NAVEGAÇÃO] → AÇÃO: Deixando orchestrator decidir próximo passo',
+          tag: 'ChecklistController');
+      AppLogger.d(
+          '🧭 [NAVEGAÇÃO] → Executando: Get.offNamed(turnoNavigationLoading)',
+          tag: 'ChecklistController');
+      Get.offNamed(Routes.turnoNavigationLoading);
+      AppLogger.i('✅ [NAVEGAÇÃO] Get.offNamed() executado',
+          tag: 'ChecklistController');
+    } else {
+      AppLogger.i('🚀 [NAVEGAÇÃO] → TIPO: Veicular concluído',
+          tag: 'ChecklistController');
+      AppLogger.i(
+          '🚀 [NAVEGAÇÃO] → AÇÃO: Deixando orchestrator decidir próximo passo',
+          tag: 'ChecklistController');
+      AppLogger.i(
+          '🔍 [NAVEGAÇÃO] → Rota atual antes da navegação: ${Get.currentRoute}',
+          tag: 'ChecklistController');
+      AppLogger.d(
+          '🧭 [NAVEGAÇÃO] → Executando: Get.offNamed(turnoNavigationLoading) - ORCHESTRADOR DECIDE',
+          tag: 'ChecklistController');
+
+      // Usa o orchestrator para decidir automaticamente qual o próximo checklist
+      Get.offNamed(Routes.turnoNavigationLoading);
+
+      AppLogger.i('✅ [NAVEGAÇÃO] Get.offNamed() executado',
+          tag: 'ChecklistController');
+    }
+    
+    AppLogger.i('🧭 [NAVEGAÇÃO] ========================================',
+        tag: 'ChecklistController');
   }
 
   // ============================================================================
@@ -336,6 +483,7 @@ class ChecklistController extends GetxController {
     /// Reseta estados reativos.
     isLoading.value = false;
     checklist.value = null;
+    jaFoiPreenchido.value = false;
 
     /// Registra finalização do controlador.
     AppLogger.d('ChecklistController finalizado e recursos liberados',

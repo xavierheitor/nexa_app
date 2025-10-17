@@ -95,20 +95,22 @@ class DioClient {
   ///
   /// Este construtor configura o cliente Dio com:
   /// - Base URL obtida de `ApiConstants`
-  /// - Timeouts de conexão e recebimento de 10 segundos
+  /// - Timeouts de conexão e recebimento de 30 segundos
   /// - Interceptors para autenticação, logging e tratamento de erros
   ///
   /// ## Configurações Aplicadas:
   /// - **Base URL**: Configurada através de `ApiConstants.baseUrl`
-  /// - **Connect Timeout**: 10 segundos para estabelecer conexão
-  /// - **Receive Timeout**: 10 segundos para receber resposta
+  /// - **Connect Timeout**: 30 segundos para estabelecer conexão
+  /// - **Receive Timeout**: 30 segundos para receber resposta
+  /// - **Send Timeout**: 30 segundos para enviar dados
   /// - **Interceptors**: Autenticação, logging e tratamento de erros
   DioClient()
       : _dio = dio.Dio(
           dio.BaseOptions(
             baseUrl: ApiConstants.baseUrl,
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 10),
+            connectTimeout: const Duration(seconds: 30),
+            receiveTimeout: const Duration(seconds: 30),
+            sendTimeout: const Duration(seconds: 30),
           ),
         ) {
     // ============================================================================

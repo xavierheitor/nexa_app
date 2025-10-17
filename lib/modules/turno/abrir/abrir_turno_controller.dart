@@ -246,8 +246,10 @@ class AbrirTurnoController extends GetxController {
       // Fecha a tela de abertura
       Get.back();
 
-      // Navega diretamente para o checklist
-      Get.toNamed(Routes.turnoChecklist);
+      // Navega para o sistema inteligente que decide qual checklist mostrar
+      AppLogger.i('🧭 Navegando para decisão inteligente de checklists',
+          tag: 'AbrirTurnoController');
+      Get.toNamed(Routes.turnoNavigationLoading);
 
       Get.snackbar(
         'Sucesso',

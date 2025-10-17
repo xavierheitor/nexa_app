@@ -422,7 +422,7 @@ class ChecklistService extends GetxService {
   Future<bool> checklistJaPreenchido(int checklistModeloRemoteId,
       {int? eletricistaRemoteId}) async {
     AppLogger.d(
-      '🔎 Verificando preenchimento prévio do checklist $checklistModeloRemoteId',
+      '🔎 Verificando preenchimento prévio do checklist modelo $checklistModeloRemoteId',
       tag: 'ChecklistService',
     );
 
@@ -450,13 +450,141 @@ class ChecklistService extends GetxService {
       });
 
       AppLogger.d(
-        '📌 Checklist $checklistModeloRemoteId já preenchido: $encontrado',
+        '📌 Checklist modelo $checklistModeloRemoteId já preenchido: $encontrado',
         tag: 'ChecklistService',
       );
 
       return encontrado;
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao verificar checklist preenchido',
+          tag: 'ChecklistService', error: e, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
+  /// Verifica se algum checklist de um determinado TIPO já foi preenchido.
+  ///
+  /// Diferente de checklistJaPreenchido que verifica por modelo específico,
+  /// este método verifica se QUALQUER modelo daquele tipo foi preenchido.
+  ///
+  /// Útil para navegação: verificar se etapa (veicular/EPC/EPI) foi concluída.
+  Future<bool> checklistPorTipoJaPreenchido(int tipoChecklistId,
+      {int? eletricistaRemoteId}) async {
+    AppLogger.i(
+      '🔎 [VERIFICAÇÃO TIPO] ========================================',
+      tag: 'ChecklistService',
+    );
+    AppLogger.i(
+      '🔎 [VERIFICAÇÃO TIPO] Verificando se checklist do tipo $tipoChecklistId já foi preenchido',
+      tag: 'ChecklistService',
+    );
+    AppLogger.i(
+      '🔎 [VERIFICAÇÃO TIPO] eletricistaRemoteId: $eletricistaRemoteId',
+      tag: 'ChecklistService',
+    );
+
+    try {
+      final turnoAtivo = await _turnoRepo.buscarTurnoAtivo();
+      if (turnoAtivo == null) {
+        AppLogger.w('⚠️ [VERIFICAÇÃO TIPO] Nenhum turno ativo encontrado',
+            tag: 'ChecklistService');
+        return false;
+      }
+
+      AppLogger.d('✅ [VERIFICAÇÃO TIPO] Turno ativo ID: ${turnoAtivo.id}',
+          tag: 'ChecklistService');
+
+      // Buscar modelos desse tipo
+      AppLogger.d('🔍 [VERIFICAÇÃO TIPO] Buscando todos os modelos...',
+          tag: 'ChecklistService');
+      final modelos = await _checklistModeloRepo.listar();
+      AppLogger.d(
+          '📋 [VERIFICAÇÃO TIPO] Total de modelos no DB: ${modelos.length}',
+          tag: 'ChecklistService');
+
+      final modelosDesseTipo =
+          modelos.where((m) => m.tipoChecklistId == tipoChecklistId).toList();
+
+      AppLogger.i(
+          '📋 [VERIFICAÇÃO TIPO] Modelos do tipo $tipoChecklistId: ${modelosDesseTipo.length}',
+          tag: 'ChecklistService');
+
+      for (final modelo in modelosDesseTipo) {
+        AppLogger.d(
+            '  - Modelo: id=${modelo.id}, remoteId=${modelo.remoteId}, nome=${modelo.nome}',
+            tag: 'ChecklistService');
+      }
+
+      if (modelosDesseTipo.isEmpty) {
+        AppLogger.w(
+            '⚠️ [VERIFICAÇÃO TIPO] Nenhum modelo encontrado para tipo $tipoChecklistId',
+            tag: 'ChecklistService');
+        AppLogger.i(
+            '🔎 [VERIFICAÇÃO TIPO] RESULTADO: false (nenhum modelo desse tipo)',
+            tag: 'ChecklistService');
+        return false;
+      }
+
+      // Buscar preenchimentos deste turno
+      AppLogger.d(
+          '🔍 [VERIFICAÇÃO TIPO] Buscando checklists preenchidos do turno ${turnoAtivo.id}...',
+          tag: 'ChecklistService');
+      final preenchidos =
+          await _checklistPreenchidoRepo.buscarPorTurno(turnoAtivo.id);
+
+      AppLogger.i(
+          '📋 [VERIFICAÇÃO TIPO] Total de checklists preenchidos no turno: ${preenchidos.length}',
+          tag: 'ChecklistService');
+
+      for (final preenchido in preenchidos) {
+        AppLogger.d(
+            '  - Preenchido: id=${preenchido.id}, checklistModeloId=${preenchido.checklistModeloId}, eletricistaRemoteId=${preenchido.eletricistaRemoteId}',
+            tag: 'ChecklistService');
+      }
+
+      // Verificar se algum modelo deste tipo foi preenchido
+      AppLogger.d(
+          '🔍 [VERIFICAÇÃO TIPO] Verificando se algum modelo deste tipo foi preenchido...',
+          tag: 'ChecklistService');
+
+      final encontrado = preenchidos.any((item) {
+        // Verifica se é um modelo deste tipo
+        final ehDesseTipo = modelosDesseTipo
+            .any((modelo) => modelo.remoteId == item.checklistModeloId);
+
+        AppLogger.d(
+            '  - Item ${item.id}: ehDesseTipo=$ehDesseTipo, eletricistaRemoteId=${item.eletricistaRemoteId}',
+            tag: 'ChecklistService');
+
+        if (!ehDesseTipo) return false;
+
+        // Se for EPI, verifica eletricista
+        if (eletricistaRemoteId != null) {
+          final match = item.eletricistaRemoteId == eletricistaRemoteId;
+          AppLogger.d('    → Verificando EPI: match=$match',
+              tag: 'ChecklistService');
+          return match;
+        }
+
+        // Para veicular e EPC, não precisa de eletricista
+        final match = item.eletricistaRemoteId == null;
+        AppLogger.d('    → Verificando Veicular/EPC: match=$match',
+            tag: 'ChecklistService');
+        return match;
+      });
+
+      AppLogger.i(
+        '📌 [VERIFICAÇÃO TIPO] RESULTADO: $encontrado (Checklist tipo $tipoChecklistId ${encontrado ? "JÁ PREENCHIDO" : "PENDENTE"})',
+        tag: 'ChecklistService',
+      );
+      AppLogger.i(
+        '🔎 [VERIFICAÇÃO TIPO] ========================================',
+        tag: 'ChecklistService',
+      );
+
+      return encontrado;
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao verificar checklist por tipo',
           tag: 'ChecklistService', error: e, stackTrace: stackTrace);
       return false;
     }
@@ -607,7 +735,7 @@ class ChecklistService extends GetxService {
 
         if (checklist != null) {
           AppLogger.d(
-              '✅ Checklist EPC encontrado por tipo de checklist e equipe',
+              '✅ Checklist EPC encontrado: id=${checklist.id}, remoteId=${checklist.remoteId}, nome=${checklist.nome}',
               tag: 'ChecklistService');
         }
       }

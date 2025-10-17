@@ -122,7 +122,7 @@ class HomePage extends StatelessWidget {
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () => Get.toNamed(Routes.turnoChecklist),
+        onTap: () => controller.abrirTurno(), // Usa navegação inteligente
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(20),

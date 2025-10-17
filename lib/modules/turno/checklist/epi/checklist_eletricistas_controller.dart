@@ -119,14 +119,25 @@ class ChecklistEletricistasController extends GetxController {
       return;
     }
 
+    AppLogger.d(
+        '🔄 [EPI] Abrindo checklist para ${item.eletricista.nome} (ID: ${item.remoteId})',
+        tag: 'ChecklistEletricistasController');
+
     final result = await Get.toNamed(Routes.turnoChecklistEPI, arguments: {
       'eletricistaRemoteId': item.remoteId,
       'eletricistaNome': item.eletricista.nome,
     });
 
-    if (result == true) {
-      await carregarEletricistas();
-    }
+    AppLogger.d('🔄 [EPI] Resultado do checklist: $result',
+        tag: 'ChecklistEletricistasController');
+
+    // SEMPRE recarrega a lista ao voltar, independente do resultado
+    // Isso garante que o status seja atualizado na UI
+    AppLogger.d('🔄 [EPI] Recarregando lista de eletricistas...',
+        tag: 'ChecklistEletricistasController');
+    await carregarEletricistas();
+    AppLogger.d('✅ [EPI] Lista recarregada',
+        tag: 'ChecklistEletricistasController');
   }
 
   Future<void> abrirTurno() async {

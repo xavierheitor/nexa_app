@@ -70,14 +70,25 @@ class TurnoNavigationOrchestrator {
   /// - Não lança exceções, retorna erro no resultado
   Future<TurnoNavigationResult> determinarProximaRota() async {
     try {
-      AppLogger.d('🧭 [NAV] Iniciando determinação de rota',
+      AppLogger.i(
+          '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i('🧭 [ORCHESTRATOR] INICIANDO determinação de rota',
           tag: 'TurnoNavigationOrchestrator');
 
       // 1. Verificar se existe turno ativo
+      AppLogger.d('🔍 [ORCHESTRATOR] Buscando turno ativo...',
+          tag: 'TurnoNavigationOrchestrator');
+      
       final turno = await _turnoRepo.buscarTurnoAtivo();
 
       if (turno == null) {
-        AppLogger.d('🧭 [NAV] Nenhum turno ativo → Rota: ABRIR TURNO',
+        AppLogger.i('🧭 [ORCHESTRATOR] ❌ Nenhum turno ativo encontrado',
+            tag: 'TurnoNavigationOrchestrator');
+        AppLogger.i('🧭 [ORCHESTRATOR] AÇÃO: Navegando para ABRIR TURNO',
+            tag: 'TurnoNavigationOrchestrator');
+        AppLogger.i(
+            '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
             tag: 'TurnoNavigationOrchestrator');
         return TurnoNavigationResult(
           state: TurnoNavigationState.naoExiste,
@@ -86,14 +97,17 @@ class TurnoNavigationOrchestrator {
         );
       }
 
-      AppLogger.d(
-          '🧭 [NAV] Turno encontrado: ID=${turno.id}, Situação=${turno.situacaoTurno.name}',
+      AppLogger.i(
+          '✅ [ORCHESTRATOR] Turno encontrado: ID=${turno.id}, Situação=${turno.situacaoTurno.name}',
           tag: 'TurnoNavigationOrchestrator');
 
       // 2. Verificar situação do turno
       switch (turno.situacaoTurno) {
         case SituacaoTurno.fechado:
-          AppLogger.d('🧭 [NAV] Turno fechado → Rota: ABRIR TURNO',
+          AppLogger.i('🧭 [ORCHESTRATOR] Turno FECHADO → Rota: ABRIR TURNO',
+              tag: 'TurnoNavigationOrchestrator');
+          AppLogger.i(
+              '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
               tag: 'TurnoNavigationOrchestrator');
           return TurnoNavigationResult(
             state: TurnoNavigationState.fechado,
@@ -102,7 +116,10 @@ class TurnoNavigationOrchestrator {
           );
 
         case SituacaoTurno.aberto:
-          AppLogger.d('🧭 [NAV] Turno aberto → Rota: SERVIÇOS',
+          AppLogger.i('🧭 [ORCHESTRATOR] Turno ABERTO → Rota: SERVIÇOS',
+              tag: 'TurnoNavigationOrchestrator');
+          AppLogger.i(
+              '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
               tag: 'TurnoNavigationOrchestrator');
           return TurnoNavigationResult(
             state: TurnoNavigationState.aberto,
@@ -112,14 +129,20 @@ class TurnoNavigationOrchestrator {
           );
 
         case SituacaoTurno.emAbertura:
+          AppLogger.i(
+              '🧭 [ORCHESTRATOR] Turno EM_ABERTURA → Verificando checklists...',
+              tag: 'TurnoNavigationOrchestrator');
           // 3. Turno em abertura - verificar checklists pendentes
           return await _verificarChecklistsPendentes(turno.id);
       }
     } catch (e, stackTrace) {
-      AppLogger.e('❌ [NAV] Erro ao determinar rota',
+      AppLogger.e('❌ [ORCHESTRATOR] Erro ao determinar rota',
           tag: 'TurnoNavigationOrchestrator',
           error: e,
           stackTrace: stackTrace);
+      AppLogger.i(
+          '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
+          tag: 'TurnoNavigationOrchestrator');
       return TurnoNavigationResult.erro(
           'Erro ao determinar próxima ação: ${e.toString()}');
     }
@@ -138,18 +161,45 @@ class TurnoNavigationOrchestrator {
   Future<TurnoNavigationResult> _verificarChecklistsPendentes(
       int turnoId) async {
     try {
-      AppLogger.d('🧭 [NAV] Verificando checklists pendentes para turno $turnoId',
+      AppLogger.i(
+          '🔍 [ORCHESTRATOR] ==========================================',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i(
+          '🔍 [ORCHESTRATOR] Verificando checklists pendentes para turno $turnoId',
           tag: 'TurnoNavigationOrchestrator');
 
-      // 1. Verificar Checklist Veicular
-      final checklistVeicularRemoteId = ApiConstants.tipoChecklistVeicularId;
+      // 1. Verificar Checklist Veicular (por TIPO, não por modelo específico)
+      AppLogger.i('🔍 [ORCHESTRATOR] ========================================',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i('🔍 [ORCHESTRATOR] ETAPA 1: Verificando CHECKLIST VEICULAR',
+          tag: 'TurnoNavigationOrchestrator');
+
+      final tipoChecklistVeicular = ApiConstants.tipoChecklistVeicularId;
+      AppLogger.i(
+          '🔍 [ORCHESTRATOR] 📌 Tipo Checklist Veicular ID: $tipoChecklistVeicular',
+          tag: 'TurnoNavigationOrchestrator');
+
+      AppLogger.i(
+          '🔍 [ORCHESTRATOR] 🔄 Chamando checklistService.checklistPorTipoJaPreenchido($tipoChecklistVeicular)...',
+          tag: 'TurnoNavigationOrchestrator');
+      
       final checklistVeicularCompleto =
-          await _checklistService.checklistJaPreenchido(
-        checklistVeicularRemoteId,
+          await _checklistService.checklistPorTipoJaPreenchido(
+        tipoChecklistVeicular,
       );
 
+      AppLogger.i(
+          '🔍 [ORCHESTRATOR] Resultado Veicular: ${checklistVeicularCompleto ? "✅ JÁ PREENCHIDO" : "❌ PENDENTE"}',
+          tag: 'TurnoNavigationOrchestrator');
+
       if (!checklistVeicularCompleto) {
-        AppLogger.d('🧭 [NAV] Checklist Veicular pendente → Rota: CHECKLIST',
+        AppLogger.i('🧭 [ORCHESTRATOR] DECISÃO: Checklist Veicular PENDENTE',
+            tag: 'TurnoNavigationOrchestrator');
+        AppLogger.i(
+            '🧭 [ORCHESTRATOR] AÇÃO: Navegando para → ${Routes.turnoChecklist}',
+            tag: 'TurnoNavigationOrchestrator');
+        AppLogger.i(
+            '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
             tag: 'TurnoNavigationOrchestrator');
         return TurnoNavigationResult(
           state: TurnoNavigationState.aguardandoChecklistVeicular,
@@ -158,16 +208,37 @@ class TurnoNavigationOrchestrator {
         );
       }
 
-      AppLogger.d('✅ [NAV] Checklist Veicular OK',
+      AppLogger.i('✅ [ORCHESTRATOR] Checklist Veicular JÁ CONCLUÍDO',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i('🔍 [ORCHESTRATOR] Próxima verificação: EPC...',
           tag: 'TurnoNavigationOrchestrator');
 
-      // 2. Verificar Checklist EPC
-      final checklistEPCRemoteId = ApiConstants.tipoChecklistEpcId;
+      // 2. Verificar Checklist EPC (por TIPO, não por modelo específico)
+      AppLogger.i('🔍 [ORCHESTRATOR] ========================================',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i('🔍 [ORCHESTRATOR] ETAPA 2: Verificando CHECKLIST EPC',
+          tag: 'TurnoNavigationOrchestrator');
+
+      final tipoChecklistEPC = ApiConstants.tipoChecklistEpcId;
+      AppLogger.d('🔍 [ORCHESTRATOR] Tipo Checklist EPC ID: $tipoChecklistEPC',
+          tag: 'TurnoNavigationOrchestrator');
+      
       final checklistEPCCompleto =
-          await _checklistService.checklistJaPreenchido(checklistEPCRemoteId);
+          await _checklistService
+          .checklistPorTipoJaPreenchido(tipoChecklistEPC);
+
+      AppLogger.i(
+          '🔍 [ORCHESTRATOR] Resultado EPC: ${checklistEPCCompleto ? "✅ JÁ PREENCHIDO" : "❌ PENDENTE"}',
+          tag: 'TurnoNavigationOrchestrator');
 
       if (!checklistEPCCompleto) {
-        AppLogger.d('🧭 [NAV] Checklist EPC pendente → Rota: CHECKLIST EPC',
+        AppLogger.i('🧭 [ORCHESTRATOR] DECISÃO: Checklist EPC PENDENTE',
+            tag: 'TurnoNavigationOrchestrator');
+        AppLogger.i(
+            '🧭 [ORCHESTRATOR] AÇÃO: Navegando para → ${Routes.turnoChecklistEPC}',
+            tag: 'TurnoNavigationOrchestrator');
+        AppLogger.i(
+            '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
             tag: 'TurnoNavigationOrchestrator');
         return TurnoNavigationResult(
           state: TurnoNavigationState.aguardandoChecklistEPC,
@@ -176,14 +247,27 @@ class TurnoNavigationOrchestrator {
         );
       }
 
-      AppLogger.d('✅ [NAV] Checklist EPC OK',
+      AppLogger.i('✅ [ORCHESTRATOR] Checklist EPC JÁ CONCLUÍDO',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i('🔍 [ORCHESTRATOR] Próxima verificação: EPIs...',
           tag: 'TurnoNavigationOrchestrator');
 
       // 3. Verificar Checklist EPI (eletricistas)
+      AppLogger.i('🔍 [ORCHESTRATOR] ========================================',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i('🔍 [ORCHESTRATOR] ETAPA 3: Verificando CHECKLIST EPI',
+          tag: 'TurnoNavigationOrchestrator');
+      
       final eletricistas = await _turnoRepo.buscarEletricistasDoTurno(turnoId);
+      AppLogger.d(
+          '🔍 [ORCHESTRATOR] Eletricistas no turno: ${eletricistas.length}',
+          tag: 'TurnoNavigationOrchestrator');
 
       if (eletricistas.isEmpty) {
-        AppLogger.w('⚠️ [NAV] Nenhum eletricista vinculado ao turno',
+        AppLogger.w('⚠️ [ORCHESTRATOR] Nenhum eletricista vinculado ao turno',
+            tag: 'TurnoNavigationOrchestrator');
+        AppLogger.i(
+            '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
             tag: 'TurnoNavigationOrchestrator');
         return TurnoNavigationResult(
           state: TurnoNavigationState.erro,
@@ -194,18 +278,34 @@ class TurnoNavigationOrchestrator {
       }
 
       // Verificar se todos os eletricistas preencheram EPI
-      final checklistEpiRemoteId =
-          _checklistService.checklistEpiModeloRemoteId;
+      final tipoChecklistEPI = ApiConstants.tipoChecklistEpiId;
+      AppLogger.d('🔍 [ORCHESTRATOR] Tipo Checklist EPI ID: $tipoChecklistEPI',
+          tag: 'TurnoNavigationOrchestrator');
 
       for (final eletricista in eletricistas) {
-        final epiPreenchido = await _checklistService.checklistJaPreenchido(
-          checklistEpiRemoteId,
+        AppLogger.d(
+            '🔍 [ORCHESTRATOR] Verificando EPI do eletricista: ${eletricista.eletricistaId}',
+            tag: 'TurnoNavigationOrchestrator');
+
+        final epiPreenchido =
+            await _checklistService.checklistPorTipoJaPreenchido(
+          tipoChecklistEPI,
           eletricistaRemoteId: eletricista.eletricistaId,
         );
 
+        AppLogger.d(
+            '🔍 [ORCHESTRATOR] Eletricista ${eletricista.eletricistaId}: EPI ${epiPreenchido ? "✅ OK" : "❌ PENDENTE"}',
+            tag: 'TurnoNavigationOrchestrator');
+
         if (!epiPreenchido) {
-          AppLogger.d(
-              '🧭 [NAV] Checklist EPI pendente (há eletricistas sem checklist) → Rota: LISTA ELETRICISTAS',
+          AppLogger.i(
+              '🧭 [ORCHESTRATOR] DECISÃO: Checklist EPI pendente (há eletricistas sem checklist)',
+              tag: 'TurnoNavigationOrchestrator');
+          AppLogger.i(
+              '🧭 [ORCHESTRATOR] AÇÃO: Navegando para → ${Routes.turnoChecklistEletricistas}',
+              tag: 'TurnoNavigationOrchestrator');
+          AppLogger.i(
+              '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
               tag: 'TurnoNavigationOrchestrator');
           return TurnoNavigationResult(
             state: TurnoNavigationState.aguardandoChecklistEPI,
@@ -215,13 +315,21 @@ class TurnoNavigationOrchestrator {
         }
       }
 
-      AppLogger.d('✅ [NAV] Todos os Checklists EPI OK',
+      AppLogger.i('✅ [ORCHESTRATOR] Todos os Checklists EPI OK',
           tag: 'TurnoNavigationOrchestrator');
 
       // 4. Todos os checklists OK - Abrir turno remotamente
-      AppLogger.d(
-          '🧭 [NAV] Todos os checklists concluídos → Rota: ABRIR TURNO REMOTO',
+      AppLogger.i('🔍 [ORCHESTRATOR] ========================================',
           tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i('🧭 [ORCHESTRATOR] ✅ TODOS OS CHECKLISTS CONCLUÍDOS!',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i(
+          '🧭 [ORCHESTRATOR] AÇÃO: Navegando para → ${Routes.turnoChecklistEletricistas}',
+          tag: 'TurnoNavigationOrchestrator');
+      AppLogger.i(
+          '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
+          tag: 'TurnoNavigationOrchestrator');
+      
       return TurnoNavigationResult(
         state: TurnoNavigationState.checklistsConcluidos,
         route: Routes.turnoChecklistEletricistas,
@@ -229,10 +337,13 @@ class TurnoNavigationOrchestrator {
         data: {'todosChecklistsConcluidos': true},
       );
     } catch (e, stackTrace) {
-      AppLogger.e('❌ [NAV] Erro ao verificar checklists',
+      AppLogger.e('❌ [ORCHESTRATOR] Erro ao verificar checklists',
           tag: 'TurnoNavigationOrchestrator',
           error: e,
           stackTrace: stackTrace);
+      AppLogger.i(
+          '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
+          tag: 'TurnoNavigationOrchestrator');
       return TurnoNavigationResult.erro(
           'Erro ao verificar checklists: ${e.toString()}');
     }
@@ -249,4 +360,3 @@ class TurnoNavigationOrchestrator {
     return result.state;
   }
 }
-

@@ -46,7 +46,10 @@ class TurnoNavigationLoadingController extends GetxController {
       hasError.value = false;
       statusMessage.value = 'Verificando turno...';
 
-      AppLogger.d('🧭 [NAV LOADING] Iniciando determinação de rota',
+      AppLogger.i(
+          '🧭🧭🧭 [NAV LOADING] ==========================================',
+          tag: 'TurnoNavigationLoadingController');
+      AppLogger.i('🧭 [NAV LOADING] Iniciando determinação de rota',
           tag: 'TurnoNavigationLoadingController');
 
       // Aguarda um mínimo de tempo para evitar flash de tela
@@ -57,7 +60,15 @@ class TurnoNavigationLoadingController extends GetxController {
         final result = results[0] as TurnoNavigationResult;
         return result;
       }).then((result) async {
-        AppLogger.d('🧭 [NAV LOADING] Resultado: ${result.toString()}',
+        AppLogger.i('🧭 [NAV LOADING] ========================================',
+            tag: 'TurnoNavigationLoadingController');
+        AppLogger.i('🧭 [NAV LOADING] Resultado recebido do orchestrator:',
+            tag: 'TurnoNavigationLoadingController');
+        AppLogger.i('🧭 [NAV LOADING]   - Estado: ${result.state}',
+            tag: 'TurnoNavigationLoadingController');
+        AppLogger.i('🧭 [NAV LOADING]   - Rota: ${result.route}',
+            tag: 'TurnoNavigationLoadingController');
+        AppLogger.i('🧭 [NAV LOADING]   - Mensagem: ${result.message}',
             tag: 'TurnoNavigationLoadingController');
 
         // Verificar se houve erro
@@ -80,14 +91,32 @@ class TurnoNavigationLoadingController extends GetxController {
           statusMessage.value = 'Navegando...';
           await Future.delayed(const Duration(milliseconds: 300));
 
-          AppLogger.d('🧭 [NAV LOADING] Navegando para: ${result.route}',
+          AppLogger.i(
+              '🧭 [NAV LOADING] ========================================',
+              tag: 'TurnoNavigationLoadingController');
+          AppLogger.i('🧭 [NAV LOADING] 🚀 EXECUTANDO NAVEGAÇÃO',
+              tag: 'TurnoNavigationLoadingController');
+          AppLogger.i('🧭 [NAV LOADING]   → Destino: ${result.route}',
+              tag: 'TurnoNavigationLoadingController');
+          AppLogger.i('🧭 [NAV LOADING]   → Argumentos: ${result.arguments}',
+              tag: 'TurnoNavigationLoadingController');
+          AppLogger.i('🧭 [NAV LOADING]   → Método: Get.offNamed()',
               tag: 'TurnoNavigationLoadingController');
 
           // Remove a tela de loading e navega
           Get.offNamed(result.route!, arguments: result.arguments);
+          
+          AppLogger.i('🧭 [NAV LOADING] ✅ Navegação executada',
+              tag: 'TurnoNavigationLoadingController');
+          AppLogger.i(
+              '🧭🧭🧭 [NAV LOADING] ==========================================',
+              tag: 'TurnoNavigationLoadingController');
         } else {
           // Sem rota definida - voltar
           AppLogger.w('⚠️ [NAV LOADING] Nenhuma rota definida, voltando',
+              tag: 'TurnoNavigationLoadingController');
+          AppLogger.i(
+              '🧭🧭🧭 [NAV LOADING] ==========================================',
               tag: 'TurnoNavigationLoadingController');
           Get.back();
         }
