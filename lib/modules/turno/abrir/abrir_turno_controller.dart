@@ -164,7 +164,8 @@ class AbrirTurnoController extends GetxController {
   /// Abre um novo turno.
   Future<void> abrirTurno() async {
     // Valida formulário
-    if (!formKey.currentState!.validate()) {
+    final formState = formKey.currentState;
+    if (formState == null || !formState.validate()) {
       return;
     }
 

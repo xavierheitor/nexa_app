@@ -260,8 +260,10 @@ class ChecklistController extends GetxController {
 
   /// Verifica se há pendências nas respostas.
   bool hasPendencias() {
-    return perguntas.any(
-        (p) => p.opcaoSelecionada != null && p.opcaoSelecionada!.geraPendencia);
+    return perguntas.any((p) {
+      final opcao = p.opcaoSelecionada;
+      return opcao != null && opcao.geraPendencia;
+    });
   }
 
   /// Finaliza o checklist e avança para a próxima etapa.

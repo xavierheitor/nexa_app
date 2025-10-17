@@ -119,8 +119,10 @@ class UsuarioTableDto extends BaseTableDto {
     validateMatricula(matricula);
     validateToken(token);
 
-    if (refreshToken != null && refreshToken!.isNotEmpty) {
-      validateToken(refreshToken);
+    // Valida refresh token se disponível
+    final refresh = refreshToken;
+    if (refresh != null && refresh.isNotEmpty) {
+      validateToken(refresh);
     }
   }
 }

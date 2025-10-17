@@ -128,7 +128,8 @@ class TurnoServicosController extends GetxController {
   /// Adiciona um novo serviço.
   Future<void> adicionarServico() async {
     // Valida formulário
-    if (!formKey.currentState!.validate()) {
+    final formState = formKey.currentState;
+    if (formState == null || !formState.validate()) {
       return;
     }
 
@@ -143,9 +144,9 @@ class TurnoServicosController extends GetxController {
 
       if (sucesso) {
         AppLogger.i('Serviço adicionado', tag: 'TurnoServicosController');
-        
+
         Get.back(); // Fecha dialog
-        
+
         Get.snackbar(
           'Sucesso',
           'Serviço adicionado com sucesso!',
@@ -208,7 +209,7 @@ class TurnoServicosController extends GetxController {
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao remover serviço',
           tag: 'TurnoServicosController', error: e, stackTrace: stackTrace);
-      
+
       Get.snackbar(
         'Erro',
         'Erro ao remover serviço.',
@@ -255,4 +256,3 @@ class TurnoServicosController extends GetxController {
     super.onClose();
   }
 }
-

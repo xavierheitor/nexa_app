@@ -145,10 +145,17 @@ class ChecklistModeloRepo implements SyncableRepository<ChecklistModeloTableDto>
       final response = await _dio.get(ApiConstants.checklistModelo);
 
       if (response.statusCode == 200) {
+        // Valida se response.data existe
+        final responseData = response.data;
+        if (responseData == null) {
+          AppLogger.w('⚠️ API retornou resposta vazia',
+              tag: 'ChecklistModeloRepo');
+          return [];
+        }
+
         // API retorna array diretamente, não dentro de 'data'
-        final List<dynamic> data = response.data is List 
-            ? response.data 
-            : (response.data['data'] ?? []);
+        final List<dynamic> data =
+            responseData is List ? responseData : (responseData['data'] ?? []);
         AppLogger.v('📦 API retornou ${data.length} modelos',
             tag: 'ChecklistModeloRepo');
 

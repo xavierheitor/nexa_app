@@ -159,8 +159,9 @@ class EquipeTableDto extends BaseDto with DriftDtoMixin, TableValidationMixin {
     BaseDto.validateStringLength(nome, 'nome', minLength: 2, maxLength: 100);
     
     // Validação da descrição (se fornecida)
-    if (descricao != null && descricao!.isNotEmpty) {
-      BaseDto.validateStringLength(descricao!, 'descricao', maxLength: 255);
+    final desc = descricao;
+    if (desc != null && desc.isNotEmpty) {
+      BaseDto.validateStringLength(desc, 'descricao', maxLength: 255);
     }
     
     // Validação do tipoEquipeId

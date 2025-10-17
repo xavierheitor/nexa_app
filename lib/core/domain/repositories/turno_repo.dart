@@ -766,7 +766,15 @@ class TurnoRepo {
         throw Exception('Erro ao abrir turno na API');
       }
 
-      final remoteId = response.data['id'] as int?;
+      // Valida se response.data existe
+      final responseData = response.data;
+      if (responseData == null) {
+        AppLogger.e('❌ [ABERTURA REMOTA] API retornou resposta vazia',
+            tag: 'TurnoRepo');
+        throw Exception('API retornou resposta vazia');
+      }
+
+      final remoteId = responseData['id'] as int?;
       if (remoteId == null) {
         AppLogger.e('❌ [ABERTURA REMOTA] API não retornou ID do turno',
             tag: 'TurnoRepo');

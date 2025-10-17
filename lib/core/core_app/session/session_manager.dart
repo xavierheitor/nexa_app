@@ -133,7 +133,7 @@ class SessionManager extends GetxService {
     if (_usuario == null) return false;
 
     /// Obtém data do último login.
-    final login = _usuario!.ultimoLogin;
+    final login = _usuario?.ultimoLogin;
     if (login == null) return false;
 
     /// Verifica se sessão ainda é válida (menos de 24 horas).
@@ -207,20 +207,30 @@ class SessionManager extends GetxService {
 
       /// Define primeiro usuário como usuário ativo.
       _usuario = usuarios.first;
-      AppLogger.i('Usuário local encontrado: ${_usuario!.nome}', tag: 'Sessão');
+      AppLogger.i('Usuário local encontrado: ${_usuario?.nome}', tag: 'Sessão');
+
+      /// Valida se usuário tem data de último login.
+      final ultimoLogin = _usuario?.ultimoLogin;
+      if (ultimoLogin == null) {
+        AppLogger.w('Usuário sem data de último login. Limpando sessão.', tag: 'Sessão');
+        await logout();
+        return;
+      }
 
       /// Calcula tempo desde último login.
-      final diff = DateTime.now().difference(_usuario!.ultimoLogin!).inHours;
+      final diff = DateTime.now().difference(ultimoLogin).inHours;
       AppLogger.d('Último login há $diff horas', tag: 'Sessão');
 
       /// Verifica se sessão expirou (24 horas).
       if (diff >= 24) {
+        AppLogger.i('Sessão expirada ($diff horas). Fazendo logout.', tag: 'Sessão');
         await logout();
         return;
       }
 
       /// Tenta renovar token se refresh token disponível.
-      if (_usuario!.refreshToken?.isNotEmpty == true) {
+      final refreshToken = _usuario?.refreshToken;
+      if (refreshToken != null && refreshToken.isNotEmpty) {
         try {
           await renovarToken();
         } catch (_) {
