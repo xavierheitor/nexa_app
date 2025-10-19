@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
-import 'package:nexa_app/core/domain/repositories/turno_repo.dart';
-import 'package:nexa_app/core/domain/dto/turno_table_dto.dart';
-import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
+import 'package:nexa_app/data/repositories/turno_repo.dart';
+import 'package:nexa_app/data/models/turno_table_dto.dart';
+import 'package:nexa_app/data/models/eletricista_table_dto.dart';
 import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
-import 'package:nexa_app/routes/routes.dart';
+import 'package:nexa_app/app/routes/routes.dart';
 
 /// Controlador global responsável pelo gerenciamento de turnos.
 ///

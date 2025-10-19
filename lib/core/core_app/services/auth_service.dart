@@ -1,5 +1,5 @@
-import 'package:nexa_app/core/domain/dto/usuario_table_dto.dart';
-import 'package:nexa_app/core/domain/repositories/usuario_repo.dart';
+import 'package:nexa_app/data/models/usuario_table_dto.dart';
+import 'package:nexa_app/data/repositories/usuario_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 
 /// Serviço responsável pelo gerenciamento de autenticação de usuários.

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/utils/app_version.dart';
-import 'package:nexa_app/app.dart';
+import 'package:nexa_app/app/app.dart';
 
 /// Ponto de entrada principal do aplicativo Flutter NexaApp.
 ///

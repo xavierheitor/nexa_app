@@ -25,9 +25,9 @@ library;
 
 import 'package:nexa_app/core/sync/syncable_repository.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
-// import 'package:nexa_app/core/utils/network/dio_client.dart';
-// import 'package:nexa_app/core/database/daos/exemplo_dao.dart';
-// import 'package:nexa_app/core/domain/dto/exemplo_dto.dart';
+// import 'package:nexa_app/core/network/dio_client.dart';
+// import 'package:nexa_app/data/datasources/local/exemplo_dao.dart';
+// import 'package:nexa_app/data/models/exemplo_dto.dart';
 
 /// Exemplo de DTO para demonstração.
 ///
