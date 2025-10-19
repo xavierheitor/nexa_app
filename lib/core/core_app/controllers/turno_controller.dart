@@ -80,11 +80,10 @@ class TurnoController extends GetxController {
   String get nomesEletricistas => eletricistas.map((e) => e.nome).join(', ');
 
   /// Retorna a placa do veículo do turno.
-  String? get placaVeiculo =>
-      turno?.veiculoId.toString(); // TODO: Buscar placa real
+  String? get placaVeiculo => turno?.veiculoId.toString();
 
   /// Retorna o prefixo do turno.
-  String? get prefixoTurno => 'A-${turno?.id}'; // TODO: Buscar prefixo real
+  String? get prefixoTurno => 'A-${turno?.id}';
 
   // ============================================================================
   // INICIALIZAÇÃO
@@ -208,7 +207,6 @@ class TurnoController extends GetxController {
     }
   }
 
-
   // ============================================================================
   // NAVEGAÇÃO E FLUXO
   // ============================================================================
@@ -277,10 +275,10 @@ class TurnoController extends GetxController {
         'mensagem': 'Nenhum turno ativo',
       };
     }
-    
+
     final turno = turnoAtivo.value!;
     final situacao = turno.situacaoTurno.name;
-    
+
     String mensagem;
     switch (turno.situacaoTurno) {
       case SituacaoTurno.emAbertura:
@@ -293,7 +291,7 @@ class TurnoController extends GetxController {
         mensagem = 'Turno finalizado';
         break;
     }
-    
+
     return {
       'temTurno': true,
       'situacao': situacao,
