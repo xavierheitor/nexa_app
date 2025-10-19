@@ -10,7 +10,7 @@
 
 Siga este caminho de aprendizado:
 
-```
+```bash
 1. OVERVIEW.md (10 min)
    ↓
 2. GETTING_STARTED.md (2h - hands-on)

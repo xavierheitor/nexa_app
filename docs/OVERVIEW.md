@@ -20,7 +20,7 @@ O **Nexa App** é um aplicativo móvel Flutter para **gerenciamento de turnos e 
 
 ## 🎯 Fluxo Principal do Usuário
 
-```
+```bash
 1. LOGIN
    ↓
 2. HOME (Dashboard)
@@ -33,8 +33,8 @@ O **Nexa App** é um aplicativo móvel Flutter para **gerenciamento de turnos e 
    • Informar KM inicial
    ↓
 4. CHECKLISTS OBRIGATÓRIOS
-   • Checklist Veicular (7 perguntas)
-   • Checklist EPC (3 perguntas)
+   • Checklist Veicular (N perguntas)
+   • Checklist EPC (N perguntas)
    • Checklist EPI por eletricista (N perguntas)
    ↓
 5. ABERTURA REMOTA
@@ -57,7 +57,7 @@ O **Nexa App** é um aplicativo móvel Flutter para **gerenciamento de turnos e 
 
 ### Visão em Camadas
 
-```
+```bash
 ┌─────────────────────────────────────────┐
 │         PRESENTATION                    │
 │  Controllers, Pages, Bindings           │
@@ -100,7 +100,7 @@ O **Nexa App** é um aplicativo móvel Flutter para **gerenciamento de turnos e 
 
 ## 📁 Estrutura de Pastas
 
-```
+```bash
 lib/
 │
 ├── 📱 app/                        # Configuração da aplicação

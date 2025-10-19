@@ -79,7 +79,7 @@ class TurnoNavigationOrchestrator {
       // 1. Verificar se existe turno ativo
       AppLogger.d('🔍 [ORCHESTRATOR] Buscando turno ativo...',
           tag: 'TurnoNavigationOrchestrator');
-      
+
       final turno = await _turnoRepo.buscarTurnoAtivo();
 
       if (turno == null) {
@@ -137,9 +137,7 @@ class TurnoNavigationOrchestrator {
       }
     } catch (e, stackTrace) {
       AppLogger.e('❌ [ORCHESTRATOR] Erro ao determinar rota',
-          tag: 'TurnoNavigationOrchestrator',
-          error: e,
-          stackTrace: stackTrace);
+          tag: 'TurnoNavigationOrchestrator', error: e, stackTrace: stackTrace);
       AppLogger.i(
           '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
           tag: 'TurnoNavigationOrchestrator');
@@ -182,7 +180,7 @@ class TurnoNavigationOrchestrator {
       AppLogger.i(
           '🔍 [ORCHESTRATOR] 🔄 Chamando checklistService.checklistPorTipoJaPreenchido($tipoChecklistVeicular)...',
           tag: 'TurnoNavigationOrchestrator');
-      
+
       final checklistVeicularCompleto =
           await _checklistService.checklistPorTipoJaPreenchido(
         tipoChecklistVeicular,
@@ -222,9 +220,8 @@ class TurnoNavigationOrchestrator {
       final tipoChecklistEPC = ApiConstants.tipoChecklistEpcId;
       AppLogger.d('🔍 [ORCHESTRATOR] Tipo Checklist EPC ID: $tipoChecklistEPC',
           tag: 'TurnoNavigationOrchestrator');
-      
-      final checklistEPCCompleto =
-          await _checklistService
+
+      final checklistEPCCompleto = await _checklistService
           .checklistPorTipoJaPreenchido(tipoChecklistEPC);
 
       AppLogger.i(
@@ -257,7 +254,7 @@ class TurnoNavigationOrchestrator {
           tag: 'TurnoNavigationOrchestrator');
       AppLogger.i('🔍 [ORCHESTRATOR] ETAPA 3: Verificando CHECKLIST EPI',
           tag: 'TurnoNavigationOrchestrator');
-      
+
       final eletricistas = await _turnoRepo.buscarEletricistasDoTurno(turnoId);
       AppLogger.d(
           '🔍 [ORCHESTRATOR] Eletricistas no turno: ${eletricistas.length}',
@@ -329,7 +326,7 @@ class TurnoNavigationOrchestrator {
       AppLogger.i(
           '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
           tag: 'TurnoNavigationOrchestrator');
-      
+
       return TurnoNavigationResult(
         state: TurnoNavigationState.checklistsConcluidos,
         route: Routes.turnoChecklistEletricistas,
@@ -338,9 +335,7 @@ class TurnoNavigationOrchestrator {
       );
     } catch (e, stackTrace) {
       AppLogger.e('❌ [ORCHESTRATOR] Erro ao verificar checklists',
-          tag: 'TurnoNavigationOrchestrator',
-          error: e,
-          stackTrace: stackTrace);
+          tag: 'TurnoNavigationOrchestrator', error: e, stackTrace: stackTrace);
       AppLogger.i(
           '🧭🧭🧭 [ORCHESTRATOR] ==========================================',
           tag: 'TurnoNavigationOrchestrator');
