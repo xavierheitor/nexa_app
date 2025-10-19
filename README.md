@@ -1,9 +1,64 @@
 # Nexa App
 
-Aplicativo Flutter organizado em módulos orientados a fluxo, com gerenciamento
-reativo de estado via GetX e persistência local através do Drift. Este guia
-resume as principais decisões arquiteturais, responsabilidades por camada e
-boas práticas adotadas para manter o código reutilizável e sustentável.
+Aplicativo Flutter para gerenciamento de turnos e serviços, seguindo **Clean Architecture** com organização por módulos, gerenciamento reativo via GetX e persistência local com Drift.
+
+> 📚 **Documentação Completa:** Veja os guias detalhados em [`docs/`](docs/)
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Instalar dependências
+flutter pub get
+
+# Gerar código do Drift
+dart run build_runner build --delete-conflicting-outputs
+
+# Executar app
+flutter run
+```
+
+---
+
+## 📚 Documentação
+
+| Documento | Descrição |
+|-----------|-----------|
+| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | 📐 Arquitetura completa, camadas e fluxo de dados |
+| **[STYLE_GUIDE.md](docs/STYLE_GUIDE.md)** | 🎨 Padrões de código, nomenclatura e convenções |
+| **[MODULE_TEMPLATE.md](docs/MODULE_TEMPLATE.md)** | 📦 Templates e exemplos para criar módulos |
+| **[MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md)** | 🔄 Guia de migração para nova estrutura |
+| **[CODE_REVIEW.md](docs/reports/flutter_code_review_2025-10-15.md)** | 🔍 Análise de código e melhorias |
+
+---
+
+## 🏗️ Arquitetura
+
+### Estrutura Atual (Em Migração)
+
+```
+lib/
+├── core/               # Núcleo (database, network, utils)
+├── modules/            # Features por módulo
+└── widgets/            # Componentes compartilhados
+```
+
+### Nova Estrutura (Destino)
+
+```
+lib/
+├── app/                # Configuração e rotas
+├── core/               # Database, network, security, utils
+├── data/               # Datasources, DTOs, Repositories
+├── domain/             # Entities, Interfaces, UseCases
+├── presentation/       # Módulos (controller + page + binding)
+└── shared/             # Widgets, middlewares, bindings globais
+```
+
+> 📖 **Detalhes:** Veja [ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+---
 
 ## Sumário
 
