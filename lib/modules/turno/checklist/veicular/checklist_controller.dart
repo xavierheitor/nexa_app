@@ -11,7 +11,7 @@ class ChecklistController extends GetxController {
   // Flags para determinar tipo de checklist (baseado em argumentos, não em rota)
   bool _isChecklistEPC = false;
   bool _isChecklistEPI = false;
-  
+
   int? get _eletricistaRemoteIdOrNull =>
       _isChecklistEPI ? _eletricistaRemoteId : null;
 
@@ -116,18 +116,18 @@ class ChecklistController extends GetxController {
       if (checklistCarregado == null) {
         AppLogger.w('⚠️ Nenhum checklist encontrado',
             tag: 'ChecklistController');
-        
+
         // Define estado vazio ANTES do snackbar
         checklist.value = null;
         perguntas.clear();
         isLoading.value = false; // ← Importante! Seta false ANTES do return
-        
+
         final mensagem = _isChecklistEPI
             ? 'Nenhum checklist de EPI encontrado para este eletricista'
             : _isChecklistEPC
                 ? 'Nenhum checklist de EPC encontrado para esta equipe'
                 : 'Nenhum checklist encontrado para este veículo';
-        
+
         Get.snackbar(
           'Atenção',
           mensagem,
@@ -228,7 +228,7 @@ class ChecklistController extends GetxController {
   bool validarRespostas() {
     AppLogger.d('🔍 [VALIDAÇÃO] Validando ${perguntas.length} perguntas...',
         tag: 'ChecklistController');
-    
+
     final naoRespondidas = perguntas.where((p) => !p.foiRespondida).toList();
 
     AppLogger.d('🔍 [VALIDAÇÃO] Não respondidas: ${naoRespondidas.length}',
@@ -238,13 +238,13 @@ class ChecklistController extends GetxController {
       AppLogger.w(
           '❌ [VALIDAÇÃO] ${naoRespondidas.length} perguntas não respondidas',
           tag: 'ChecklistController');
-      
+
       // Log das perguntas não respondidas
       for (final p in naoRespondidas) {
         AppLogger.d('  - Pergunta não respondida: ${p.nome}',
             tag: 'ChecklistController');
       }
-      
+
       Get.snackbar(
         'Atenção',
         'Por favor, responda todas as perguntas antes de continuar',
@@ -277,13 +277,13 @@ class ChecklistController extends GetxController {
 
     AppLogger.d('🎬 [FINALIZAR] Método finalizarChecklist() INICIADO',
         tag: 'ChecklistController');
-    
+
     try {
       isFinalizando.value = true;
 
       AppLogger.d('🔍 [FINALIZAR] Validando respostas...',
           tag: 'ChecklistController');
-      
+
       if (!validarRespostas()) {
         AppLogger.w('❌ [FINALIZAR] Validação falhou - abortando',
             tag: 'ChecklistController');
@@ -298,7 +298,7 @@ class ChecklistController extends GetxController {
       if (temPendencias) {
         AppLogger.w('⚠️ Checklist possui pendências',
             tag: 'ChecklistController');
-        // TODO: Aqui você pode salvar as pendências no banco
+        // Aqui você pode salvar as pendências no banco
       }
 
       final checklistAtual = checklist.value;
@@ -320,7 +320,7 @@ class ChecklistController extends GetxController {
       AppLogger.d(
           '💾 [FINALIZAR] ChecklistAtual: id=${checklistAtual.id}, remoteId=${checklistAtual.remoteId}, nome=${checklistAtual.nome}',
           tag: 'ChecklistController');
-      
+
       final sucesso = await _checklistService.salvarChecklistPreenchido(
         checklist: checklistAtual,
         perguntasRespondidas: perguntasRespondidas,
@@ -406,7 +406,7 @@ class ChecklistController extends GetxController {
         tag: 'ChecklistController');
 
     _jaNavegou = true; // Marca que já navegou
-    
+
     if (_isChecklistEPI) {
       AppLogger.i('🚀 [NAVEGAÇÃO] → TIPO: EPI concluído',
           tag: 'ChecklistController');
@@ -459,7 +459,7 @@ class ChecklistController extends GetxController {
       AppLogger.i('✅ [NAVEGAÇÃO] Get.offNamed() executado',
           tag: 'ChecklistController');
     }
-    
+
     AppLogger.i('🧭 [NAVEGAÇÃO] ========================================',
         tag: 'ChecklistController');
   }

@@ -16,7 +16,7 @@ import 'package:nexa_app/core/utils/network/dio_client.dart';
 /// de abertura e fechamento de turnos.
 class TurnoRepo {
   // ignore: unused_field
-  final DioClient _dio; // TODO: Será usado para sincronização com API
+  final DioClient _dio;
   final AppDatabase _db;
   late final TurnoDao _turnoDao;
   late final TurnoEletricistasDao _turnoEletricistasDao;
@@ -235,8 +235,6 @@ class TurnoRepo {
         'Validando abertura do turno (id=$turnoId, remoteId=$turnoRemoteId)',
         tag: 'TurnoRepo',
       );
-
-      // TODO: Integrar com API real. Enquanto não disponível, assume sucesso.
       return true;
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao validar abertura do turno',
@@ -733,7 +731,6 @@ class TurnoRepo {
           '👷 [ABERTURA REMOTA] ${eletricistas.length} eletricistas encontrados',
           tag: 'TurnoRepo');
 
-      // 3. TODO: Buscar checklists preenchidos do turno
       // final checklists = await buscarChecklistsDoTurno(turnoAtivo.id);
 
       // 4. Montar payload

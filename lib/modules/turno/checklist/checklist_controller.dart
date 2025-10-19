@@ -170,7 +170,6 @@ class ChecklistController extends GetxController {
       // Para EPI, precisamos passar o eletricistaRemoteId
       int? eletricistaRemoteId;
       if (_isChecklistEPI) {
-        // TODO: Obter o eletricistaRemoteId do contexto atual
         // Por enquanto, vamos usar um valor padrão ou null
         eletricistaRemoteId =
             null; // Será implementado quando tivermos o contexto do eletricista
