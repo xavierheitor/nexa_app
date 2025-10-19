@@ -134,44 +134,163 @@ class AbrirTurnoPage extends StatelessWidget {
               const SizedBox(height: 16),
 
               /// Lista de Eletricistas Selecionados.
+              /// Otimizado: Obx isolado apenas para verificar se lista está vazia
               Obx(() {
                 if (controller.eletricistasSelecionados.isEmpty) {
                   return const SizedBox.shrink();
                 }
 
-                return Card(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.people,
-                              color: colorScheme.primary,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Eletricistas Selecionados (${controller.eletricistasSelecionados.length})',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.primary,
+                return _buildEletricistasList(
+                  controller,
+                  theme,
+                  colorScheme,
+                );
+              }),
+
+              const SizedBox(height: 16),
+
+              /// Card com informações selecionadas.
+              /// Otimizado: Obx isolado para card de resumo
+              Obx(() {
+                final veiculoSelecionado =
+                    controller.veiculoDropdownController.selected.value;
+                final equipeSelecionada =
+                    controller.equipeDropdownController.selected.value;
+                final kmInicial = controller.kmInicialController.text.trim();
+
+                if (veiculoSelecionado == null ||
+                    equipeSelecionada == null ||
+                    kmInicial.isEmpty ||
+                    controller.eletricistasSelecionados.length < 2) {
+                  return const SizedBox.shrink();
+                }
+
+                return _buildInfoCard(
+                  veiculoSelecionado,
+                  equipeSelecionada,
+                  kmInicial,
+                  controller,
+                  theme,
+                  colorScheme,
+                );
+              }),
+
+              const SizedBox(height: 32),
+
+              /// Botão de Abrir Turno.
+              /// Otimizado: Obx apenas para isLoading
+              Obx(() => SizedBox(
+                    height: 56,
+                    child: FilledButton.icon(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : controller.abrirTurno,
+                      icon: controller.isLoading.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
-                            ),
-                          ],
+                            )
+                          : const Icon(Icons.play_arrow),
+                      label: Text(
+                        controller.isLoading.value
+                            ? 'Abrindo...'
+                            : 'Iniciar Turno',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 12),
-                        ...controller.eletricistasSelecionados
-                            .map((eletricistaSelecionado) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Container(
+                      ),
+                      style: FilledButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  )),
+
+              const SizedBox(height: 16),
+
+              /// Card informativo.
+              Card(
+                color: colorScheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Ao iniciar o turno, você poderá registrar os serviços executados.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Constrói a lista de eletricistas selecionados
+  Widget _buildEletricistasList(
+    AbrirTurnoController controller,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    return Card(
+      color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header - Obx isolado apenas para o contador
+            Row(
+              children: [
+                Icon(
+                  Icons.people,
+                  color: colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Obx(() => Text(
+                      'Eletricistas Selecionados (${controller.eletricistasSelecionados.length})',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      ),
+                    )),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Lista - Obx isolado para os itens
+            Obx(() => Column(
+                  children: controller.eletricistasSelecionados
+                      .map((eletricistaSelecionado) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: eletricistaSelecionado.isMotorista
@@ -265,214 +384,135 @@ class AbrirTurnoPage extends StatelessWidget {
                               ),
                             ),
                           );
-                        }),
-                        if (controller.eletricistasSelecionados.length < 2)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              'Mínimo de 2 eletricistas necessários',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.error,
-                              ),
-                            ),
-                          ),
-                        // Aviso sobre motorista obrigatório
-                        if (controller.eletricistasSelecionados.length >= 2 &&
-                            !controller.eletricistasSelecionados
-                                .any((e) => e.isMotorista))
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color:
-                                    colorScheme.errorContainer.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: colorScheme.error,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.warning,
-                                    color: colorScheme.error,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'É obrigatório marcar um motorista para abrir o turno',
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        color: colorScheme.error,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
+                  }).toList(),
+                )),
+            // Avisos - Obx isolado para validações
+            Obx(() {
+              if (controller.eletricistasSelecionados.length < 2) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Mínimo de 2 eletricistas necessários',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.error,
                     ),
                   ),
                 );
-              }),
-
-              const SizedBox(height: 24),
-
-              /// Card com informações selecionadas.
-              Obx(() {
-                final veiculoSelecionado =
-                    controller.veiculoDropdownController.selected.value;
-
-                final equipeSelecionada =
-                    controller.equipeDropdownController.selected.value;
-                final kmInicial = controller.kmInicialController.text.trim();
-
-                if (veiculoSelecionado == null ||
-                    equipeSelecionada == null ||
-                    kmInicial.isEmpty ||
-                    controller.eletricistasSelecionados.length < 2) {
-                  return const SizedBox.shrink();
-                }
-
-                return Card(
-                  color: colorScheme.primaryContainer.withOpacity(0.3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              }
+              return const SizedBox.shrink();
+            }),
+            // Aviso sobre motorista obrigatório - Obx isolado
+            Obx(() {
+              if (controller.eletricistasSelecionados.length >= 2 &&
+                  !controller.eletricistasSelecionados
+                      .any((e) => e.isMotorista)) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.errorContainer.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: colorScheme.error,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: colorScheme.primary,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Informações do Turno',
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.primary,
-                              ),
-                            ),
-                          ],
+                        Icon(
+                          Icons.warning,
+                          color: colorScheme.error,
+                          size: 20,
                         ),
-                        const SizedBox(height: 12),
-                        _buildInfoRow(
-                            'Veículo',
-                            'Veículo ${veiculoSelecionado.placa}',
-                            Icons.directions_car),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                            'Placa', veiculoSelecionado.placa, Icons.badge),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                            'Equipe', equipeSelecionada.nome, Icons.group),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                            'KM Inicial', '$kmInicial km', Icons.speed),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                          'Eletricistas',
-                          '${controller.eletricistasSelecionados.length} selecionados',
-                          Icons.people,
-                        ),
-                        const SizedBox(height: 8),
-                        _buildInfoRow(
-                          'Motorista',
-                          controller.eletricistasSelecionados
-                                  .where((e) => e.isMotorista)
-                                  .isNotEmpty
-                              ? controller.eletricistasSelecionados
-                                  .firstWhere((e) => e.isMotorista)
-                                  .eletricista
-                                  .nome
-                              : 'Não definido',
-                          Icons.drive_eta,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'É obrigatório marcar um motorista para abrir o turno',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.error,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 );
-              }),
+              }
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
+      ),
+    );
+  }
 
-              const SizedBox(height: 32),
-
-              /// Botão de Abrir Turno.
-              Obx(() => SizedBox(
-                    height: 56,
-                    child: FilledButton.icon(
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : controller.abrirTurno,
-                      icon: controller.isLoading.value
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.play_arrow),
-                      label: Text(
-                        controller.isLoading.value
-                            ? 'Abrindo...'
-                            : 'Iniciar Turno',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  )),
-
-              const SizedBox(height: 16),
-
-              /// Card informativo.
-              Card(
-                color: colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+  /// Constrói o card de informações do turno
+  Widget _buildInfoCard(
+    dynamic veiculoSelecionado,
+    dynamic equipeSelecionada,
+    String kmInicial,
+    AbrirTurnoController controller,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    return Card(
+      color: colorScheme.primaryContainer.withOpacity(0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: colorScheme.primary,
+                  size: 20,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Ao iniciar o turno, você poderá registrar os serviços executados.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ],
+                const SizedBox(width: 8),
+                Text(
+                  'Informações do Turno',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildInfoRow('Veículo', 'Veículo ${veiculoSelecionado.placa}',
+                Icons.directions_car),
+            const SizedBox(height: 8),
+            _buildInfoRow('Placa', veiculoSelecionado.placa, Icons.badge),
+            const SizedBox(height: 8),
+            _buildInfoRow('Equipe', equipeSelecionada.nome, Icons.group),
+            const SizedBox(height: 8),
+            _buildInfoRow('KM Inicial', '$kmInicial km', Icons.speed),
+            const SizedBox(height: 8),
+            Obx(() => _buildInfoRow(
+                  'Eletricistas',
+                  '${controller.eletricistasSelecionados.length} selecionados',
+                  Icons.people,
+                )),
+            const SizedBox(height: 8),
+            Obx(() => _buildInfoRow(
+                  'Motorista',
+                  controller.eletricistasSelecionados
+                          .where((e) => e.isMotorista)
+                          .isNotEmpty
+                      ? controller.eletricistasSelecionados
+                          .firstWhere((e) => e.isMotorista)
+                          .eletricista
+                          .nome
+                      : 'Não definido',
+                  Icons.drive_eta,
+                )),
+          ],
         ),
       ),
     );

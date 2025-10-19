@@ -18,79 +18,104 @@ class ChecklistPage extends GetView<ChecklistController> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 24),
-                Text(
-                  'Verificando checklist...',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
+      body: Column(
+        children: [
+          // Loading indicator - Obx isolado
+          Obx(() {
+            if (controller.isLoading.value) {
+              return Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Verificando checklist...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          );
-        }
+              );
+            }
+            return const SizedBox.shrink();
+          }),
 
-        if (controller.checklist.value == null ||
-            controller.perguntas.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.warning_amber_rounded,
-                    size: 64, color: Colors.orange),
-                const SizedBox(height: 16),
-                const Text(
-                  'Nenhum checklist encontrado',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          // Empty state - Obx isolado
+          Obx(() {
+            if (!controller.isLoading.value &&
+                (controller.checklist.value == null ||
+                    controller.perguntas.isEmpty)) {
+              return Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.warning_amber_rounded,
+                          size: 64, color: Colors.orange),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Nenhum checklist encontrado',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Não foi possível carregar o checklist para este veículo',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Voltar'),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Não foi possível carregar o checklist para este veículo',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+
+          // Content - Obx isolado que só renderiza quando não está loading e tem dados
+          Obx(() {
+            if (!controller.isLoading.value &&
+                controller.checklist.value != null &&
+                controller.perguntas.isNotEmpty) {
+              return Expanded(
+                child: Column(
+                  children: [
+                    // Header com progresso
+                    _buildProgressHeader(),
+                    const Divider(height: 1),
+
+                    // Lista de perguntas
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.perguntas.length,
+                        itemBuilder: (context, index) {
+                          return _buildPerguntaCard(index);
+                        },
+                      ),
+                    ),
+
+                    // Botão de finalizar
+                    _buildFinalizarButton(),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: () => Get.back(),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Voltar'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return Column(
-          children: [
-            // Header com progresso
-            _buildProgressHeader(),
-            const Divider(height: 1),
-
-            // Lista de perguntas
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.perguntas.length,
-                itemBuilder: (context, index) {
-                  final pergunta = controller.perguntas[index];
-                  return _buildPerguntaCard(pergunta, index);
-                },
-              ),
-            ),
-
-            // Botão de finalizar
-            _buildFinalizarButton(),
-          ],
-        );
-      }),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+        ],
+      ),
     );
   }
 
@@ -136,7 +161,8 @@ class ChecklistPage extends GetView<ChecklistController> {
   }
 
   /// Card de uma pergunta com suas opções.
-  Widget _buildPerguntaCard(ChecklistPerguntaModel pergunta, int index) {
+  /// Otimizado: Recebe apenas o index e acessa diretamente a lista reativa
+  Widget _buildPerguntaCard(int index) {
     return Obx(() {
       // Pega a pergunta atualizada da lista reativa
       final perguntaAtual = controller.perguntas[index];
