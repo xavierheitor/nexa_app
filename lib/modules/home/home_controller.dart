@@ -76,6 +76,14 @@ class HomeController extends GetxController {
     _carregarTurnoSeNecessario();
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    // Recarrega o turno quando a página está pronta
+    // Isso garante que o estado mais recente seja exibido
+    _recarregarTurnoAtivo();
+  }
+
   /// Carrega o turno ativo se ainda não foi carregado
   Future<void> _carregarTurnoSeNecessario() async {
     try {
@@ -87,6 +95,17 @@ class HomeController extends GetxController {
       }
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao carregar turno na inicialização da home',
+          tag: 'HomeController', error: e, stackTrace: stackTrace);
+    }
+  }
+
+  /// Recarrega o turno ativo (útil quando volta para a home)
+  Future<void> _recarregarTurnoAtivo() async {
+    try {
+      AppLogger.d('Recarregando turno ativo na home', tag: 'HomeController');
+      await turnoController.carregarTurnoAtivo();
+    } catch (e, stackTrace) {
+      AppLogger.e('Erro ao recarregar turno na home',
           tag: 'HomeController', error: e, stackTrace: stackTrace);
     }
   }

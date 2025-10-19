@@ -386,11 +386,17 @@ class ChecklistPage extends StatelessWidget {
 
           if (controller.temPerguntaAnterior) const SizedBox(width: 16),
 
-          // Botão próximo/salvar
+          // Botão próximo/salvar - Obx otimizado
           Expanded(
             flex: 2,
             child: Obx(() {
-              if (controller.isSaving.value) {
+              final isSaving = controller.isSaving.value;
+              final isUltima = controller.isUltimaPergunta;
+              final isCompleto = controller.checklistCompleto.value;
+              final temProxima = controller.temProximaPergunta;
+
+              // Loading state
+              if (isSaving) {
                 return const SizedBox(
                   height: 56,
                   child: Center(
@@ -399,10 +405,10 @@ class ChecklistPage extends StatelessWidget {
                 );
               }
 
-              if (controller.isUltimaPergunta &&
-                  controller.checklistCompleto.value) {
+              // Última pergunta e completo
+              if (isUltima && isCompleto) {
                 return ElevatedButton.icon(
-                  onPressed: () => controller.salvarChecklist(),
+                  onPressed: controller.salvarChecklist,
                   icon: const Icon(Icons.save),
                   label: const Text('Salvar Checklist'),
                   style: ElevatedButton.styleFrom(
@@ -411,7 +417,10 @@ class ChecklistPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 );
-              } else if (controller.temProximaPergunta) {
+              }
+
+              // Tem próxima pergunta
+              if (temProxima) {
                 return ElevatedButton.icon(
                   onPressed: controller.proximaPergunta,
                   icon: const Icon(Icons.arrow_forward),
@@ -422,20 +431,19 @@ class ChecklistPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 );
-              } else {
-                return ElevatedButton.icon(
-                  onPressed: controller.checklistCompleto.value
-                      ? () => controller.salvarChecklist()
-                      : null,
-                  icon: const Icon(Icons.save),
-                  label: const Text('Salvar Checklist'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade600,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                );
               }
+
+              // Fallback: botão salvar (habilitado apenas se completo)
+              return ElevatedButton.icon(
+                onPressed: isCompleto ? controller.salvarChecklist : null,
+                icon: const Icon(Icons.save),
+                label: const Text('Salvar Checklist'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade600,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              );
             }),
           ),
         ],

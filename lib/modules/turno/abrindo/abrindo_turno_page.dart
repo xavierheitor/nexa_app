@@ -54,7 +54,7 @@ class AbrindoTurnoPage extends GetView<AbrindoTurnoController> {
 
                 const SizedBox(height: 16),
 
-                // Status
+              // Status - Obx isolado
                 Obx(() => Text(
                       controller.statusMensagem.value,
                       style: const TextStyle(
@@ -78,61 +78,67 @@ class AbrindoTurnoPage extends GetView<AbrindoTurnoController> {
 
                 const SizedBox(height: 24),
 
-                // Mensagem adicional
+              // Mensagem de erro - Obx isolado e otimizado
                 Obx(() {
-                  if (controller.erro.value != null) {
-                    return Column(
-                      children: [
-                        const SizedBox(height: 24),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade900.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.red.shade300),
-                          ),
-                          child: Column(
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                color: Colors.white,
-                                size: 48,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                controller.erro.value!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: controller.voltar,
-                          icon: const Icon(Icons.arrow_back),
-                          label: const Text('Voltar'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.blue.shade700,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  return const SizedBox.shrink();
-                }),
+                final erro = controller.erro.value;
+                if (erro != null && erro.isNotEmpty) {
+                  return _buildErrorMessage(erro);
+                }
+                return const SizedBox.shrink();
+              }),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// Constrói a mensagem de erro com botão de voltar
+  Widget _buildErrorMessage(String erro) {
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.red.shade900.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.red.shade300),
+          ),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: Colors.white,
+                size: 48,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                erro,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        ElevatedButton.icon(
+          onPressed: controller.voltar,
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Voltar'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.blue.shade700,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 32,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

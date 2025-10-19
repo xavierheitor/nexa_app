@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/core_app/services/error_message_service.dart';
 import 'package:nexa_app/core/domain/dto/eletricista_table_dto.dart';
 import 'package:nexa_app/core/domain/repositories/eletricista_repo.dart';
@@ -16,6 +17,7 @@ class ChecklistEletricistasController extends GetxController {
       Get.find<TurnoAberturaOrchestratorService>();
   final ErrorMessageService _errorMessageService =
       Get.find<ErrorMessageService>();
+  final TurnoController _turnoController = Get.find<TurnoController>();
 
   final RxBool isLoading = false.obs;
   final RxList<EletricistaChecklistStatus> eletricistas =
@@ -199,6 +201,11 @@ class ChecklistEletricistasController extends GetxController {
       final remoteId = resultado['remoteId'];
       AppLogger.i('✅ [ABERTURA TURNO] Sucesso! RemoteID: $remoteId',
           tag: 'ChecklistEletricistasController');
+
+      // Recarrega o turno ativo para atualizar o estado no TurnoController
+      AppLogger.d('🔄 [ABERTURA TURNO] Recarregando turno no TurnoController',
+          tag: 'ChecklistEletricistasController');
+      await _turnoController.carregarTurnoAtivo();
 
       // Limpa qualquer erro anterior
       _errorMessageService.limparErro();

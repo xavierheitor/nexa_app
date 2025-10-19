@@ -28,19 +28,28 @@ class TurnoNavigationLoadingPage extends GetView<TurnoNavigationLoadingControlle
         ),
         child: SafeArea(
           child: Center(
-            child: Obx(() => _buildContent(context)),
+            child: Column(
+              children: [
+                // Loading state - Obx isolado
+                Obx(() {
+                  if (!controller.hasError.value) {
+                    return Expanded(child: _buildLoadingState(context));
+                  }
+                  return const SizedBox.shrink();
+                }),
+                // Error state - Obx isolado
+                Obx(() {
+                  if (controller.hasError.value) {
+                    return Expanded(child: _buildErrorState(context));
+                  }
+                  return const SizedBox.shrink();
+                }),
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
-
-  Widget _buildContent(BuildContext context) {
-    if (controller.hasError.value) {
-      return _buildErrorState(context);
-    }
-
-    return _buildLoadingState(context);
   }
 
   Widget _buildLoadingState(BuildContext context) {
@@ -87,7 +96,7 @@ class TurnoNavigationLoadingPage extends GetView<TurnoNavigationLoadingControlle
 
         const SizedBox(height: 24),
 
-        // Mensagem de status
+        // Mensagem de status - Obx isolado
         Obx(() => Text(
               controller.statusMessage.value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -148,7 +157,7 @@ class TurnoNavigationLoadingPage extends GetView<TurnoNavigationLoadingControlle
 
           const SizedBox(height: 16),
 
-          // Mensagem de erro
+          // Mensagem de erro - Obx isolado
           Obx(() => Text(
                 controller.errorMessage.value,
                 style: Theme.of(context).textTheme.bodyMedium,
