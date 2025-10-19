@@ -4,6 +4,8 @@ import 'package:nexa_app/core/core_app/services/auth_service.dart';
 import 'package:nexa_app/core/core_app/services/error_message_service.dart';
 import 'package:nexa_app/core/core_app/services/sync_service.dart';
 import 'package:nexa_app/core/core_app/session/session_manager.dart';
+import 'package:nexa_app/core/domain/repositories/equipe_repo.dart';
+import 'package:nexa_app/core/domain/repositories/veiculo_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/routes/routes.dart';
 
@@ -253,6 +255,34 @@ class HomeController extends GetxController {
   /// Limpa a mensagem de erro de abertura de turno
   void limparErroAberturaTurno() {
     _errorMessageService.limparErro();
+  }
+
+  // ============================================================================
+  // MÉTODOS AUXILIARES PARA DADOS DO TURNO
+  // ============================================================================
+
+  /// Busca o nome da equipe pelo ID.
+  Future<String> buscarNomeEquipe(int equipeId) async {
+    try {
+      final equipeRepo = Get.find<EquipeRepo>();
+      final equipe = await equipeRepo.buscarPorId(equipeId.toString());
+      return equipe?.nome ?? 'Equipe $equipeId';
+    } catch (e) {
+      AppLogger.w('Erro ao buscar nome da equipe: $e', tag: 'HomeController');
+      return 'Equipe $equipeId';
+    }
+  }
+
+  /// Busca a placa do veículo pelo ID.
+  Future<String> buscarPlacaVeiculo(int veiculoId) async {
+    try {
+      final veiculoRepo = Get.find<VeiculoRepo>();
+      final veiculo = await veiculoRepo.buscarPorId(veiculoId);
+      return veiculo.placa;
+    } catch (e) {
+      AppLogger.w('Erro ao buscar placa do veículo: $e', tag: 'HomeController');
+      return 'Veículo $veiculoId';
+    }
   }
 
   // ============================================================================

@@ -211,22 +211,29 @@ class HomePage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.directions_car,
-                    size: 16,
-                    color: Colors.orange.shade600,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Veículo ${turno.veiculoId}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.orange.shade700,
-                    ),
-                  ),
-                ],
+              FutureBuilder<String>(
+                future: controller.buscarPlacaVeiculo(turno.veiculoId),
+                builder: (context, snapshot) {
+                  final placaVeiculo = snapshot.data ?? 'Carregando...';
+                  return Row(
+                    children: [
+                      Icon(
+                        Icons.directions_car,
+                        size: 16,
+                        color: Colors.orange.shade600,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        placaVeiculo,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Container(
@@ -471,21 +478,31 @@ class HomePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-              /// Informações da equipe e veículo.
-            _buildInfoRow(
-                icon: Icons.group_outlined,
-                label: 'Equipe',
-                value:
-                    'Equipe ${turno.equipeId}', // TODO: Buscar nome real da equipe
-              colorScheme: colorScheme,
+              /// Informações da equipe e veículo - Com busca real.
+              FutureBuilder<String>(
+                future: controller.buscarNomeEquipe(turno.equipeId),
+                builder: (context, snapshot) {
+                  final nomeEquipe = snapshot.data ?? 'Carregando...';
+                  return _buildInfoRow(
+                    icon: Icons.group_outlined,
+                    label: 'Equipe',
+                    value: nomeEquipe,
+                    colorScheme: colorScheme,
+                  );
+                },
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(
-                icon: Icons.directions_car_outlined,
-              label: 'Placa',
-                value:
-                    'Veículo ${turno.veiculoId}', // TODO: Buscar placa real do veículo
-              colorScheme: colorScheme,
+              FutureBuilder<String>(
+                future: controller.buscarPlacaVeiculo(turno.veiculoId),
+                builder: (context, snapshot) {
+                  final placaVeiculo = snapshot.data ?? 'Carregando...';
+                  return _buildInfoRow(
+                    icon: Icons.directions_car_outlined,
+                    label: 'Placa',
+                    value: placaVeiculo,
+                    colorScheme: colorScheme,
+                  );
+                },
             ),
           ],
         ),
