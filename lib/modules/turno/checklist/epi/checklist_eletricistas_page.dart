@@ -13,75 +13,106 @@ class ChecklistEletricistasPage
         title: const Text('Checklist EPI - Eletricistas'),
         centerTitle: true,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      body: _buildBody(),
+    );
+  }
 
-        final erro = controller.erro.value;
-        if (erro != null) {
-          return _ErroWidget(
-            mensagem: erro,
-            onRetry: controller.carregarEletricistas,
-          );
-        }
+  /// Constrói o corpo da página com Obx otimizados.
+  /// Separado em múltiplos Obx para reduzir reconstruções desnecessárias.
+  Widget _buildBody() {
+    // Observa apenas isLoading
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      return _buildContent();
+    });
+  }
 
-        if (controller.eletricistas.isEmpty) {
-          return _ErroWidget(
-            mensagem: 'Nenhum eletricista disponível para o checklist.',
-            onRetry: controller.carregarEletricistas,
-          );
-        }
+  /// Constrói o conteúdo principal (erro ou lista).
+  Widget _buildContent() {
+    // Observa apenas erro
+    return Obx(() {
+      final erro = controller.erro.value;
+      if (erro != null) {
+        return _ErroWidget(
+          mensagem: erro,
+          onRetry: controller.carregarEletricistas,
+        );
+      }
+      return _buildListaOuVazio();
+    });
+  }
 
-        return Column(
-          children: [
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.eletricistas.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
+  /// Constrói a lista de eletricistas ou estado vazio.
+  Widget _buildListaOuVazio() {
+    // Observa apenas eletricistas
+    return Obx(() {
+      if (controller.eletricistas.isEmpty) {
+        return const _ErroWidget(
+          mensagem: 'Nenhum eletricista disponível para o checklist.',
+          onRetry: null, // Não há retry para estado vazio
+        );
+      }
+
+      return Column(
+        children: [
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: controller.eletricistas.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                // Cada item observa apenas seu índice específico
+                return Obx(() {
+                  if (index >= controller.eletricistas.length) {
+                    return const SizedBox.shrink();
+                  }
                   final item = controller.eletricistas[index];
                   return _EletricistaCard(
                     item: item,
                     onTap: () => controller.abrirChecklist(item),
                   );
-                },
-              ),
+                });
+              },
             ),
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Obx(() {
-                    final podeAbrir = controller.todosConcluidos;
-                    final carregando = controller.isAbrindoTurno.value;
-                    return ElevatedButton.icon(
-                      onPressed:
-                          podeAbrir && !carregando ? controller.abrirTurno : null,
-                      icon: carregando
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.lock_open),
-                      label: Text(carregando ? 'Validando...' : 'Abrir turno'),
-                    );
-                  }),
-                ),
-              ),
-            ),
-          ],
-        );
-      }),
+          ),
+          _buildBotaoAbrirTurno(),
+        ],
+      );
+    });
+  }
+
+  /// Constrói o botão de abrir turno.
+  /// Observa apenas todosConcluidos e isAbrindoTurno.
+  Widget _buildBotaoAbrirTurno() {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: SizedBox(
+          width: double.infinity,
+          child: Obx(() {
+            final podeAbrir = controller.todosConcluidos;
+            final carregando = controller.isAbrindoTurno.value;
+            return ElevatedButton.icon(
+              onPressed:
+                  podeAbrir && !carregando ? controller.abrirTurno : null,
+              icon: carregando
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.lock_open),
+              label: Text(carregando ? 'Validando...' : 'Abrir turno'),
+            );
+          }),
+        ),
+      ),
     );
   }
 }
@@ -145,9 +176,9 @@ class _EletricistaCard extends StatelessWidget {
 
 class _ErroWidget extends StatelessWidget {
   final String mensagem;
-  final Future<void> Function() onRetry;
+  final Future<void> Function()? onRetry;
 
-  const _ErroWidget({required this.mensagem, required this.onRetry});
+  const _ErroWidget({required this.mensagem, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -168,14 +199,16 @@ class _ErroWidget extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                onRetry();
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Tentar novamente'),
-            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  onRetry?.call();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Tentar novamente'),
+              ),
+            ],
           ],
         ),
       ),

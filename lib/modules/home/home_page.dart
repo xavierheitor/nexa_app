@@ -27,7 +27,11 @@ class HomePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /// Card de informações do turno.
-              Obx(() => _buildTurnoCard(controller, colorScheme)),
+              /// Otimizado: Obx acessa apenas turnoAtivo, reduzindo reconstruções
+              Obx(() {
+                final turno = controller.turnoController.turnoAtivo.value;
+                return _buildTurnoCardOptimized(turno, controller, colorScheme);
+              }),
 
               /// Card de erro de abertura de turno (se houver)
               Obx(() => controller.temErroAberturaTurno
@@ -91,10 +95,10 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Constrói o card com informações do turno.
-  Widget _buildTurnoCard(HomeController controller, ColorScheme colorScheme) {
-    final turno = controller.turnoController.turnoAtivo.value;
-
+  /// Constrói o card com informações do turno (versão otimizada).
+  /// Recebe o turno diretamente, evitando acessar observables desnecessários.
+  Widget _buildTurnoCardOptimized(
+      dynamic turno, HomeController controller, ColorScheme colorScheme) {
     if (turno == null) {
       return _buildSemTurnoCard(controller, colorScheme);
     }

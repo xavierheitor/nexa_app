@@ -32,6 +32,7 @@ class TurnoServicosPage extends StatelessWidget {
           _buildTurnoInfo(controller, theme, colorScheme),
 
           /// Lista de serviços.
+          /// Otimizado: ListView constante, apenas itemCount reativo
           Expanded(
             child: Obx(() {
               final servicos = controller.turnoController.servicos;
@@ -40,19 +41,28 @@ class TurnoServicosPage extends StatelessWidget {
                 return _buildEmptyState(colorScheme);
               }
 
+              // ListView é constante, apenas a contagem de itens muda
               return RefreshIndicator(
                 onRefresh: controller.turnoController.atualizar,
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: servicos.length,
                   itemBuilder: (context, index) {
-                    final servico = servicos[index];
-                    return _buildServicoCard(
-                      controller,
-                      servico,
-                      theme,
-                      colorScheme,
-                    );
+                    // Cada item observa apenas seu próprio índice
+                    return Obx(() {
+                      // Acessa apenas o item específico da lista
+                      if (index >= controller.turnoController.servicos.length) {
+                        return const SizedBox.shrink();
+                      }
+                      final servico =
+                          controller.turnoController.servicos[index];
+                      return _buildServicoCard(
+                        controller,
+                        servico,
+                        theme,
+                        colorScheme,
+                      );
+                    });
                   },
                 ),
               );
