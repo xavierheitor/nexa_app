@@ -76,6 +76,53 @@ class AbrirTurnoController extends GetxController {
       <EletricistaSelecionado>[].obs;
 
   // ============================================================================
+  // FLAGS DE VALIDAÇÃO (OTIMIZADAS PARA EVITAR REBUILD EXCESSIVO)
+  // ============================================================================
+
+  /// Flag indicando se veículo foi selecionado.
+  final RxBool _veiculoSelecionado = false.obs;
+
+  /// Flag indicando se KM inicial foi preenchido.
+  final RxBool _kmInicialPreenchido = false.obs;
+
+  /// Flag indicando se equipe foi selecionada.
+  final RxBool _equipeSelecionada = false.obs;
+
+  /// Flag indicando se tem motorista marcado.
+  final RxBool _temMotorista = false.obs;
+
+  /// Flag indicando se tem eletricistas suficientes (mínimo 2).
+  final RxBool _temEletricistasSuficientes = false.obs;
+
+  /// Flag computada indicando se formulário está completo.
+  final RxBool _formularioCompleto = false.obs;
+
+  // ============================================================================
+  // GETTERS PÚBLICOS
+  // ============================================================================
+
+  /// Getter para verificar se veículo foi selecionado.
+  bool get veiculoSelecionado => _veiculoSelecionado.value;
+
+  /// Getter para verificar se KM inicial foi preenchido.
+  bool get kmInicialPreenchido => _kmInicialPreenchido.value;
+
+  /// Getter para verificar se equipe foi selecionada.
+  bool get equipeSelecionada => _equipeSelecionada.value;
+
+  /// Getter para verificar se tem motorista marcado.
+  bool get temMotorista => _temMotorista.value;
+
+  /// Getter para verificar se tem eletricistas suficientes.
+  bool get temEletricistasSuficientes => _temEletricistasSuficientes.value;
+
+  /// Getter para verificar se formulário está completo.
+  bool get formularioCompleto => _formularioCompleto.value;
+
+  /// Verifica se o botão deve estar habilitado.
+  bool get podeAbrirTurno => !isLoading.value && _formularioCompleto.value;
+
+  // ============================================================================
   // VALIDAÇÕES
   // ============================================================================
 
@@ -117,6 +164,9 @@ class AbrirTurnoController extends GetxController {
       );
       AppLogger.d('Eletricista adicionado: ${eletricista.nome}',
           tag: 'AbrirTurnoController');
+      
+      // Atualiza validações
+      _atualizarValidacaoEletricistas();
     }
   }
 
@@ -127,6 +177,9 @@ class AbrirTurnoController extends GetxController {
     );
     AppLogger.d('Eletricista removido: $eletricistaId',
         tag: 'AbrirTurnoController');
+    
+    // Atualiza validações
+    _atualizarValidacaoEletricistas();
   }
 
   /// Alterna status de motorista de um eletricista.
@@ -154,7 +207,53 @@ class AbrirTurnoController extends GetxController {
 
       AppLogger.d('Motorista alternado: ${eletricista.eletricista.nome}',
           tag: 'AbrirTurnoController');
+      
+      // Atualiza validação de motorista
+      _atualizarValidacaoEletricistas();
     }
+  }
+
+  // ============================================================================
+  // MÉTODOS PRIVADOS DE VALIDAÇÃO (OTIMIZAÇÃO)
+  // ============================================================================
+
+  /// Atualiza flag de veículo selecionado.
+  void _atualizarValidacaoVeiculo() {
+    _veiculoSelecionado.value =
+        veiculoDropdownController.selected.value != null;
+    _recalcularFormularioCompleto();
+  }
+
+  /// Atualiza flag de KM inicial preenchido.
+  void _atualizarValidacaoKmInicial() {
+    _kmInicialPreenchido.value = kmInicialController.text.trim().isNotEmpty;
+    _recalcularFormularioCompleto();
+  }
+
+  /// Atualiza flag de equipe selecionada.
+  void _atualizarValidacaoEquipe() {
+    _equipeSelecionada.value = equipeDropdownController.selected.value != null;
+    _recalcularFormularioCompleto();
+  }
+
+  /// Atualiza flags de eletricistas (quantidade e motorista).
+  void _atualizarValidacaoEletricistas() {
+    _temEletricistasSuficientes.value = eletricistasSelecionados.length >= 2;
+    _temMotorista.value = eletricistasSelecionados.any((e) => e.isMotorista);
+    _recalcularFormularioCompleto();
+  }
+
+  /// Recalcula o estado geral do formulário.
+  ///
+  /// Este método é chamado sempre que uma validação individual muda,
+  /// atualizando apenas a flag `_formularioCompleto` ao invés de
+  /// recalcular todas as condições repetidamente.
+  void _recalcularFormularioCompleto() {
+    _formularioCompleto.value = _veiculoSelecionado.value &&
+        _kmInicialPreenchido.value &&
+        _equipeSelecionada.value &&
+        _temEletricistasSuficientes.value &&
+        _temMotorista.value;
   }
 
   // ============================================================================
@@ -300,11 +399,28 @@ class AbrirTurnoController extends GetxController {
       remoteSearch: _buscarEletricistas,
     );
 
+    // Configura listeners otimizados para atualizar apenas flags específicas
+    _setupListeners();
+
     // Carrega dados iniciais
     _carregarDadosIniciais();
 
     AppLogger.d('AbrirTurnoController inicializado',
         tag: 'AbrirTurnoController');
+  }
+
+  /// Configura listeners otimizados para evitar rebuilds excessivos.
+  ///
+  /// Cada listener atualiza apenas a flag específica relacionada,
+  /// ao invés de forçar rebuild de toda a UI.
+  void _setupListeners() {
+    // Listener para campo de KM Inicial
+    kmInicialController.addListener(_atualizarValidacaoKmInicial);
+
+    // Listeners para os dropdowns (via workers do GetX)
+    ever(veiculoDropdownController.selected,
+        (_) => _atualizarValidacaoVeiculo());
+    ever(equipeDropdownController.selected, (_) => _atualizarValidacaoEquipe());
   }
 
   /// Limpeza do controlador.

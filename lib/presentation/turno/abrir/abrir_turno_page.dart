@@ -178,40 +178,57 @@ class AbrirTurnoPage extends StatelessWidget {
               const SizedBox(height: 32),
 
               /// Botão de Abrir Turno.
-              /// Otimizado: Obx apenas para isLoading
-              Obx(() => SizedBox(
-                    height: 56,
-                    child: FilledButton.icon(
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : controller.abrirTurno,
-                      icon: controller.isLoading.value
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.play_arrow),
-                      label: Text(
-                        controller.isLoading.value
-                            ? 'Abrindo...'
-                            : 'Iniciar Turno',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+              ///
+              /// **Otimização de Performance:**
+              /// - Obx isolado observa apenas `_formularioCompleto` e `isLoading`
+              /// - Não causa rebuild de toda a tela quando validações mudam
+              /// - Cada campo atualiza sua própria flag de validação
+              Obx(() {
+                final podeAbrir = controller.podeAbrirTurno;
+                final isLoading = controller.isLoading.value;
+
+                return SizedBox(
+                  height: 56,
+                  child: FilledButton.icon(
+                    onPressed: podeAbrir ? controller.abrirTurno : null,
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(Icons.play_arrow),
+                    label: Text(
+                      isLoading ? 'Abrindo...' : 'Iniciar Turno',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  )),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 16),
+
+              /// Card de requisitos (quando formulário incompleto)
+              /// Obx isolado apenas para mostrar/ocultar o card
+              Obx(() {
+                if (controller.formularioCompleto) {
+                  return const SizedBox.shrink();
+                }
+
+                return _buildCardRequisitos(controller, theme, colorScheme);
+              }),
 
               const SizedBox(height: 16),
 
@@ -541,6 +558,123 @@ class AbrirTurnoPage extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Constrói o card de requisitos com Obx isolados para cada item.
+  ///
+  /// Esta abordagem evita rebuilds excessivos ao isolar cada validação
+  /// em seu próprio Obx, garantindo que apenas o item específico seja
+  /// reconstruído quando sua flag mudar.
+  Widget _buildCardRequisitos(
+    AbrirTurnoController controller,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    return Card(
+      color: colorScheme.secondaryContainer.withOpacity(0.5),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: colorScheme.secondary.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.checklist,
+                  color: colorScheme.secondary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Preencha todos os campos obrigatórios:',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.secondary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Obx isolado para veículo
+            Obx(() => _buildRequisitoItem(
+                  controller.veiculoSelecionado,
+                  'Veículo selecionado',
+                  colorScheme,
+                )),
+            const SizedBox(height: 6),
+
+            // Obx isolado para KM inicial
+            Obx(() => _buildRequisitoItem(
+                  controller.kmInicialPreenchido,
+                  'KM inicial informado',
+                  colorScheme,
+                )),
+            const SizedBox(height: 6),
+
+            // Obx isolado para equipe
+            Obx(() => _buildRequisitoItem(
+                  controller.equipeSelecionada,
+                  'Equipe selecionada',
+                  colorScheme,
+                )),
+            const SizedBox(height: 6),
+
+            // Obx isolado para eletricistas
+            Obx(() => _buildRequisitoItem(
+                  controller.temEletricistasSuficientes,
+                  'Mínimo 2 eletricistas',
+                  colorScheme,
+                )),
+            const SizedBox(height: 6),
+
+            // Obx isolado para motorista
+            Obx(() => _buildRequisitoItem(
+                  controller.temMotorista,
+                  'Motorista marcado',
+                  colorScheme,
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Constrói um item do checklist de requisitos.
+  Widget _buildRequisitoItem(
+    bool completo,
+    String texto,
+    ColorScheme colorScheme,
+  ) {
+    return Row(
+      children: [
+        Icon(
+          completo ? Icons.check_circle : Icons.radio_button_unchecked,
+          size: 18,
+          color: completo ? Colors.green[600] : colorScheme.outline,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            texto,
+            style: TextStyle(
+              fontSize: 13,
+              color: completo
+                  ? colorScheme.onSurface
+                  : colorScheme.onSurfaceVariant,
+              fontWeight: completo ? FontWeight.w500 : FontWeight.normal,
             ),
           ),
         ),
