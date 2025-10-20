@@ -12,6 +12,7 @@ import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/presentation/turno/checklist/veicular/checklist_service.dart';
 import 'package:nexa_app/presentation/turno/navigation/turno_navigation_loading_controller.dart';
 import 'package:nexa_app/presentation/turno/navigation/turno_navigation_orchestrator.dart';
+import 'package:nexa_app/shared/bindings/repository_builder.dart';
 
 /// Binding para a tela de loading de navegação do turno.
 ///
@@ -20,33 +21,18 @@ import 'package:nexa_app/presentation/turno/navigation/turno_navigation_orchestr
 class TurnoNavigationLoadingBinding extends Bindings {
   @override
   void dependencies() {
-    final db = Get.find<AppDatabase>();
-    final dio = Get.find<DioClient>();
+    // Criar builder para repositories
+    final builder = RepositoryBuilder(
+      dio: Get.find<DioClient>(),
+      db: Get.find<AppDatabase>(),
+    );
 
     // ========================================================================
     // REPOSITÓRIOS BASE
     // ========================================================================
-
-    if (!Get.isRegistered<TurnoRepo>()) {
-      Get.lazyPut<TurnoRepo>(
-        () => TurnoRepo(dio: dio, db: db),
-        fenix: true,
-      );
-    }
-
-    if (!Get.isRegistered<VeiculoRepo>()) {
-      Get.lazyPut<VeiculoRepo>(
-        () => VeiculoRepo(dio: dio, db: db),
-        fenix: true,
-      );
-    }
-
-    if (!Get.isRegistered<EquipeRepo>()) {
-      Get.lazyPut<EquipeRepo>(
-        () => EquipeRepo(dio: dio, db: db),
-        fenix: true,
-      );
-    }
+    
+    // NOTA: TurnoRepo, VeiculoRepo e EquipeRepo já estão registrados globalmente
+    // no InitialBinding (com fenix: true). O GetX encontrará automaticamente.
 
     // ========================================================================
     // REPOSITÓRIOS DE CHECKLIST
@@ -54,35 +40,35 @@ class TurnoNavigationLoadingBinding extends Bindings {
 
     if (!Get.isRegistered<ChecklistModeloRepo>()) {
       Get.lazyPut<ChecklistModeloRepo>(
-        () => ChecklistModeloRepo(dio: dio, db: db),
+        () => builder.createChecklistModeloRepo(),
         fenix: true,
       );
     }
 
     if (!Get.isRegistered<ChecklistPerguntaRepo>()) {
       Get.lazyPut<ChecklistPerguntaRepo>(
-        () => ChecklistPerguntaRepo(dio: dio, db: db),
+        () => builder.createChecklistPerguntaRepo(),
         fenix: true,
       );
     }
 
     if (!Get.isRegistered<ChecklistOpcaoRespostaRepo>()) {
       Get.lazyPut<ChecklistOpcaoRespostaRepo>(
-        () => ChecklistOpcaoRespostaRepo(dio: dio, db: db),
+        () => builder.createChecklistOpcaoRespostaRepo(),
         fenix: true,
       );
     }
 
     if (!Get.isRegistered<ChecklistPreenchidoRepo>()) {
       Get.lazyPut<ChecklistPreenchidoRepo>(
-        () => ChecklistPreenchidoRepo(db.checklistPreenchidoDao),
+        () => builder.createChecklistPreenchidoRepo(),
         fenix: true,
       );
     }
 
     if (!Get.isRegistered<ChecklistRespostaRepo>()) {
       Get.lazyPut<ChecklistRespostaRepo>(
-        () => ChecklistRespostaRepo(db.checklistRespostaDao),
+        () => builder.createChecklistRespostaRepo(),
         fenix: true,
       );
     }

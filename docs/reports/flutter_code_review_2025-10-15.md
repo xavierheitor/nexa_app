@@ -32,7 +32,7 @@
 
 1. Adicionar `onClose()` em todos os controllers para evitar memory leaks - aplicado
 2. Implementar validação null-safety consistente
-3. Usar `Obx` e `GetBuilder` adequadamente para performance
+3. Usar `Obx` e `GetBuilde2ra performance
 4. Criptografar tokens antes de armazenar localmente
 5. Configurar linters mais rigorosos (very_good_cli)
 
