@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/services/auth_service.dart';
+import 'package:nexa_app/core/security/token_storage_service.dart';
 import 'package:nexa_app/data/models/usuario_table_dto.dart';
 import 'package:nexa_app/core/utils/errors/error_handler.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
@@ -67,6 +68,12 @@ class SessionManager extends GetxService {
   /// de dados de usuário.
   final AuthService authService;
 
+  /// Serviço de armazenamento seguro de tokens.
+  ///
+  /// Gerencia armazenamento criptografado de access token e refresh token
+  /// usando FlutterSecureStorage (Keychain no iOS, EncryptedSharedPreferences no Android).
+  final TokenStorageService _tokenStorage;
+
   /// Construtor do gerenciador de sessão.
   ///
   /// Inicializa o gerenciador com as dependências necessárias
@@ -74,7 +81,11 @@ class SessionManager extends GetxService {
   ///
   /// ## Parâmetros:
   /// - `authService`: Serviço de autenticação (obrigatório)
-  SessionManager({required this.authService});
+  /// - `tokenStorage`: Serviço de armazenamento seguro (opcional, cria se não fornecido)
+  SessionManager({
+    required this.authService,
+    TokenStorageService? tokenStorage,
+  }) : _tokenStorage = tokenStorage ?? TokenStorageService();
 
   // ============================================================================
   // ESTADO INTERNO
@@ -140,24 +151,44 @@ class SessionManager extends GetxService {
     return DateTime.now().difference(login).inHours < 24;
   }
 
-  /// Token de acesso síncrono para uso imediato.
+  /// Token de acesso síncrono (DEPRECATED - usar token assíncrono).
   ///
-  /// Fornece token de acesso de forma síncrona para uso em
-  /// interceptors HTTP e outras operações que requerem
-  /// acesso imediato ao token.
+  /// **ATENÇÃO**: Este getter está deprecated pois tokens agora são
+  /// armazenados de forma assíncrona no secure storage. Use `token` ao invés.
+  ///
+  /// Por compatibilidade, retorna o token do cache em memória se disponível,
+  /// mas o ideal é migrar para `await sessionManager.token`.
   ///
   /// ## Retorno:
-  /// - `String?`: Token de acesso ou null se não logado
+  /// - `String?`: Token do cache ou null
+  @Deprecated('Use o getter assíncrono `token` ao invés')
   String? get tokenSync => _usuario?.token;
 
-  /// Token de acesso assíncrono para uso futuro.
+  /// Token de acesso do armazenamento seguro.
   ///
-  /// Fornece token de acesso de forma assíncrona, útil para
-  /// operações que podem aguardar a obtenção do token.
+  /// Recupera o access token do armazenamento criptografado.
+  /// Tokens são armazenados de forma segura usando FlutterSecureStorage.
   ///
   /// ## Retorno:
-  /// - `Future<String?>`: Token de acesso ou null se não logado
-  Future<String?> get token async => _usuario?.token;
+  /// - `Future<String?>`: Token descriptografado ou null se não existir
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final token = await sessionManager.token;
+  /// if (token != null) {
+  ///   // Usar token em requisição
+  /// }
+  /// ```
+  Future<String?> get token async => await _tokenStorage.getAccessToken();
+
+  /// Refresh token do armazenamento seguro.
+  ///
+  /// Recupera o refresh token do armazenamento criptografado.
+  ///
+  /// ## Retorno:
+  /// - `Future<String?>`: Refresh token descriptografado ou null
+  Future<String?> get refreshToken async =>
+      await _tokenStorage.getRefreshToken();
 
   // ============================================================================
   // OPERAÇÕES DE GERENCIAMENTO DE SESSÃO
@@ -304,13 +335,13 @@ class SessionManager extends GetxService {
 
     try {
       /// Solicita novos tokens via API.
-      await authService.refreshToken(token);
+      final usuarioAtualizado = await authService.refreshToken(token);
 
-      /// Atualiza dados do usuário com novos tokens.
-      _usuario = (await authService.getUsuarios()).first;
+      /// Salva novos tokens de forma segura no SecureStorage.
+      await setUsuario(usuarioAtualizado);
 
       /// Registra sucesso da renovação.
-      AppLogger.i('Token renovado com sucesso', tag: 'Sessão');
+      AppLogger.i('✅ Token renovado e salvo com segurança', tag: 'Sessão');
     } catch (e, s) {
       /// Trata erro e registra detalhes.
       final erro = ErrorHandler.tratar(e, s);
@@ -325,17 +356,69 @@ class SessionManager extends GetxService {
     }
   }
 
+  /// Define usuário autenticado e salva tokens de forma segura.
+  ///
+  /// Este método deve ser chamado após login bem-sucedido ou refresh de token.
+  /// Salva os tokens de forma criptografada e atualiza o usuário em memória.
+  ///
+  /// ## Parâmetros:
+  /// - `usuario`: Dados do usuário autenticado
+  ///
+  /// ## Comportamento:
+  /// 1. Salva access token no secure storage
+  /// 2. Salva refresh token no secure storage (se disponível)
+  /// 3. Salva IDs auxiliares
+  /// 4. Atualiza estado em memória
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// await sessionManager.setUsuario(usuarioLogado);
+  /// ```
+  Future<void> setUsuario(UsuarioTableDto usuario) async {
+    try {
+      // Salva access token no secure storage
+      final accessToken = usuario.token;
+      if (accessToken != null && accessToken.isNotEmpty) {
+        await _tokenStorage.saveAccessToken(accessToken);
+      }
+
+      // Salva refresh token no secure storage
+      final refreshToken = usuario.refreshToken;
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        await _tokenStorage.saveRefreshToken(refreshToken);
+      }
+
+      // Salva IDs auxiliares
+      await _tokenStorage.saveUserId(usuario.id);
+      await _tokenStorage.saveUserMatricula(usuario.matricula);
+
+      // Atualiza usuário em memória
+      _usuario = usuario;
+
+      AppLogger.i('✅ Usuário e tokens salvos com segurança',
+          tag: 'SessionManager');
+    } catch (e, stackTrace) {
+      AppLogger.e(
+        '❌ Erro ao salvar usuário e tokens',
+        tag: 'SessionManager',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
   /// Finaliza a sessão atual e limpa dados do usuário.
   ///
   /// Executa logout completo, removendo dados de autenticação
-  /// do banco local e limpando estado interno do gerenciador.
-  /// Não realiza logout no servidor (tokens continuam válidos).
+  /// do banco local E do armazenamento seguro de tokens.
   ///
   /// ## Comportamento:
-  /// 1. Solicita logout via AuthService
-  /// 2. Remove dados do banco local
-  /// 3. Limpa estado interno
-  /// 4. Registra resultado da operação
+  /// 1. Limpa tokens do secure storage (NOVO)
+  /// 2. Solicita logout via AuthService
+  /// 3. Remove dados do banco local
+  /// 4. Limpa estado interno
+  /// 5. Registra resultado da operação
   ///
   /// ## Casos de Uso:
   /// - Logout manual do usuário
@@ -357,14 +440,19 @@ class SessionManager extends GetxService {
   /// ## Tratamento de Erros:
   /// - Registra erros detalhados
   /// - Retorna false em caso de falha
-  /// - Não impede limpeza de estado local
+  /// - Sempre limpa tokens do secure storage
   ///
   /// ## Nota de Segurança:
-  /// Este método apenas limpa dados locais. Tokens no servidor
-  /// continuam válidos até expirarem naturalmente.
+  /// Tokens são COMPLETAMENTE removidos do dispositivo,
+  /// incluindo armazenamento criptografado.
   Future<bool> logout() async {
     try {
-      /// Solicita logout via AuthService.
+      // Limpa TODOS os tokens do secure storage (prioridade máxima de segurança)
+      await _tokenStorage.clearAll();
+      AppLogger.d('🔐 Tokens removidos do secure storage',
+          tag: 'SessionManager');
+
+      /// Solicita logout via AuthService (limpa dados do banco).
       final result = await authService.logout();
 
       if (result) {
@@ -372,7 +460,7 @@ class SessionManager extends GetxService {
         _usuario = null;
 
         /// Registra sucesso do logout.
-        AppLogger.i('Sessão encerrada com sucesso', tag: 'Sessão');
+        AppLogger.i('✅ Sessão encerrada com segurança completa', tag: 'Sessão');
 
         /// Retorna sucesso.
         return true;
@@ -391,3 +479,4 @@ class SessionManager extends GetxService {
     }
   }
 }
+

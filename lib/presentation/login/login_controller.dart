@@ -280,6 +280,12 @@ class LoginController extends GetxController {
       AppLogger.i('Login realizado com sucesso para: ${usuario.nome}',
           tag: 'LoginController');
 
+      /// Salva tokens de forma segura no TokenStorageService via SessionManager.
+      /// IMPORTANTE: Tokens agora são criptografados (não mais em texto plano).
+      final sessionManager = Get.find<SessionManager>();
+      await sessionManager.setUsuario(usuario);
+      AppLogger.d('🔐 Tokens salvos de forma segura', tag: 'LoginController');
+
       /// Navega para splash para fazer sincronização antes de ir para home.
       AppLogger.i('Redirecionando para splash para sincronização...',
           tag: 'LoginController');

@@ -59,6 +59,10 @@ class AuthInterceptor extends Interceptor {
     try {
       // Obtém SessionManager e token
       final sessionManager = g.Get.find<SessionManager>();
+      
+      // NOTA: Usamos tokenSync aqui pois interceptors precisam de acesso síncrono.
+      // O token é mantido em cache em memória após ser carregado do SecureStorage.
+      // ignore: deprecated_member_use_from_same_package
       final token = sessionManager.tokenSync;
 
       // Anexa token ao header se disponível
@@ -160,6 +164,9 @@ class AuthInterceptor extends Interceptor {
 
     try {
       await _refreshCompleter?.future.timeout(const Duration(seconds: 5));
+      
+      // NOTA: Usa tokenSync para acesso síncrono após refresh
+      // ignore: deprecated_member_use_from_same_package
       final newToken = sessionManager.tokenSync;
 
       if (newToken != null && newToken.isNotEmpty) {
@@ -191,6 +198,8 @@ class AuthInterceptor extends Interceptor {
       _isRefreshing = false;
 
       // Retorna o novo token
+      // NOTA: Usa tokenSync para acesso síncrono após refresh
+      // ignore: deprecated_member_use_from_same_package
       final newToken = sessionManager.tokenSync;
       if (newToken != null && newToken.isNotEmpty) {
         AppLogger.i('✅ Token renovado com sucesso', tag: 'AuthInterceptor');

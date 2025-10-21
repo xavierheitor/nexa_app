@@ -6,6 +6,7 @@ import 'package:nexa_app/core/core_app/services/sync_service.dart';
 import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/core/security/session_manager.dart';
+import 'package:nexa_app/core/security/token_storage_service.dart';
 import 'package:nexa_app/data/repositories/equipe_repo.dart';
 import 'package:nexa_app/data/repositories/turno_repo.dart';
 import 'package:nexa_app/data/repositories/usuario_repo.dart';
@@ -59,6 +60,13 @@ class InitialBinding extends Bindings {
     // Cliente HTTP (Dio)
     Get.put<DioClient>(
       DioClient(),
+      permanent: true,
+    );
+
+    // Armazenamento seguro de tokens (FlutterSecureStorage)
+    // NOVO: Criptografia nativa para tokens sensíveis
+    Get.put<TokenStorageService>(
+      TokenStorageService(),
       permanent: true,
     );
   }
@@ -168,9 +176,13 @@ class InitialBinding extends Bindings {
 
   void _registerGlobalControllers() {
     // SessionManager - Gerenciamento de sessão e autenticação
-    // Depende de: AuthService
+    // Depende de: AuthService, TokenStorageService
+    // ATUALIZADO: Agora usa armazenamento seguro de tokens
     Get.put<SessionManager>(
-      SessionManager(authService: Get.find<AuthService>()),
+      SessionManager(
+        authService: Get.find<AuthService>(),
+        tokenStorage: Get.find<TokenStorageService>(),
+      ),
       permanent: true,
     );
 
