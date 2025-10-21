@@ -36,8 +36,9 @@ class ChecklistTipoVeiculoRelacaoDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> inserirOuAtualizar(
       ChecklistTipoVeiculoRelacaoTableDto dto) async {
-    if (dto.remoteId != null) {
-      final existente = await buscarPorRemoteId(dto.remoteId!);
+    final remoteId = dto.remoteId;
+    if (remoteId != null) {
+      final existente = await buscarPorRemoteId(remoteId);
       if (existente != null) {
         await atualizar(dto.copyWith(id: existente.id));
         return existente.id;

@@ -83,16 +83,20 @@ class ErrorMessageService extends GetxService {
       _tipoErro.value == 'conflict' || _statusCode.value == 409;
 
   /// Verifica se é um erro de validação
-  bool get isErroValidacao =>
-      _tipoErro.value == 'validation' ||
-      (_statusCode.value != null &&
-          _statusCode.value! >= 400 &&
-          _statusCode.value! < 500);
+  bool get isErroValidacao {
+    if (_tipoErro.value == 'validation') return true;
+
+    final statusCode = _statusCode.value;
+    return statusCode != null && statusCode >= 400 && statusCode < 500;
+  }
 
   /// Verifica se é um erro de servidor
-  bool get isErroServidor =>
-      _tipoErro.value == 'server' ||
-      (_statusCode.value != null && _statusCode.value! >= 500);
+  bool get isErroServidor {
+    if (_tipoErro.value == 'server') return true;
+
+    final statusCode = _statusCode.value;
+    return statusCode != null && statusCode >= 500;
+  }
 
   @override
   void onClose() {

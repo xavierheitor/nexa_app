@@ -268,7 +268,9 @@ class TurnoController extends GetxController {
 
   /// Obtém informações resumidas do turno para exibição.
   Map<String, dynamic> obterInfoTurno() {
-    if (!hasTurno) {
+    final turno = turnoAtivo.value;
+
+    if (turno == null) {
       return {
         'temTurno': false,
         'situacao': 'Nenhum turno',
@@ -276,7 +278,6 @@ class TurnoController extends GetxController {
       };
     }
 
-    final turno = turnoAtivo.value!;
     final situacao = turno.situacaoTurno.name;
 
     String mensagem;

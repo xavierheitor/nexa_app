@@ -210,13 +210,16 @@ class LoginResponseDto extends BaseTableDto {
     BaseDto.validateRequiredString(matricula, 'matricula');
 
     /// Valida data de expiração do token se informada (não pode ser futura).
-    if (expiresAt != null) {
-      validateNotFutureDate(expiresAt!, 'expiresAt');
+    final expiresAtValue = expiresAt;
+    if (expiresAtValue != null) {
+      validateNotFutureDate(expiresAtValue, 'expiresAt');
     }
 
     /// Valida data de expiração do refresh token se informada (não pode ser futura).
-    if (refreshTokenExpiresAt != null) {
-      validateNotFutureDate(refreshTokenExpiresAt!, 'refreshTokenExpiresAt');
+    final refreshTokenExpiresAtValue = refreshTokenExpiresAt;
+    if (refreshTokenExpiresAtValue != null) {
+      validateNotFutureDate(
+          refreshTokenExpiresAtValue, 'refreshTokenExpiresAt');
     }
   }
 

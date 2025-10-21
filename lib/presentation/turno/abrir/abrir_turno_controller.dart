@@ -282,8 +282,18 @@ class AbrirTurnoController extends GetxController {
       isLoading.value = true;
       AppLogger.i('Abrindo novo turno...', tag: 'AbrirTurnoController');
 
-      final veiculoSelecionado = veiculoDropdownController.selected.value!;
-      final equipeSelecionada = equipeDropdownController.selected.value!;
+      // Validação segura de seleções
+      final veiculoSelecionado = veiculoDropdownController.selected.value;
+      final equipeSelecionada = equipeDropdownController.selected.value;
+
+      if (veiculoSelecionado == null || equipeSelecionada == null) {
+        AppLogger.e('Veículo ou equipe não selecionados',
+            tag: 'AbrirTurnoController');
+        SnackbarUtils.validacao(
+            'Selecione veículo e equipe antes de continuar');
+        return;
+      }
+      
       final kmInicial = int.tryParse(kmInicialController.text) ?? 0;
 
       // Prepara lista de IDs dos eletricistas
@@ -536,8 +546,10 @@ class AbrirTurnoController extends GetxController {
   /// Busca os dados previamente carregados ou realiza uma nova busca se
   /// necessário, atualizando os dropdowns ao mesmo tempo.
   Future<AbrirTurnoDados> _obterDadosCarregados({bool forceRefresh = false}) async {
-    if (!forceRefresh && _dadosCarregados != null) {
-      return _dadosCarregados!;
+    // Retorna cache se disponível e não forçar refresh
+    final dadosCache = _dadosCarregados;
+    if (!forceRefresh && dadosCache != null) {
+      return dadosCache;
     }
 
     final dados = await _abrirTurnoService.buscarDadosIniciais(

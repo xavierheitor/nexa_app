@@ -84,7 +84,8 @@ class TurnoNavigationLoadingController extends GetxController {
         }
 
         // Navegar para a rota correta
-        if (result.route != null) {
+        final rota = result.route;
+        if (rota != null) {
           statusMessage.value = 'Navegando...';
           await Future.delayed(const Duration(milliseconds: 300));
 
@@ -93,7 +94,7 @@ class TurnoNavigationLoadingController extends GetxController {
               tag: 'TurnoNavigationLoadingController');
           AppLogger.i('🧭 [NAV LOADING] 🚀 EXECUTANDO NAVEGAÇÃO',
               tag: 'TurnoNavigationLoadingController');
-          AppLogger.i('🧭 [NAV LOADING]   → Destino: ${result.route}',
+          AppLogger.i('🧭 [NAV LOADING]   → Destino: $rota',
               tag: 'TurnoNavigationLoadingController');
           AppLogger.i('🧭 [NAV LOADING]   → Argumentos: ${result.arguments}',
               tag: 'TurnoNavigationLoadingController');
@@ -101,7 +102,7 @@ class TurnoNavigationLoadingController extends GetxController {
               tag: 'TurnoNavigationLoadingController');
 
           // Remove a tela de loading e navega
-          Get.offNamed(result.route!, arguments: result.arguments);
+          Get.offNamed(rota, arguments: result.arguments);
           
           AppLogger.i('🧭 [NAV LOADING] ✅ Navegação executada',
               tag: 'TurnoNavigationLoadingController');

@@ -79,8 +79,9 @@ class LoggingInterceptor extends Interceptor {
     }
 
     // Log do body da resposta de erro (se houver)
-    if (err.response?.data != null) {
-      AppLogger.v('🔻 Body: ${_formatResponseData(err.response!.data)}', tag: 'HTTP');
+    final responseData = err.response?.data;
+    if (responseData != null) {
+      AppLogger.v('🔻 Body: ${_formatResponseData(responseData)}', tag: 'HTTP');
     }
 
     handler.next(err);

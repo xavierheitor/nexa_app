@@ -177,33 +177,57 @@ class ChecklistService {
     AppLogger.i('✅ Checklist encontrado: ${modelo.nome}',
         tag: 'ChecklistService');
 
+    // Validação segura de remoteId
+    final modeloRemoteId = modelo.remoteId;
+    if (modeloRemoteId == null) {
+      AppLogger.e('❌ Modelo de checklist sem remoteId',
+          tag: 'ChecklistService');
+      return null;
+    }
+
     // Buscar perguntas e opções
     final checklistPerguntaDao = _db.checklistPerguntaDao;
     final checklistOpcaoRespostaDao = _db.checklistOpcaoRespostaDao;
 
     final perguntas =
-        await checklistPerguntaDao.buscarPorModelo(modelo.remoteId!);
+        await checklistPerguntaDao.buscarPorModelo(modeloRemoteId);
     AppLogger.d('📋 ${perguntas.length} perguntas encontradas',
         tag: 'ChecklistService');
 
     final perguntasComOpcoes = <ChecklistPerguntaModel>[];
 
     for (final pergunta in perguntas) {
+      final perguntaRemoteId = pergunta.remoteId;
+      if (perguntaRemoteId == null) {
+        AppLogger.w('⚠️ Pergunta sem remoteId: ${pergunta.nome}',
+            tag: 'ChecklistService');
+        continue; // Pula perguntas sem remoteId
+      }
+      
       final opcoes =
-          await checklistOpcaoRespostaDao.buscarPorModelo(modelo.remoteId!);
+          await checklistOpcaoRespostaDao.buscarPorModelo(modeloRemoteId);
       final opcoesFiltradas =
           opcoes.where((opcao) => opcao.remoteId == pergunta.remoteId).toList();
 
       final opcoesModel = opcoesFiltradas
-          .map((opcao) => ChecklistOpcaoRespostaModel(
-                id: opcao.remoteId!,
-                nome: opcao.nome,
-                geraPendencia: opcao.geraPendencia,
-              ))
+          .map((opcao) {
+            final opcaoRemoteId = opcao.remoteId;
+            if (opcaoRemoteId == null) {
+              AppLogger.w('⚠️ Opção sem remoteId: ${opcao.nome}',
+                  tag: 'ChecklistService');
+              return null;
+            }
+            return ChecklistOpcaoRespostaModel(
+              id: opcaoRemoteId,
+              nome: opcao.nome,
+              geraPendencia: opcao.geraPendencia,
+            );
+          })
+          .whereType<ChecklistOpcaoRespostaModel>() // Remove nulls
           .toList();
 
       perguntasComOpcoes.add(ChecklistPerguntaModel(
-        id: pergunta.remoteId!,
+        id: perguntaRemoteId,
         nome: pergunta.nome,
         opcoes: opcoesModel,
       ));
@@ -252,33 +276,57 @@ class ChecklistService {
     AppLogger.i('✅ Checklist EPC encontrado: ${modelo.nome}',
         tag: 'ChecklistService');
 
+    // Validação segura de remoteId
+    final modeloRemoteId = modelo.remoteId;
+    if (modeloRemoteId == null) {
+      AppLogger.e('❌ Modelo de checklist EPC sem remoteId',
+          tag: 'ChecklistService');
+      return null;
+    }
+
     // Buscar perguntas e opções
     final checklistPerguntaDao = _db.checklistPerguntaDao;
     final checklistOpcaoRespostaDao = _db.checklistOpcaoRespostaDao;
 
     final perguntas =
-        await checklistPerguntaDao.buscarPorModelo(modelo.remoteId!);
+        await checklistPerguntaDao.buscarPorModelo(modeloRemoteId);
     AppLogger.d('📋 ${perguntas.length} perguntas encontradas',
         tag: 'ChecklistService');
 
     final perguntasComOpcoes = <ChecklistPerguntaModel>[];
 
     for (final pergunta in perguntas) {
+      final perguntaRemoteId = pergunta.remoteId;
+      if (perguntaRemoteId == null) {
+        AppLogger.w('⚠️ Pergunta EPC sem remoteId: ${pergunta.nome}',
+            tag: 'ChecklistService');
+        continue; // Pula perguntas sem remoteId
+      }
+      
       final opcoes =
-          await checklistOpcaoRespostaDao.buscarPorModelo(modelo.remoteId!);
+          await checklistOpcaoRespostaDao.buscarPorModelo(modeloRemoteId);
       final opcoesFiltradas =
           opcoes.where((opcao) => opcao.remoteId == pergunta.remoteId).toList();
 
       final opcoesModel = opcoesFiltradas
-          .map((opcao) => ChecklistOpcaoRespostaModel(
-                id: opcao.remoteId!,
-                nome: opcao.nome,
-                geraPendencia: opcao.geraPendencia,
-              ))
+          .map((opcao) {
+            final opcaoRemoteId = opcao.remoteId;
+            if (opcaoRemoteId == null) {
+              AppLogger.w('⚠️ Opção EPC sem remoteId: ${opcao.nome}',
+                  tag: 'ChecklistService');
+              return null;
+            }
+            return ChecklistOpcaoRespostaModel(
+              id: opcaoRemoteId,
+              nome: opcao.nome,
+              geraPendencia: opcao.geraPendencia,
+            );
+          })
+          .whereType<ChecklistOpcaoRespostaModel>() // Remove nulls
           .toList();
 
       perguntasComOpcoes.add(ChecklistPerguntaModel(
-        id: pergunta.remoteId!,
+        id: perguntaRemoteId,
         nome: pergunta.nome,
         opcoes: opcoesModel,
       ));
@@ -317,11 +365,19 @@ class ChecklistService {
         return false;
       }
 
+      // Validação segura de remoteId do modelo
+      final modeloRemoteId = checklist.modelo.remoteId;
+      if (modeloRemoteId == null) {
+        AppLogger.e('❌ Modelo de checklist sem remoteId ao salvar',
+            tag: 'ChecklistService');
+        return false;
+      }
+
       // 2. Salvar o checklist preenchido
       final checklistPreenchidoId =
           await _checklistPreenchidoRepo.salvarChecklistCompleto(
         turnoId: turnoAtivo.id,
-        checklistModeloId: checklist.modelo.remoteId!,
+        checklistModeloId: modeloRemoteId,
         respostas: [], // Será preenchido abaixo
         latitude: latitude,
         longitude: longitude,

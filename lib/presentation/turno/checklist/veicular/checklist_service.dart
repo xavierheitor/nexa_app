@@ -244,15 +244,29 @@ class ChecklistService extends GetxService {
     AppLogger.i('✅ Checklist encontrado: ${modelo.nome}',
         tag: 'ChecklistService');
 
+    // Validação segura de remoteId
+    final modeloRemoteId = modelo.remoteId;
+    if (modeloRemoteId == null) {
+      AppLogger.e('❌ Modelo de checklist sem remoteId',
+          tag: 'ChecklistService');
+      return ChecklistCompletoModel(
+        id: modelo.id,
+        remoteId: modelo.id, // Usa id local como fallback
+        nome: modelo.nome,
+        tipoChecklistId: modelo.tipoChecklistId,
+        perguntas: const [],
+      );
+    }
+
     final perguntas =
-        await _checklistPerguntaRepo.buscarPorModelo(modelo.remoteId!);
+        await _checklistPerguntaRepo.buscarPorModelo(modeloRemoteId);
 
     if (perguntas.isEmpty) {
       AppLogger.w('⚠️ Nenhuma pergunta encontrada para o checklist',
           tag: 'ChecklistService');
       return ChecklistCompletoModel(
         id: modelo.id,
-        remoteId: modelo.remoteId!,
+        remoteId: modeloRemoteId,
         nome: modelo.nome,
         tipoChecklistId: modelo.tipoChecklistId,
         perguntas: const [],
@@ -263,7 +277,7 @@ class ChecklistService extends GetxService {
         tag: 'ChecklistService');
 
     final opcoes =
-        await _checklistOpcaoRespostaRepo.buscarPorModelo(modelo.remoteId!);
+        await _checklistOpcaoRespostaRepo.buscarPorModelo(modeloRemoteId);
 
     final opcoesModel = opcoes.map((opcao) {
       if (opcao.remoteId == null) {
@@ -304,7 +318,7 @@ class ChecklistService extends GetxService {
 
     return ChecklistCompletoModel(
       id: modelo.id,
-      remoteId: modelo.remoteId!,
+      remoteId: modeloRemoteId, // Já validado acima
       nome: modelo.nome,
       tipoChecklistId: modelo.tipoChecklistId,
       perguntas: perguntasCompletas,

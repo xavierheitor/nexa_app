@@ -73,7 +73,15 @@ class ChecklistPage extends StatelessWidget {
   }
 
   Widget _buildChecklistContent(ChecklistController controller) {
-    final checklist = controller.checklistAtual!;
+    final checklist = controller.checklistAtual;
+
+    // Validação defensiva
+    if (checklist == null) {
+      return const Center(
+        child: Text('Checklist não carregado'),
+      );
+    }
+    
     final perguntaAtual = controller.perguntaAtualModel;
 
     return Column(

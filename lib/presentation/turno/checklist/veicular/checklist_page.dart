@@ -254,21 +254,27 @@ class ChecklistPage extends GetView<ChecklistController> {
       );
     } else if (pergunta.opcoes.length <= 4) {
       // Para 3-4 opções, usa Wrap com flexibilidade
-      return Wrap(
-        spacing: 8.0,
-        runSpacing: 8.0,
-        children: pergunta.opcoes.map((opcao) {
-          final isSelected = pergunta.respostaSelecionada == opcao.id;
-          return SizedBox(
-            width: (MediaQuery.of(Get.context!).size.width - 64) / 2 -
-                4, // Metade da largura menos padding
-            child: _buildOpcaoResposta(
-              opcao: opcao,
-              isSelected: isSelected,
-              onTap: () => controller.selecionarResposta(pergunta.id, opcao.id),
-            ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final width = (constraints.maxWidth - 64) / 2 - 4;
+          
+          return Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: pergunta.opcoes.map((opcao) {
+              final isSelected = pergunta.respostaSelecionada == opcao.id;
+              return SizedBox(
+                width: width,
+                child: _buildOpcaoResposta(
+                  opcao: opcao,
+                  isSelected: isSelected,
+                  onTap: () =>
+                      controller.selecionarResposta(pergunta.id, opcao.id),
+                ),
+              );
+            }).toList(),
           );
-        }).toList(),
+        },
       );
     } else {
       // Para mais de 4 opções, usa layout vertical

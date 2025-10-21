@@ -33,13 +33,18 @@ class ChecklistModeloTableDto {
 
   /// Converte para Companion (para inserção/atualização).
   ChecklistModeloTableCompanion toCompanion() {
+    // Extrai valores para type promotion
+    final remote = remoteId;
+    final created = createdAt;
+    final updated = updatedAt;
+    
     return ChecklistModeloTableCompanion(
       id: id == 0 ? const Value.absent() : Value(id), // Autoincrement se for 0
-      remoteId: remoteId != null ? Value(remoteId!) : const Value.absent(),
+      remoteId: remote != null ? Value(remote) : const Value.absent(),
       nome: Value(nome),
       tipoChecklistId: Value(tipoChecklistId),
-      createdAt: createdAt != null ? Value(createdAt!) : const Value.absent(),
-      updatedAt: updatedAt != null ? Value(updatedAt!) : const Value.absent(),
+      createdAt: created != null ? Value(created) : const Value.absent(),
+      updatedAt: updated != null ? Value(updated) : const Value.absent(),
     );
   }
 
