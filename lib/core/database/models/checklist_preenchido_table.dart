@@ -1,17 +1,23 @@
 import 'package:drift/drift.dart';
 
-/// Tabela para armazenar checklists preenchidos
+/// Tabela para armazenar checklists preenchidos.
+///
+/// ⚠️ IMPORTANTE:
+/// - turnoId: FK para turno_table.id (ID LOCAL)
+/// - checklistModeloId: ID REMOTO do modelo (SEM FK!)
+/// - eletricistaRemoteId: ID REMOTO do eletricista (SEM FK!)
 class ChecklistPreenchidoTable extends Table {
   /// ID local (autoincrement)
   IntColumn get id => integer().autoIncrement()();
 
-  /// ID local do turno
-  IntColumn get turnoId => integer()();
+  /// FK para turno_table.id (ID LOCAL)
+  IntColumn get turnoId => integer().customConstraint(
+      'NOT NULL REFERENCES turno_table(id) ON DELETE CASCADE')();
 
-  /// ID remoto do modelo de checklist
+  /// ID REMOTO do modelo de checklist (SEM FK!)
   IntColumn get checklistModeloId => integer()();
 
-  /// ID remoto do eletricista (opcional) - usado para checklists por eletricista (EPI)
+  /// ID REMOTO do eletricista (opcional) - usado para checklists por eletricista (EPI)
   IntColumn get eletricistaRemoteId => integer().nullable()();
 
   /// Latitude do preenchimento (opcional)
@@ -23,15 +29,16 @@ class ChecklistPreenchidoTable extends Table {
   /// Data e hora do preenchimento
   DateTimeColumn get dataPreenchimento => dateTime().withDefault(currentDateAndTime)();
 
-  /// Relacionamento com turno
-  // @override
-  // Set<Column> get primaryKey => {id};
-
-  /// Índices para melhor performance
-  List<Set<Column>> get indexes => [
+  List<Set<Column>> get customIndexes => [
+        // Buscar checklists de um turno
         {turnoId},
+        // Buscar por modelo de checklist
         {checklistModeloId},
+        // Buscar checklists de um eletricista
         {eletricistaRemoteId},
+        // Ordenar por data
         {dataPreenchimento},
+        // Índice composto para evitar duplicatas
+        {turnoId, checklistModeloId, eletricistaRemoteId},
       ];
 }

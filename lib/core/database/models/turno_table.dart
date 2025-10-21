@@ -16,11 +16,13 @@ class TurnoTable extends Table {
   /// ID remoto do servidor (pode ser nulo se ainda não sincronizado).
   IntColumn get remoteId => integer().named('remote_id').nullable()();
 
-  /// ID do veículo utilizado no turno.
-  IntColumn get veiculoId => integer()();
+  /// ID do veículo utilizado no turno (FK para veiculo_table.id LOCAL).
+  IntColumn get veiculoId => integer().customConstraint(
+      'NOT NULL REFERENCES veiculo_table(id) ON DELETE RESTRICT')();
 
-  /// ID da equipe responsável pelo turno.
-  IntColumn get equipeId => integer()();
+  /// ID da equipe responsável pelo turno (FK para equipe_table.id LOCAL).
+  IntColumn get equipeId => integer().customConstraint(
+      'NOT NULL REFERENCES equipe_table(id) ON DELETE RESTRICT')();
 
   /// Quilometragem inicial do veículo.
   IntColumn get kmInicial => integer()();
@@ -42,4 +44,15 @@ class TurnoTable extends Table {
 
   /// Situação atual do turno (usando converter personalizado).
   TextColumn get situacaoTurno => text().map(const SituacaoTurnoConverter())();
+
+  List<Set<Column>> get customIndexes => [
+        // Query mais frequente: buscar turno ativo
+        {situacaoTurno},
+        // Buscar turnos por veículo ativo
+        {veiculoId, situacaoTurno},
+        // Buscar turnos por equipe
+        {equipeId},
+        // Buscar turno por remote_id na sincronização
+        {remoteId},
+      ];
 }

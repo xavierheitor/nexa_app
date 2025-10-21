@@ -880,7 +880,10 @@ class $VeiculoTableTable extends VeiculoTable
   @override
   late final GeneratedColumn<int> tipoVeiculoId = GeneratedColumn<int>(
       'tipo_veiculo_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints:
+          'NOT NULL REFERENCES tipo_veiculo_table(id) ON DELETE RESTRICT');
   @override
   List<GeneratedColumn> get $columns =>
       [id, remoteId, createdAt, updatedAt, sincronizado, placa, tipoVeiculoId];
@@ -975,6 +978,8 @@ class VeiculoTableData extends DataClass
   final DateTime updatedAt;
   final bool sincronizado;
   final String placa;
+
+  /// Relacionamento com tipo de veículo (FK para ID LOCAL)
   final int tipoVeiculoId;
   const VeiculoTableData(
       {required this.id,
@@ -1620,7 +1625,10 @@ class $EquipeTableTable extends EquipeTable
   @override
   late final GeneratedColumn<int> tipoEquipeId = GeneratedColumn<int>(
       'tipo_equipe_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints:
+          'NOT NULL REFERENCES tipo_equipe_table(id) ON DELETE RESTRICT');
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -1729,6 +1737,8 @@ class EquipeTableData extends DataClass implements Insertable<EquipeTableData> {
   final bool sincronizado;
   final String nome;
   final String? descricao;
+
+  /// Relacionamento com tipo de equipe (FK para ID LOCAL)
   final int tipoEquipeId;
   const EquipeTableData(
       {required this.id,
@@ -2400,13 +2410,19 @@ class $TurnoTableTable extends TurnoTable
   @override
   late final GeneratedColumn<int> veiculoId = GeneratedColumn<int>(
       'veiculo_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints:
+          'NOT NULL REFERENCES veiculo_table(id) ON DELETE RESTRICT');
   static const VerificationMeta _equipeIdMeta =
       const VerificationMeta('equipeId');
   @override
   late final GeneratedColumn<int> equipeId = GeneratedColumn<int>(
       'equipe_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints:
+          'NOT NULL REFERENCES equipe_table(id) ON DELETE RESTRICT');
   static const VerificationMeta _kmInicialMeta =
       const VerificationMeta('kmInicial');
   @override
@@ -2577,10 +2593,10 @@ class TurnoTableData extends DataClass implements Insertable<TurnoTableData> {
   /// ID remoto do servidor (pode ser nulo se ainda não sincronizado).
   final int? remoteId;
 
-  /// ID do veículo utilizado no turno.
+  /// ID do veículo utilizado no turno (FK para veiculo_table.id LOCAL).
   final int veiculoId;
 
-  /// ID da equipe responsável pelo turno.
+  /// ID da equipe responsável pelo turno (FK para equipe_table.id LOCAL).
   final int equipeId;
 
   /// Quilometragem inicial do veículo.
@@ -2964,7 +2980,10 @@ class $TurnoEletricistasTableTable extends TurnoEletricistasTable
   @override
   late final GeneratedColumn<int> turnoId = GeneratedColumn<int>(
       'turno_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints:
+          'NOT NULL REFERENCES turno_table(id) ON DELETE CASCADE');
   static const VerificationMeta _eletricistaIdMeta =
       const VerificationMeta('eletricistaId');
   @override
@@ -3045,7 +3064,12 @@ class $TurnoEletricistasTableTable extends TurnoEletricistasTable
 class TurnoEletricistasTableData extends DataClass
     implements Insertable<TurnoEletricistasTableData> {
   final int id;
+
+  /// FK para turno_table.id (ID LOCAL)
   final int turnoId;
+
+  /// ID REMOTO do eletricista (SEM FK!)
+  /// Armazena o remote_id do eletricista para enviar para API.
   final int eletricistaId;
   final bool motorista;
   const TurnoEletricistasTableData(
@@ -5990,7 +6014,10 @@ class $ChecklistPreenchidoTableTable extends ChecklistPreenchidoTable
   @override
   late final GeneratedColumn<int> turnoId = GeneratedColumn<int>(
       'turno_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints:
+          'NOT NULL REFERENCES turno_table(id) ON DELETE CASCADE');
   static const VerificationMeta _checklistModeloIdMeta =
       const VerificationMeta('checklistModeloId');
   @override
@@ -6119,13 +6146,13 @@ class ChecklistPreenchidoTableData extends DataClass
   /// ID local (autoincrement)
   final int id;
 
-  /// ID local do turno
+  /// FK para turno_table.id (ID LOCAL)
   final int turnoId;
 
-  /// ID remoto do modelo de checklist
+  /// ID REMOTO do modelo de checklist (SEM FK!)
   final int checklistModeloId;
 
-  /// ID remoto do eletricista (opcional) - usado para checklists por eletricista (EPI)
+  /// ID REMOTO do eletricista (opcional) - usado para checklists por eletricista (EPI)
   final int? eletricistaRemoteId;
 
   /// Latitude do preenchimento (opcional)
@@ -6408,7 +6435,10 @@ class $ChecklistRespostaTableTable extends ChecklistRespostaTable
   @override
   late final GeneratedColumn<int> checklistPreenchidoId = GeneratedColumn<int>(
       'checklist_preenchido_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints:
+          'NOT NULL REFERENCES checklist_preenchido_table(id) ON DELETE CASCADE');
   static const VerificationMeta _perguntaIdMeta =
       const VerificationMeta('perguntaId');
   @override
@@ -6510,13 +6540,13 @@ class ChecklistRespostaTableData extends DataClass
   /// ID local (autoincrement)
   final int id;
 
-  /// ID do checklist preenchido (FK)
+  /// FK para checklist_preenchido_table.id (ID LOCAL)
   final int checklistPreenchidoId;
 
-  /// ID remoto da pergunta
+  /// ID REMOTO da pergunta (SEM FK!)
   final int perguntaId;
 
-  /// ID remoto da opção de resposta escolhida
+  /// ID REMOTO da opção de resposta escolhida (SEM FK!)
   final int opcaoRespostaId;
 
   /// Data e hora da resposta
