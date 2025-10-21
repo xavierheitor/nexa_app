@@ -317,8 +317,6 @@ class LoginController extends GetxController {
   /// colorido baseado na severidade do erro.
   void _showErrorSnackbar(dynamic erro, dynamic mensagemErro) {
     String titulo;
-    Color backgroundColor;
-    Color textColor = Colors.white;
 
     /// Determina o tipo de erro baseado no código ou tipo de exceção.
     if (erro is DioException) {
@@ -327,41 +325,32 @@ class LoginController extends GetxController {
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
           titulo = '⏱️ Timeout do Servidor';
-          backgroundColor = Colors.orange;
           break;
         case DioExceptionType.badResponse:
           final statusCode = erro.response?.statusCode;
           if (statusCode == 401) {
             titulo = '🔐 Credenciais Inválidas';
-            backgroundColor = Colors.red;
           } else if (statusCode == 500) {
             titulo = '🔥 Erro Interno do Servidor';
-            backgroundColor = Colors.red.shade800;
           } else if (statusCode != null &&
               statusCode >= 400 &&
               statusCode < 500) {
             titulo = '❌ Erro de Cliente ($statusCode)';
-            backgroundColor = Colors.red;
           } else {
             titulo = '⚠️ Erro do Servidor ($statusCode)';
-            backgroundColor = Colors.red;
           }
           break;
         case DioExceptionType.cancel:
           titulo = '🚫 Requisição Cancelada';
-          backgroundColor = Colors.grey;
           break;
         case DioExceptionType.connectionError:
           titulo = '🌐 Erro de Conexão';
-          backgroundColor = Colors.red.shade700;
           break;
         default:
           titulo = '❌ Erro de Rede';
-          backgroundColor = Colors.red;
       }
     } else {
       titulo = '⚠️ Erro Desconhecido';
-      backgroundColor = Colors.grey.shade600;
     }
 
     /// Exibe o snackbar de erro padronizado.
