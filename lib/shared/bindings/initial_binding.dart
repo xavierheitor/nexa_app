@@ -16,7 +16,7 @@ import 'package:nexa_app/shared/bindings/repository_builder.dart';
 /// Binding inicial responsável por registrar dependências globais da aplicação.
 ///
 /// Este binding é executado no início do app e registra apenas dependências
-/// que precisam estar disponíveis durante TODO o ciclo de vida da aplicação
+/// que precisam estar disponíveis durante todo o ciclo de vida da aplicação
 /// ou que são usadas em múltiplos módulos.
 ///
 /// **Princípios:**
