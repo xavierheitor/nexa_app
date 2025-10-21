@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/utils/snackbar_utils.dart';
+import 'package:nexa_app/domain/entities/servico_model.dart';
 
 /// Controlador da tela de serviços do turno.
 ///
@@ -28,6 +29,9 @@ class TurnoServicosController extends GetxController {
   // ============================================================================
   // ESTADO REATIVO
   // ============================================================================
+
+  /// Lista de serviços executados no turno.
+  final RxList<ServicoModel> servicos = <ServicoModel>[].obs;
 
   /// Tipo de serviço selecionado.
   final Rx<TipoServico> tipoSelecionado = TipoServico.coleta.obs;
@@ -138,25 +142,37 @@ class TurnoServicosController extends GetxController {
       isLoading.value = true;
       AppLogger.i('Adicionando serviço...', tag: 'TurnoServicosController');
 
-      final sucesso = await turnoController.adicionarServico(
+      // Verifica se há turno aberto
+      if (!turnoController.hasTurnoAberto) {
+        SnackbarUtils.validacao(
+          'É necessário ter um turno aberto para adicionar serviços.',
+        );
+        return;
+      }
+
+      // TODO: Integrar com API/Banco quando disponível
+      // Por enquanto, apenas adiciona na lista local
+      final novoServico = ServicoModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
         descricao: descricaoController.text.trim(),
+        horario: DateTime.now(),
         tipo: tipoSelecionado.value,
       );
 
-      if (sucesso) {
-        AppLogger.i('Serviço adicionado', tag: 'TurnoServicosController');
-        
-        // Sucesso: apenas fecha o dialog sem mostrar snackbar
-        Get.back();
-      } else {
-        SnackbarUtils.erro(
-          titulo: 'Erro ao Adicionar Serviço',
-          mensagem: 'Não foi possível adicionar o serviço. Tente novamente.',
-        );
-      }
+      servicos.add(novoServico);
+
+      AppLogger.i('Serviço adicionado', tag: 'TurnoServicosController');
+
+      // Sucesso: apenas fecha o dialog sem mostrar snackbar
+      Get.back();
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao adicionar serviço',
           tag: 'TurnoServicosController', error: e, stackTrace: stackTrace);
+
+      SnackbarUtils.erro(
+        titulo: 'Erro ao Adicionar Serviço',
+        mensagem: 'Não foi possível adicionar o serviço. Tente novamente.',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -190,12 +206,12 @@ class TurnoServicosController extends GetxController {
       isLoading.value = true;
       AppLogger.i('Removendo serviço...', tag: 'TurnoServicosController');
 
-      final sucesso = await turnoController.removerServico(servicoId);
+      // TODO: Integrar com API/Banco quando disponível
+      // Por enquanto, apenas remove da lista local
+      servicos.removeWhere((s) => s.id == servicoId);
 
-      if (sucesso) {
-        AppLogger.i('Serviço removido', tag: 'TurnoServicosController');
-        // Sucesso: apenas remove sem mostrar snackbar
-      }
+      AppLogger.i('Serviço removido', tag: 'TurnoServicosController');
+      // Sucesso: apenas remove sem mostrar snackbar
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao remover serviço',
           tag: 'TurnoServicosController', error: e, stackTrace: stackTrace);
@@ -218,6 +234,28 @@ class TurnoServicosController extends GetxController {
     super.onInit();
     AppLogger.d('TurnoServicosController inicializado',
         tag: 'TurnoServicosController');
+    
+    // Carrega serviços mockados (TODO: substituir por API/Banco)
+    _carregarServicosMock();
+  }
+
+  /// Carrega serviços mockados para demonstração.
+  /// TODO: Substituir por busca real do banco/API quando implementado.
+  void _carregarServicosMock() {
+    servicos.value = [
+      ServicoModel(
+        id: '1',
+        descricao: 'Coleta de lixo - Rua Principal',
+        horario: DateTime.now().subtract(const Duration(hours: 1)),
+        tipo: TipoServico.coleta,
+      ),
+      ServicoModel(
+        id: '2',
+        descricao: 'Limpeza de calçada - Praça Central',
+        horario: DateTime.now().subtract(const Duration(minutes: 30)),
+        tipo: TipoServico.limpeza,
+      ),
+    ];
   }
 
   /// Limpeza do controlador.
@@ -232,6 +270,9 @@ class TurnoServicosController extends GetxController {
   void onClose() {
     /// Dispose de TextEditingController.
     descricaoController.dispose();
+
+    /// Limpa listas observáveis.
+    servicos.clear();
 
     /// Reseta estados reativos.
     isLoading.value = false;

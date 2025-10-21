@@ -6,19 +6,28 @@ import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart'
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/app/routes/routes.dart';
 
-/// Controlador global responsável pelo gerenciamento de turnos.
+/// Controlador global responsável pelo gerenciamento de estado de turnos.
 ///
 /// Este controlador fica disponível durante todo o ciclo de vida da aplicação,
 /// gerenciando o estado do turno ativo e fornecendo acesso a informações
 /// do turno para qualquer parte da aplicação.
 ///
-/// ## Funcionalidades Principais:
+/// ## Responsabilidades:
 ///
-/// 1. **Gerenciamento de Turno**: Controla turno aberto/fechado
-/// 2. **Estado Global**: Acessível de qualquer parte da aplicação
-/// 3. **Persistência**: Salva e carrega turno do banco local
-/// 4. **Validações**: Verifica se pode abrir/fechar turno
-/// 5. **Serviços**: Gerencia serviços executados no turno
+/// 1. **Estado Global**: Mantém turno ativo carregado em memória
+/// 2. **Sincronização**: Carrega turno do banco quando necessário
+/// 3. **Navegação**: Determina para onde ir baseado no estado do turno
+/// 4. **Acesso Rápido**: Fornece getters para informações do turno
+///
+/// ## ⚠️ Importante:
+///
+/// Este controller **NÃO implementa** as ações de abrir/fechar turno.
+/// Ele apenas **lê o estado** do banco.
+///
+/// **Implementações reais**:
+/// - Abrir turno: `AbrirTurnoController` (lib/presentation/turno/abrir/)
+/// - Enviar para API: `AbrindoTurnoController` (lib/presentation/turno/abrindo/)
+/// - Fechar turno: `TurnoServicosController` (lib/presentation/turno/servicos/)
 ///
 /// ## Uso:
 ///
@@ -44,9 +53,6 @@ class TurnoController extends GetxController {
 
   /// Lista de eletricistas do turno atual.
   final RxList<EletricistaTableDto> eletricistas = <EletricistaTableDto>[].obs;
-
-  /// Lista de serviços executados no turno atual.
-  final RxList<ServicoModel> servicos = <ServicoModel>[].obs;
 
   /// Flag indicando se está carregando.
   final RxBool isLoading = false.obs;
@@ -116,10 +122,6 @@ class TurnoController extends GetxController {
         // Usa diretamente o TurnoTableDto
         turnoAtivo.value = turnoAtivoDb;
 
-        if (hasTurnoAberto) {
-          await _carregarServicos();
-        }
-
         AppLogger.i(
             '✅ Turno carregado do banco: ${turnoAtivoDb.id} (${turnoAtivoDb.situacaoTurno.name})',
             tag: 'TurnoController');
@@ -142,7 +144,6 @@ class TurnoController extends GetxController {
   void _limparEstado() {
     turnoAtivo.value = null;
     eletricistas.clear();
-    servicos.clear();
   }
 
   /// Carrega eletricistas do turno atual.
@@ -156,7 +157,7 @@ class TurnoController extends GetxController {
           await _turnoRepo.buscarEletricistasDoTurno(turnoId);
 
       if (relacionamentos.isNotEmpty) {
-        // TODO: Buscar dados completos dos eletricistas
+        // Buscar dados completos dos eletricistas
         // Por enquanto, limpa a lista
         eletricistas.clear();
 
@@ -171,39 +172,6 @@ class TurnoController extends GetxController {
       AppLogger.e('❌ Erro ao carregar eletricistas do turno',
           tag: 'TurnoController', error: e, stackTrace: stackTrace);
       eletricistas.clear();
-    }
-  }
-
-  /// Carrega serviços do turno atual.
-  Future<void> _carregarServicos() async {
-    try {
-      AppLogger.d('Carregando serviços do turno...', tag: 'TurnoController');
-
-      // TODO: Buscar serviços reais do banco/API
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      // Simula alguns serviços (remover quando integrar com API)
-      servicos.value = [
-        ServicoModel(
-          id: '1',
-          descricao: 'Coleta de lixo - Rua Principal',
-          horario: DateTime.now().subtract(const Duration(hours: 1)),
-          tipo: TipoServico.coleta,
-        ),
-        ServicoModel(
-          id: '2',
-          descricao: 'Limpeza de calçada - Praça Central',
-          horario: DateTime.now().subtract(const Duration(minutes: 30)),
-          tipo: TipoServico.limpeza,
-        ),
-      ];
-
-      AppLogger.i('${servicos.length} serviços carregados',
-          tag: 'TurnoController');
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao carregar serviços',
-          tag: 'TurnoController', error: e, stackTrace: stackTrace);
-      servicos.clear();
     }
   }
 
@@ -305,137 +273,10 @@ class TurnoController extends GetxController {
   }
 
   // ============================================================================
-  // AÇÕES DE TURNO
+  // AÇÕES DE ATUALIZAÇÃO
   // ============================================================================
 
-  /// Abre um novo turno.
-  Future<bool> abrirTurno({
-    required String prefixo,
-    required String veiculo,
-    required String placa,
-  }) async {
-    try {
-      if (hasTurnoAberto) {
-        AppLogger.w('Já existe um turno aberto', tag: 'TurnoController');
-        return false;
-      }
-
-      isLoading.value = true;
-      AppLogger.i('Abrindo novo turno: $prefixo', tag: 'TurnoController');
-
-      // TODO: Salvar turno no banco/API
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Implementar abertura real de turno usando TurnoRepo
-      // Por enquanto, apenas limpa o estado
-      turnoAtivo.value = null;
-
-      servicos.clear();
-
-      AppLogger.i('Turno aberto com sucesso', tag: 'TurnoController');
-      return true;
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao abrir turno',
-          tag: 'TurnoController', error: e, stackTrace: stackTrace);
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// Fecha o turno atual.
-  Future<bool> fecharTurno() async {
-    try {
-      if (!hasTurnoAberto) {
-        AppLogger.w('Não há turno aberto para fechar', tag: 'TurnoController');
-        return false;
-      }
-
-      isLoading.value = true;
-      AppLogger.i('Fechando turno: ${turno?.id}', tag: 'TurnoController');
-
-      // TODO: Atualizar turno no banco/API
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Implementar fechamento real de turno usando TurnoRepo
-      // Por enquanto, apenas limpa o estado
-      turnoAtivo.value = null;
-
-      AppLogger.i('Turno fechado com sucesso', tag: 'TurnoController');
-      return true;
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao fechar turno',
-          tag: 'TurnoController', error: e, stackTrace: stackTrace);
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  // ============================================================================
-  // AÇÕES DE SERVIÇOS
-  // ============================================================================
-
-  /// Adiciona um novo serviço ao turno.
-  Future<bool> adicionarServico({
-    required String descricao,
-    required TipoServico tipo,
-  }) async {
-    try {
-      if (!hasTurnoAberto) {
-        AppLogger.w('Não há turno aberto', tag: 'TurnoController');
-        return false;
-      }
-
-      isLoading.value = true;
-      AppLogger.i('Adicionando serviço: $descricao', tag: 'TurnoController');
-
-      // TODO: Salvar serviço no banco/API
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      final novoServico = ServicoModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        descricao: descricao,
-        horario: DateTime.now(),
-        tipo: tipo,
-      );
-
-      servicos.add(novoServico);
-
-      AppLogger.i('Serviço adicionado com sucesso', tag: 'TurnoController');
-      return true;
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao adicionar serviço',
-          tag: 'TurnoController', error: e, stackTrace: stackTrace);
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// Remove um serviço do turno.
-  Future<bool> removerServico(String servicoId) async {
-    try {
-      isLoading.value = true;
-      AppLogger.i('Removendo serviço: $servicoId', tag: 'TurnoController');
-
-      // TODO: Remover serviço do banco/API
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      servicos.removeWhere((s) => s.id == servicoId);
-
-      AppLogger.i('Serviço removido com sucesso', tag: 'TurnoController');
-      return true;
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao remover serviço',
-          tag: 'TurnoController', error: e, stackTrace: stackTrace);
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// Atualiza dados do turno e serviços.
+  /// Atualiza dados do turno.
   Future<void> atualizar() async {
     AppLogger.d('Atualizando turno...', tag: 'TurnoController');
     await carregarTurnoAtivo();
@@ -488,7 +329,6 @@ class TurnoController extends GetxController {
   void onClose() {
     /// Limpa listas observáveis para liberar memória.
     eletricistas.clear();
-    servicos.clear();
 
     /// Reseta estados reativos.
     turnoAtivo.value = null;
@@ -500,48 +340,5 @@ class TurnoController extends GetxController {
         tag: 'TurnoController');
 
     super.onClose();
-  }
-}
-
-// ============================================================================
-// MODELO DE SERVIÇO
-// ============================================================================
-
-/// Modelo para representação de um serviço executado no turno.
-class ServicoModel {
-  final String id;
-  final String descricao;
-  final DateTime horario;
-  final TipoServico tipo;
-
-  ServicoModel({
-    required this.id,
-    required this.descricao,
-    required this.horario,
-    required this.tipo,
-  });
-}
-
-/// Tipos de serviços disponíveis.
-enum TipoServico {
-  coleta,
-  limpeza,
-  manutencao,
-  outro,
-}
-
-/// Extensão para obter nome legível do tipo de serviço.
-extension TipoServicoExtension on TipoServico {
-  String get nome {
-    switch (this) {
-      case TipoServico.coleta:
-        return 'Coleta';
-      case TipoServico.limpeza:
-        return 'Limpeza';
-      case TipoServico.manutencao:
-        return 'Manutenção';
-      case TipoServico.outro:
-        return 'Outro';
-    }
   }
 }
