@@ -5,6 +5,7 @@ import 'package:nexa_app/data/models/eletricista_table_dto.dart';
 import 'package:nexa_app/data/repositories/eletricista_repo.dart';
 import 'package:nexa_app/data/repositories/turno_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/utils/snackbar_utils.dart';
 import 'package:nexa_app/presentation/turno/checklist/veicular/checklist_service.dart';
 import 'package:nexa_app/presentation/turno/checklist/services/turno_abertura_orchestrator_service.dart';
 import 'package:nexa_app/app/routes/routes.dart';
@@ -113,10 +114,10 @@ class ChecklistEletricistasController extends GetxController {
 
   Future<void> abrirChecklist(EletricistaChecklistStatus item) async {
     if (item.remoteId == null) {
-      Get.snackbar(
-        'Dados incompletos',
-        'Eletricista sem identificador remoto. Sincronize os dados antes de continuar.',
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarUtils.erro(
+        titulo: 'Dados Incompletos',
+        mensagem:
+            'Eletricista sem identificador remoto. Sincronize os dados antes de continuar.',
       );
       return;
     }
@@ -144,10 +145,8 @@ class ChecklistEletricistasController extends GetxController {
 
   Future<void> abrirTurno() async {
     if (!todosConcluidos) {
-      Get.snackbar(
-        'Checklist pendente',
+      SnackbarUtils.validacao(
         'Finalize o checklist de EPI de todos os eletricistas antes de abrir o turno.',
-        snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
@@ -210,15 +209,12 @@ class ChecklistEletricistasController extends GetxController {
       // Limpa qualquer erro anterior
       _errorMessageService.limparErro();
 
-      Get.snackbar(
-        'Turno aberto com sucesso!',
-        'Todos os dados foram enviados para a API. Turno liberado para execução.',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
-      );
+      // Sucesso: apenas navega sem mostrar snackbar
+      AppLogger.i('✅ Turno aberto com sucesso! Navegando para serviços...',
+          tag: 'ChecklistEletricistasController');
 
       // Navegar para tela de serviços do turno
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(milliseconds: 500));
       Get.offAllNamed(Routes.turnoServicos);
       
     } catch (e, stackTrace) {

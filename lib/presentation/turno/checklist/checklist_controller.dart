@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/utils/snackbar_utils.dart';
 import 'package:nexa_app/presentation/turno/checklist/checklist_service.dart';
 
 /// Controller para gerenciar o checklist
@@ -61,12 +62,15 @@ class ChecklistController extends GetxController {
       } else {
         AppLogger.w('⚠️ Nenhum checklist encontrado',
             tag: 'ChecklistController');
-        Get.snackbar('Erro', 'Nenhum checklist encontrado para este veículo');
+        SnackbarUtils.erro(
+          titulo: 'Checklist Não Encontrado',
+          mensagem: 'Nenhum checklist encontrado para este veículo',
+        );
       }
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao carregar checklist: $e',
           tag: 'ChecklistController', error: e, stackTrace: stackTrace);
-      Get.snackbar('Erro', 'Erro ao carregar checklist: $e');
+      SnackbarUtils.erroGenerico();
     } finally {
       isLoading.value = false;
     }
@@ -152,7 +156,7 @@ class ChecklistController extends GetxController {
   Future<void> salvarChecklist({double? latitude, double? longitude}) async {
     if (!checklistCompleto.value) {
       AppLogger.w('⚠️ Checklist não está completo', tag: 'ChecklistController');
-      Get.snackbar('Atenção', 'Responda todas as perguntas antes de salvar');
+      SnackbarUtils.validacao('Responda todas as perguntas antes de salvar');
       return;
     }
 
@@ -189,7 +193,7 @@ class ChecklistController extends GetxController {
       if (sucesso) {
         AppLogger.i('✅ Checklist salvo com sucesso',
             tag: 'ChecklistController');
-        Get.snackbar('Sucesso', 'Checklist salvo com sucesso!');
+        // Sucesso: apenas navega sem mostrar snackbar
 
         // Debug: verificar rota atual e tipo de checklist
         AppLogger.d('🔍 [NAVEGAÇÃO] Rota atual: ${Get.currentRoute}',
@@ -232,12 +236,15 @@ class ChecklistController extends GetxController {
         }
       } else {
         AppLogger.e('❌ Erro ao salvar checklist', tag: 'ChecklistController');
-        Get.snackbar('Erro', 'Erro ao salvar checklist');
+        SnackbarUtils.erro(
+          titulo: 'Erro ao Salvar',
+          mensagem: 'Não foi possível salvar o checklist. Tente novamente.',
+        );
       }
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao salvar checklist: $e',
           tag: 'ChecklistController', error: e, stackTrace: stackTrace);
-      Get.snackbar('Erro', 'Erro ao salvar checklist: $e');
+      SnackbarUtils.erroGenerico();
     } finally {
       isSaving.value = false;
     }

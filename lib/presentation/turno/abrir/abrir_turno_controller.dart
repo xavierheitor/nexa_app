@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/data/repositories/turno_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/utils/snackbar_utils.dart';
 import 'package:nexa_app/app/routes/routes.dart';
 import 'package:nexa_app/shared/widgets/custom_searcheable_dropdown.dart';
 import 'package:nexa_app/data/models/veiculo_table_dto.dart';
@@ -273,14 +274,7 @@ class AbrirTurnoController extends GetxController {
     if (erroEletricistas != null) {
       AppLogger.w('Erro na validação de eletricistas: $erroEletricistas',
           tag: 'AbrirTurnoController');
-      Get.snackbar(
-        'Validação',
-        erroEletricistas,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.errorContainer,
-        colorText: Get.theme.colorScheme.onErrorContainer,
-        duration: const Duration(seconds: 4),
-      );
+      SnackbarUtils.validacao(erroEletricistas);
       return;
     }
 
@@ -349,23 +343,16 @@ class AbrirTurnoController extends GetxController {
       // Navega para o sistema inteligente que decide qual checklist mostrar
       AppLogger.i('🧭 Navegando para decisão inteligente de checklists',
           tag: 'AbrirTurnoController');
+      
+      // Sucesso: apenas navega sem mostrar snackbar
       Get.toNamed(Routes.turnoNavigationLoading);
-
-      Get.snackbar(
-        'Sucesso',
-        'Turno aberto com sucesso!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.primaryContainer,
-      );
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao abrir turno',
           tag: 'AbrirTurnoController', error: e, stackTrace: stackTrace);
 
-      Get.snackbar(
-        'Erro',
-        'Erro inesperado ao abrir turno.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.errorContainer,
+      SnackbarUtils.erro(
+        titulo: 'Erro ao Abrir Turno',
+        mensagem: 'Não foi possível abrir o turno. Tente novamente.',
       );
     } finally {
       isLoading.value = false;

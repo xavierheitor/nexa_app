@@ -386,7 +386,7 @@ class ChecklistPage extends StatelessWidget {
 
           if (controller.temPerguntaAnterior) const SizedBox(width: 16),
 
-          // Botão próximo/salvar - Obx otimizado
+          // Botão próximo/salvar - Obx otimizado com feedback visual aprimorado
           Expanded(
             flex: 2,
             child: Obx(() {
@@ -395,26 +395,33 @@ class ChecklistPage extends StatelessWidget {
               final isCompleto = controller.checklistCompleto.value;
               final temProxima = controller.temProximaPergunta;
 
-              // Loading state
-              if (isSaving) {
-                return const SizedBox(
-                  height: 56,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-
-              // Última pergunta e completo
+              // Última pergunta e completo - Botão Salvar
               if (isUltima && isCompleto) {
                 return ElevatedButton.icon(
-                  onPressed: controller.salvarChecklist,
-                  icon: const Icon(Icons.save),
-                  label: const Text('Salvar Checklist'),
+                  onPressed: isSaving ? null : controller.salvarChecklist,
+                  icon: isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.save),
+                  label: Text(
+                    isSaving ? 'Salvando...' : 'Salvar Checklist',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green.shade600,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: isSaving ? 0 : 2,
                   ),
                 );
               }
@@ -424,7 +431,13 @@ class ChecklistPage extends StatelessWidget {
                 return ElevatedButton.icon(
                   onPressed: controller.proximaPergunta,
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Próxima'),
+                  label: const Text(
+                    'Próxima',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade600,
                     foregroundColor: Colors.white,
@@ -433,15 +446,34 @@ class ChecklistPage extends StatelessWidget {
                 );
               }
 
-              // Fallback: botão salvar (habilitado apenas se completo)
+              // Fallback: botão salvar (habilitado apenas se completo e não estiver salvando)
               return ElevatedButton.icon(
-                onPressed: isCompleto ? controller.salvarChecklist : null,
-                icon: const Icon(Icons.save),
-                label: const Text('Salvar Checklist'),
+                onPressed: (isCompleto && !isSaving)
+                    ? controller.salvarChecklist
+                    : null,
+                icon: isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Icon(Icons.save),
+                label: Text(
+                  isSaving ? 'Salvando...' : 'Salvar Checklist',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade600,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: isSaving ? 0 : 2,
                 ),
               );
             }),

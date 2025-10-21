@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/domain/entities/checklist_model.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/utils/snackbar_utils.dart';
 import 'package:nexa_app/presentation/turno/checklist/veicular/checklist_service.dart';
 import 'package:nexa_app/app/routes/routes.dart';
 
@@ -94,10 +95,9 @@ class ChecklistController extends GetxController {
             '❌ Eletricista remoto não informado para checklist EPI',
             tag: 'ChecklistController',
           );
-          Get.snackbar(
-            'Erro',
-            'Eletricista não encontrado para o checklist de EPI',
-            snackPosition: SnackPosition.BOTTOM,
+          SnackbarUtils.erro(
+            titulo: 'Erro',
+            mensagem: 'Eletricista não encontrado para o checklist de EPI',
           );
           Get.back();
           return;
@@ -128,11 +128,7 @@ class ChecklistController extends GetxController {
                 ? 'Nenhum checklist de EPC encontrado para esta equipe'
                 : 'Nenhum checklist encontrado para este veículo';
 
-        Get.snackbar(
-          'Atenção',
-          mensagem,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarUtils.validacao(mensagem);
 
         AppLogger.d('🔙 Estado vazio configurado - botão Voltar disponível',
             tag: 'ChecklistController');
@@ -157,16 +153,13 @@ class ChecklistController extends GetxController {
         );
 
         // Mostra snackbar informativo
-        Get.snackbar(
-          'Checklist já realizado',
-          _isChecklistEPI
-              ? 'Checklist de EPI já registrado para ${_eletricistaNome ?? 'este eletricista'}.'
-              : _isChecklistEPC
-                  ? 'Checklist de EPC já registrado para este turno.'
-                  : 'Checklist veicular já registrado para este turno.',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 3),
-        );
+        final mensagemJaRealizado = _isChecklistEPI
+            ? 'Checklist de EPI já registrado para ${_eletricistaNome ?? 'este eletricista'}.'
+            : _isChecklistEPC
+                ? 'Checklist de EPC já registrado para este turno.'
+                : 'Checklist veicular já registrado para este turno.';
+
+        SnackbarUtils.validacao(mensagemJaRealizado);
 
         // NÃO NAVEGAR MAIS AUTOMATICAMENTE!
         // Carrega o checklist mesmo assim para permitir visualização/edição
@@ -182,11 +175,7 @@ class ChecklistController extends GetxController {
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao carregar checklist',
           tag: 'ChecklistController', error: e, stackTrace: stackTrace);
-      Get.snackbar(
-        'Erro',
-        'Erro ao carregar checklist',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      SnackbarUtils.erroGenerico();
     } finally {
       isLoading.value = false;
     }
@@ -245,11 +234,8 @@ class ChecklistController extends GetxController {
             tag: 'ChecklistController');
       }
 
-      Get.snackbar(
-        'Atenção',
-        'Por favor, responda todas as perguntas antes de continuar',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      SnackbarUtils.validacao(
+          'Por favor, responda todas as perguntas antes de continuar');
       return false;
     }
 
@@ -305,10 +291,9 @@ class ChecklistController extends GetxController {
       if (checklistAtual == null) {
         AppLogger.e('❌ Checklist atual não encontrado ao finalizar',
             tag: 'ChecklistController');
-        Get.snackbar(
-          'Erro',
-          'Não foi possível finalizar o checklist atual',
-          snackPosition: SnackPosition.BOTTOM,
+        SnackbarUtils.erro(
+          titulo: 'Erro ao Finalizar',
+          mensagem: 'Não foi possível finalizar o checklist atual',
         );
         return;
       }
@@ -333,29 +318,17 @@ class ChecklistController extends GetxController {
       if (!sucesso) {
         AppLogger.e('❌ [FINALIZAR] Falha ao salvar - abortando',
             tag: 'ChecklistController');
-        Get.snackbar(
-          'Erro',
-          'Não foi possível salvar o checklist. Tente novamente.',
-          snackPosition: SnackPosition.BOTTOM,
+        SnackbarUtils.erro(
+          titulo: 'Erro ao Salvar',
+          mensagem: 'Não foi possível salvar o checklist. Tente novamente.',
         );
         return;
       }
 
       AppLogger.i('✅ [FINALIZAR] Checklist finalizado e salvo com sucesso',
           tag: 'ChecklistController');
-
-      final tituloSnack = _isChecklistEPI ? 'Checklist EPI' : 'Sucesso';
-      final mensagemSnack = _isChecklistEPI
-          ? 'Checklist de EPI concluído para ${_eletricistaNome ?? 'este eletricista'}.'
-          : temPendencias
-              ? 'Checklist concluído com pendências'
-              : 'Checklist concluído com sucesso';
-
-      Get.snackbar(
-        tituloSnack,
-        mensagemSnack,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      
+      // Sucesso: apenas navega sem mostrar snackbar
 
       AppLogger.d(
           '🔍 [FINALIZAR] Tipo checklist: EPC=$_isChecklistEPC, EPI=$_isChecklistEPI, Veicular=${!_isChecklistEPC && !_isChecklistEPI}',
@@ -365,11 +338,7 @@ class ChecklistController extends GetxController {
     } catch (e, stackTrace) {
       AppLogger.e('❌ Erro ao finalizar checklist',
           tag: 'ChecklistController', error: e, stackTrace: stackTrace);
-      Get.snackbar(
-        'Erro',
-        'Erro ao finalizar checklist',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      SnackbarUtils.erroGenerico();
     } finally {
       isFinalizando.value = false;
     }

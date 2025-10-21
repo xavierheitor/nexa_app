@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/core/core_app/controllers/turno_controller.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/utils/snackbar_utils.dart';
 
 /// Controlador da tela de serviços do turno.
 ///
@@ -144,21 +145,13 @@ class TurnoServicosController extends GetxController {
 
       if (sucesso) {
         AppLogger.i('Serviço adicionado', tag: 'TurnoServicosController');
-
-        Get.back(); // Fecha dialog
-
-        Get.snackbar(
-          'Sucesso',
-          'Serviço adicionado com sucesso!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.colorScheme.primaryContainer,
-        );
+        
+        // Sucesso: apenas fecha o dialog sem mostrar snackbar
+        Get.back();
       } else {
-        Get.snackbar(
-          'Erro',
-          'Erro ao adicionar serviço. Tente novamente.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.colorScheme.errorContainer,
+        SnackbarUtils.erro(
+          titulo: 'Erro ao Adicionar Serviço',
+          mensagem: 'Não foi possível adicionar o serviço. Tente novamente.',
         );
       }
     } catch (e, stackTrace) {
@@ -200,21 +193,16 @@ class TurnoServicosController extends GetxController {
       final sucesso = await turnoController.removerServico(servicoId);
 
       if (sucesso) {
-        Get.snackbar(
-          'Sucesso',
-          'Serviço removido com sucesso!',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        AppLogger.i('Serviço removido', tag: 'TurnoServicosController');
+        // Sucesso: apenas remove sem mostrar snackbar
       }
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao remover serviço',
           tag: 'TurnoServicosController', error: e, stackTrace: stackTrace);
 
-      Get.snackbar(
-        'Erro',
-        'Erro ao remover serviço.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.errorContainer,
+      SnackbarUtils.erro(
+        titulo: 'Erro ao Remover',
+        mensagem: 'Não foi possível remover o serviço. Tente novamente.',
       );
     } finally {
       isLoading.value = false;

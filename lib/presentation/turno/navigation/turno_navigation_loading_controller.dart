@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/utils/snackbar_utils.dart';
 import 'package:nexa_app/presentation/turno/navigation/turno_navigation_orchestrator.dart';
 import 'package:nexa_app/presentation/turno/navigation/turno_navigation_state.dart';
 
@@ -77,13 +78,9 @@ class TurnoNavigationLoadingController extends GetxController {
           return;
         }
 
-        // Mostrar snackbar se necessário
+        // Mostrar snackbar se necessário (apenas validações/avisos)
         if (result.showSnackbar) {
-          Get.snackbar(
-            'Atenção',
-            result.message,
-            snackPosition: SnackPosition.BOTTOM,
-          );
+          SnackbarUtils.validacao(result.message);
         }
 
         // Navegar para a rota correta

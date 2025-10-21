@@ -7,6 +7,7 @@ import 'package:nexa_app/core/security/session_manager.dart';
 import 'package:nexa_app/data/repositories/equipe_repo.dart';
 import 'package:nexa_app/data/repositories/veiculo_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/utils/snackbar_utils.dart';
 import 'package:nexa_app/app/routes/routes.dart';
 
 /// Controlador responsável pelo gerenciamento da tela principal (home).
@@ -137,21 +138,13 @@ class HomeController extends GetxController {
   /// Navega para tela de APR (Análise Preliminar de Risco).
   void abrirAPR() {
     AppLogger.i('Navegando para tela de APR', tag: 'HomeController');
-    Get.snackbar(
-      'APR',
-      'Tela de APR em desenvolvimento',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    SnackbarUtils.validacao('Tela de APR em desenvolvimento');
   }
 
   /// Navega para tela de checklist.
   void abrirChecklist() {
     AppLogger.i('Navegando para tela de checklist', tag: 'HomeController');
-    Get.snackbar(
-      'Checklist',
-      'Tela de checklist em desenvolvimento',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    SnackbarUtils.validacao('Tela de checklist em desenvolvimento');
   }
 
   /// Navega para tela de almoxarifado.
@@ -173,13 +166,10 @@ class HomeController extends GetxController {
         AppLogger.w('Tentativa de logout com turno aberto',
             tag: 'HomeController');
 
-        Get.snackbar(
-          'Turno Aberto',
-          'Não é possível fazer logout com turno aberto. Por favor, feche o turno antes de sair.',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 4),
-          backgroundColor: Get.theme.colorScheme.errorContainer,
-          colorText: Get.theme.colorScheme.onErrorContainer,
+        SnackbarUtils.erro(
+          titulo: 'Turno Aberto',
+          mensagem:
+              'Não é possível fazer logout com turno aberto. Por favor, feche o turno antes de sair.',
         );
         return;
       }
@@ -195,10 +185,9 @@ class HomeController extends GetxController {
       AppLogger.e('Erro ao fazer logout',
           tag: 'HomeController', error: e, stackTrace: stackTrace);
 
-      Get.snackbar(
-        'Erro',
-        'Erro ao fazer logout. Tente novamente.',
-        snackPosition: SnackPosition.BOTTOM,
+      SnackbarUtils.erro(
+        titulo: 'Erro ao Fazer Logout',
+        mensagem: 'Não foi possível fazer logout. Tente novamente.',
       );
     } finally {
       isLoading.value = false;
@@ -216,35 +205,20 @@ class HomeController extends GetxController {
       if (sucesso) {
         AppLogger.i('Sincronização concluída com sucesso',
             tag: 'HomeController');
-        Get.snackbar(
-          'Sincronização',
-          'Dados atualizados com sucesso!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.colorScheme.primaryContainer,
-          colorText: Get.theme.colorScheme.onPrimaryContainer,
-          duration: const Duration(seconds: 3),
-        );
+        // Sucesso: apenas log, sem snackbar
       } else {
         AppLogger.w('Sincronização falhou', tag: 'HomeController');
-        Get.snackbar(
-          'Erro na Sincronização',
-          'Falha ao atualizar dados. Tente novamente.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.colorScheme.errorContainer,
-          colorText: Get.theme.colorScheme.onErrorContainer,
-          duration: const Duration(seconds: 4),
+        SnackbarUtils.erro(
+          titulo: 'Erro na Sincronização',
+          mensagem: 'Falha ao atualizar dados. Tente novamente.',
         );
       }
     } catch (e, stackTrace) {
       AppLogger.e('Erro durante sincronização',
           tag: 'HomeController', error: e, stackTrace: stackTrace);
-      Get.snackbar(
-        'Erro na Sincronização',
-        'Erro inesperado durante sincronização.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.errorContainer,
-        colorText: Get.theme.colorScheme.onErrorContainer,
-        duration: const Duration(seconds: 4),
+      SnackbarUtils.erro(
+        titulo: 'Erro na Sincronização',
+        mensagem: 'Erro inesperado durante sincronização.',
       );
     }
 

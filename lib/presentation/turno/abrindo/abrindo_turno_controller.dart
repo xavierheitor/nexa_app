@@ -43,14 +43,8 @@ class AbrindoTurnoController extends GetxController {
       await Future.delayed(const Duration(milliseconds: 800));
 
       // 4. Redirecionar para home
+      // Sucesso: apenas navega sem mostrar snackbar
       Get.offAllNamed(Routes.home);
-
-      Get.snackbar(
-        'Turno aberto',
-        'Turno aberto com sucesso! Bom trabalho!',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
-      );
     } catch (e, stackTrace) {
       AppLogger.e('❌ [ABERTURA TURNO] Erro ao abrir turno remotamente',
           tag: 'AbrindoTurnoController', error: e, stackTrace: stackTrace);

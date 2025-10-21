@@ -364,12 +364,13 @@ class LoginController extends GetxController {
       backgroundColor = Colors.grey.shade600;
     }
 
-    /// Exibe o snackbar com as informações do erro.
+    /// Exibe o snackbar de erro padronizado.
+    /// Nota: Simplificado para usar o padrão vermelho de erro.
     Get.snackbar(
       titulo,
       mensagemErro.descricao,
-      backgroundColor: backgroundColor,
-      colorText: textColor,
+      backgroundColor: Get.theme.colorScheme.error,
+      colorText: Get.theme.colorScheme.onError,
       snackPosition: SnackPosition.TOP,
       duration: const Duration(seconds: 4),
       margin: const EdgeInsets.all(16),
@@ -378,7 +379,7 @@ class LoginController extends GetxController {
         erro is DioException && erro.response?.statusCode == 401
             ? Icons.lock_outline
             : Icons.error_outline,
-        color: textColor,
+        color: Get.theme.colorScheme.onError,
       ),
     );
   }
