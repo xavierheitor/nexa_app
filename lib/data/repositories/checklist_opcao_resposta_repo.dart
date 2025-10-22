@@ -5,9 +5,12 @@ import 'package:nexa_app/data/models/checklist_opcao_resposta_table_dto.dart';
 import 'package:nexa_app/core/sync/syncable_repository.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
+import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 
 /// Repositório para gerenciar operações com Opções de Resposta de Checklist.
-class ChecklistOpcaoRespostaRepo implements SyncableRepository<ChecklistOpcaoRespostaTableDto> {
+class ChecklistOpcaoRespostaRepo
+    with log_mixin.LoggingMixin
+    implements SyncableRepository<ChecklistOpcaoRespostaTableDto> {
   final DioClient _dio;
   final AppDatabase _db;
   late final ChecklistOpcaoRespostaDao _dao;
@@ -19,101 +22,88 @@ class ChecklistOpcaoRespostaRepo implements SyncableRepository<ChecklistOpcaoRes
   }
 
   @override
+  String get repositoryName => 'ChecklistOpcaoRespostaRepository';
+
+  @override
   String get nomeEntidade => 'checklist-opcao-resposta';
 
   // ============================================================================
   // CRUD LOCAL
   // ============================================================================
 
-  /// Lista todas as opções de resposta.
   Future<List<ChecklistOpcaoRespostaTableDto>> listar() async {
-    try {
-      return await _dao.listarDto();
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao listar opções de resposta',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'listar',
+      operation: () async {
+        return await _dao.listarDto();
+      },
+    );
   }
 
-  /// Busca uma opção por ID local.
   Future<ChecklistOpcaoRespostaTableDto?> buscarPorId(int id) async {
-    try {
-      return await _dao.buscarPorIdDto(id);
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar opção por ID',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorId',
+      operation: () async {
+        return await _dao.buscarPorIdDto(id);
+      },
+    );
   }
 
-  /// Busca uma opção por remote ID.
   Future<ChecklistOpcaoRespostaTableDto?> buscarPorRemoteId(
       int remoteId) async {
-    try {
-      return await _dao.buscarPorRemoteIdDto(remoteId);
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar opção por remote ID',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorRemoteId',
+      operation: () async {
+        return await _dao.buscarPorRemoteIdDto(remoteId);
+      },
+    );
   }
 
-  /// Busca opções de resposta de um modelo de checklist.
   Future<List<ChecklistOpcaoRespostaTableDto>> buscarPorModelo(
       int checklistModeloId) async {
-    try {
-      return await _dao.buscarPorModelo(checklistModeloId);
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar opções por modelo',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorModelo',
+      operation: () async {
+        return await _dao.buscarPorModelo(checklistModeloId);
+      },
+    );
   }
 
-  /// Busca opções por nome (busca parcial).
   Future<List<ChecklistOpcaoRespostaTableDto>> buscarPorNome(
       String nome) async {
-    try {
-      return await _dao.buscarPorNome(nome);
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar opções por nome',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorNome',
+      operation: () async {
+        return await _dao.buscarPorNome(nome);
+      },
+    );
   }
 
-  /// Busca opções que geram pendência.
   Future<List<ChecklistOpcaoRespostaTableDto>> buscarQueGeramPendencia() async {
-    try {
-      return await _dao.buscarQueGeramPendencia();
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar opções que geram pendência',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarQueGeramPendencia',
+      operation: () async {
+        return await _dao.buscarQueGeramPendencia();
+      },
+    );
   }
 
-  /// Conta o total de opções.
   Future<int> contar() async {
-    try {
-      return await _dao.contar();
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao contar opções',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'contar',
+      operation: () async {
+        return await _dao.contar();
+      },
+    );
   }
 
-  /// Conta opções que geram pendência.
   Future<int> contarQueGeramPendencia() async {
-    try {
-      return await _dao.contarQueGeramPendencia();
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao contar opções que geram pendência',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'contarQueGeramPendencia',
+      operation: () async {
+        return await _dao.contarQueGeramPendencia();
+      },
+    );
   }
 
   // ============================================================================
@@ -122,89 +112,76 @@ class ChecklistOpcaoRespostaRepo implements SyncableRepository<ChecklistOpcaoRes
 
   @override
   Future<List<ChecklistOpcaoRespostaTableDto>> buscarDaApi() async {
-    try {
-      AppLogger.d('🔄 Buscando opções de resposta da API',
-          tag: 'ChecklistOpcaoRespostaRepo');
+    return await executeWithLogging(
+      operationName: 'buscarDaApi',
+      operation: () async {
+        final response = await _dio.get(ApiConstants.checklistOpcaoResposta);
 
-      final response = await _dio.get(ApiConstants.checklistOpcaoResposta);
+        if (response.statusCode == 200) {
+          final responseData = response.data;
+          if (responseData == null) {
+            AppLogger.w('⚠️ API retornou resposta vazia', tag: repositoryName);
+            return <ChecklistOpcaoRespostaTableDto>[];
+          }
 
-      if (response.statusCode == 200) {
-        // Valida se response.data existe
-        final responseData = response.data;
-        if (responseData == null) {
-          AppLogger.w('⚠️ API retornou resposta vazia',
-              tag: 'ChecklistOpcaoRespostaRepo');
-          return [];
+          final List<dynamic> data = responseData is List
+              ? responseData
+              : (responseData['data'] ?? []);
+          AppLogger.v('📦 API retornou ${data.length} opções',
+              tag: repositoryName);
+
+          return data.map((item) {
+            final now = DateTime.now();
+            return ChecklistOpcaoRespostaTableDto(
+              id: 0,
+              remoteId: item['id'] as int,
+              nome: item['nome'] as String,
+              geraPendencia: item['geraPendencia'] as bool? ?? false,
+              createdAt: item['createdAt'] != null
+                  ? DateTime.parse(item['createdAt'])
+                  : (item['created_at'] != null
+                      ? DateTime.parse(item['created_at'])
+                      : now),
+              updatedAt: item['updatedAt'] != null
+                  ? DateTime.parse(item['updatedAt'])
+                  : (item['updated_at'] != null
+                      ? DateTime.parse(item['updated_at'])
+                      : now),
+            );
+          }).toList();
+        } else {
+          throw Exception(
+              'Erro ao buscar opções da API: ${response.statusCode}');
         }
-
-        // API retorna array diretamente, não dentro de 'data'
-        final List<dynamic> data =
-            responseData is List ? responseData : (responseData['data'] ?? []);
-        AppLogger.v('📦 API retornou ${data.length} opções',
-            tag: 'ChecklistOpcaoRespostaRepo');
-
-        return data.map((item) {
-          final now = DateTime.now();
-          return ChecklistOpcaoRespostaTableDto(
-            id: 0,
-            remoteId: item['id'] as int,
-            nome: item['nome'] as String,
-            geraPendencia: item['geraPendencia'] as bool? ?? false,
-            // Se não vier da API, usa data atual
-            createdAt: item['createdAt'] != null
-                ? DateTime.parse(item['createdAt'])
-                : (item['created_at'] != null
-                    ? DateTime.parse(item['created_at'])
-                    : now),
-            updatedAt: item['updatedAt'] != null
-                ? DateTime.parse(item['updatedAt'])
-                : (item['updated_at'] != null
-                    ? DateTime.parse(item['updated_at'])
-                    : now),
-          );
-        }).toList();
-      } else {
-        throw Exception(
-            'Erro ao buscar opções da API: ${response.statusCode}');
-      }
-    } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao buscar opções de resposta da API',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+      },
+    );
   }
 
   @override
   Future<void> sincronizarComBanco(List<ChecklistOpcaoRespostaTableDto> itens) async {
-    try {
-      AppLogger.d('💾 Sincronizando ${itens.length} opções com o banco',
-          tag: 'ChecklistOpcaoRespostaRepo');
-
-      await _dao.deletarTodos();
-
-      for (final item in itens) {
-        await _dao.inserirOuAtualizarDto(item);
-      }
-
-      AppLogger.i('✅ ${itens.length} opções sincronizadas com sucesso',
-          tag: 'ChecklistOpcaoRespostaRepo');
-    } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao sincronizar opções com banco',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeVoidWithLogging(
+      operationName: 'sincronizarComBanco',
+      operation: () async {
+        await _dao.deletarTodos();
+        for (final item in itens) {
+          await _dao.inserirOuAtualizarDto(item);
+        }
+        AppLogger.i('✅ ${itens.length} opções sincronizadas com sucesso',
+            tag: repositoryName);
+      },
+      logLevel: log_mixin.LogLevel.info,
+    );
   }
 
   @override
   Future<bool> estaVazio(String entidade) async {
-    try {
-      final count = await _dao.contar();
-      return count == 0;
-    } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao verificar se tabela está vazia',
-          tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
-      return false;
-    }
+    return await executeWithLogging(
+      operationName: 'estaVazio',
+      operation: () async {
+        final count = await _dao.contar();
+        return count == 0;
+      },
+    );
   }
 }
 

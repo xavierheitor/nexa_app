@@ -3,9 +3,8 @@ import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/data/datasources/local/usuario_dao.dart';
 import 'package:nexa_app/data/models/login_response_dto.dart';
 import 'package:nexa_app/data/models/usuario_table_dto.dart';
-import 'package:nexa_app/core/utils/errors/error_handler.dart';
-import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
+import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 
 /// Repositório responsável pelo gerenciamento de dados de usuários.
 ///
@@ -58,7 +57,7 @@ import 'package:nexa_app/core/network/dio_client.dart';
 /// - `AppDatabase`: Instância do banco de dados local
 /// - `UsuarioDao`: Data Access Object para operações de usuário
 /// - `UsuarioTableDto`: DTO para representação de dados de usuário
-class UsuarioRepo {
+class UsuarioRepo with log_mixin.LoggingMixin {
   // ============================================================================
   // DEPENDÊNCIAS E CONFIGURAÇÃO
   // ============================================================================
@@ -99,6 +98,13 @@ class UsuarioRepo {
       : usuarioDao = db.usuarioDao;
 
   // ============================================================================
+  // IMPLEMENTAÇÃO DO LOGGING MIXIN
+  // ============================================================================
+
+  @override
+  String get repositoryName => 'UsuarioRepository';
+
+  // ============================================================================
   // OPERAÇÕES DE LEITURA (READ)
   // ============================================================================
 
@@ -127,82 +133,35 @@ class UsuarioRepo {
   /// usuarios.forEach((usuario) => print('${usuario.nome} - ${usuario.matricula}'));
   /// ```
   Future<List<UsuarioTableDto>> listar() async {
-    /// Executa consulta no banco para obter todas as entidades de usuário.
-    final usuarios = await usuarioDao.listar();
-
-    /// Converte cada entidade para DTO padronizado e retorna como lista.
-    return usuarios
-        .map((usuario) => UsuarioTableDto.fromEntity(usuario))
-        .toList();
+    return await executeWithLogging(
+      operationName: 'listar',
+      operation: () async {
+        final usuarios = await usuarioDao.listar();
+        return usuarios
+            .map((usuario) => UsuarioTableDto.fromEntity(usuario))
+            .toList();
+      },
+    );
   }
 
-  /// Busca um usuário específico pelo seu identificador único.
-  ///
-  /// Localiza um usuário no banco de dados através do ID primário
-  /// e retorna os dados completos em formato DTO padronizado.
-  ///
-  /// ## Parâmetros:
-  /// - `id`: Identificador único do usuário (int)
-  ///
-  /// ## Retorno:
-  /// - `Future<UsuarioTableDto>`: Dados completos do usuário encontrado
-  ///
-  /// ## Comportamento:
-  /// - Busca registro específico por ID
-  /// - Converte entidade para DTO
-  /// - Lança exceção se usuário não for encontrado
-  ///
-  /// ## Casos de Uso:
-  /// - Visualização de perfil do usuário
-  /// - Edição de dados específicos
-  /// - Validação de existência de usuário
-  ///
-  /// ## Exemplo:
-  /// ```dart
-  /// final usuario = await usuarioRepo.buscarPorId(123);
-  /// print('Usuário: ${usuario.nome}');
-  /// ```
   Future<UsuarioTableDto> buscarPorId(int id) async {
-    /// Executa consulta específica por ID no banco de dados.
-    final usuario = await usuarioDao.buscarPorIdOuFalha(id);
-
-    /// Converte a entidade encontrada para DTO padronizado.
-    return UsuarioTableDto.fromEntity(usuario);
+    return await executeWithLogging(
+      operationName: 'buscarPorId',
+      operation: () async {
+        final usuario = await usuarioDao.buscarPorIdOuFalha(id);
+        return UsuarioTableDto.fromEntity(usuario);
+      },
+    );
   }
 
-  /// Busca um usuário específico pela sua matrícula.
-  ///
-  /// Localiza um usuário no banco de dados através da matrícula
-  /// (identificador único de negócio) e retorna os dados completos
-  /// em formato DTO padronizado.
-  ///
-  /// ## Parâmetros:
-  /// - `matricula`: Matrícula do usuário (String)
-  ///
-  /// ## Retorno:
-  /// - `Future<UsuarioTableDto>`: Dados completos do usuário encontrado
-  ///
-  /// ## Comportamento:
-  /// - Busca registro específico por matrícula
-  /// - Converte entidade para DTO
-  /// - Lança exceção se usuário não for encontrado
-  ///
-  /// ## Casos de Uso:
-  /// - Autenticação de usuário
-  /// - Busca por identificador de negócio
-  /// - Validação de matrícula existente
-  ///
-  /// ## Exemplo:
-  /// ```dart
-  /// final usuario = await usuarioRepo.buscarPorMatricula('12345');
-  /// print('Usuário encontrado: ${usuario.nome}');
-  /// ```
   Future<UsuarioTableDto> buscarPorMatricula(String matricula) async {
-    /// Executa consulta específica por matrícula no banco de dados.
-    final usuario = await usuarioDao.buscarPorMatricula(matricula);
-
-    /// Converte a entidade encontrada para DTO padronizado.
-    return UsuarioTableDto.fromEntity(usuario);
+    return await executeWithLogging(
+      operationName: 'buscarPorMatricula',
+      operation: () async {
+        final usuario = await usuarioDao.buscarPorMatricula(matricula);
+        return UsuarioTableDto.fromEntity(usuario);
+      },
+    );
   }
 
   // ============================================================================
@@ -243,17 +202,15 @@ class UsuarioRepo {
   /// print('ID gerado: ${usuarioInserido.id}');
   /// ```
   Future<UsuarioTableDto> inserir(UsuarioTableDto usuario) async {
-    /// Converte DTO para Companion (formato de inserção do Drift).
-    /// Usa o método que insere ou atualiza baseado na matrícula.
-    final id =
-        await usuarioDao.inserirOuAtualizarPorMatricula(usuario.toCompanion());
-
-    /// Busca o registro recém-inserido para obter dados completos
-    /// incluindo o ID gerado automaticamente.
-    final usuarioInserido = await usuarioDao.buscarPorIdOuFalha(id);
-
-    /// Converte a entidade para DTO e retorna dados completos.
-    return UsuarioTableDto.fromEntity(usuarioInserido);
+    return await executeWithLogging(
+      operationName: 'inserir',
+      operation: () async {
+        final id = await usuarioDao
+            .inserirOuAtualizarPorMatricula(usuario.toCompanion());
+        final usuarioInserido = await usuarioDao.buscarPorIdOuFalha(id);
+        return UsuarioTableDto.fromEntity(usuarioInserido);
+      },
+    );
   }
 
   /// Atualiza os dados de um usuário existente.
@@ -290,17 +247,16 @@ class UsuarioRepo {
   /// print('Usuário atualizado: ${resultado.nome}');
   /// ```
   Future<UsuarioTableDto> atualizar(UsuarioTableDto usuario) async {
-    /// Converte DTO para companion e executa atualização no banco usando ID separado.
-    await usuarioDao.atualizarPorId(
-        int.parse(usuario.id), usuario.toCompanion());
-
-    /// Busca o registro atualizado para garantir dados consistentes
-    /// e obter qualquer valor calculado ou modificado pelo banco.
-    final usuarioAtualizado =
-        await usuarioDao.buscarPorIdOuFalha(int.parse(usuario.id));
-
-    /// Converte a entidade atualizada para DTO e retorna.
-    return UsuarioTableDto.fromEntity(usuarioAtualizado);
+    return await executeWithLogging(
+      operationName: 'atualizar',
+      operation: () async {
+        await usuarioDao.atualizarPorId(
+            int.parse(usuario.id), usuario.toCompanion());
+        final usuarioAtualizado =
+            await usuarioDao.buscarPorIdOuFalha(int.parse(usuario.id));
+        return UsuarioTableDto.fromEntity(usuarioAtualizado);
+      },
+    );
   }
 
   /// Remove um usuário do banco de dados.
@@ -335,9 +291,12 @@ class UsuarioRepo {
   /// Esta operação é **irreversível**. Certifique-se de que o usuário
   /// realmente deve ser removido antes de executar esta operação.
   Future<void> deletar(int id) async {
-    /// Executa exclusão do registro específico por ID.
-    /// A operação é atômica e falhará completamente se houver problemas.
-    await usuarioDao.deletar(id);
+    return await executeVoidWithLogging(
+      operationName: 'deletar',
+      operation: () async {
+        await usuarioDao.deletar(id);
+      },
+    );
   }
 
   // ============================================================================
@@ -388,30 +347,17 @@ class UsuarioRepo {
   /// - Tag específica: `UsuarioRepositoryImpl`
   /// - Contexto: `[usuario_repository_impl - login]`
   Future<LoginResponseDto> login(String matricula, String senha) async {
-    try {
-      /// Envia requisição POST para endpoint de login com credenciais.
-      final response = await dio.post(ApiConstants.login, data: {
-        'matricula': matricula,
-        'senha': senha,
-      });
-
-      /// Converte resposta JSON para DTO tipado com validação completa.
-      return await LoginResponseDto.fromJson(response.data);
-    } catch (e, s) {
-      /// Trata erro bruto e converte para AppException padronizada.
-      final erro = ErrorHandler.tratar(e, s);
-
-      /// Registra erro detalhado para debugging e monitoramento.
-      AppLogger.e(
-        '[usuario_repository_impl - login] ${erro.mensagem}',
-        tag: 'UsuarioRepositoryImpl',
-        error: e,
-        stackTrace: s,
-      );
-
-      /// Re-lança erro tratado para camada superior.
-      throw erro;
-    }
+    return await executeWithLogging(
+      operationName: 'login',
+      operation: () async {
+        final response = await dio.post(ApiConstants.login, data: {
+          'matricula': matricula,
+          'senha': senha,
+        });
+        return await LoginResponseDto.fromJson(response.data);
+      },
+      logLevel: log_mixin.LogLevel.info,
+    );
   }
 
   /// Renova tokens de autenticação usando refresh token.
@@ -460,28 +406,15 @@ class UsuarioRepo {
   /// Se este método falhar, o usuário precisará fazer novo login
   /// com credenciais, pois o refresh token pode ter expirado.
   Future<LoginResponseDto> refreshToken(String refreshToken) async {
-    try {
-      /// Envia requisição POST para endpoint de renovação com refresh token.
-      final response = await dio.post(ApiConstants.refreshToken, data: {
-        'refreshToken': refreshToken,
-      });
-
-      /// Converte resposta JSON para DTO tipado com validação completa.
-      return await LoginResponseDto.fromJson(response.data);
-    } catch (e, s) {
-      /// Trata erro bruto e converte para AppException padronizada.
-      final erro = ErrorHandler.tratar(e, s);
-
-      /// Registra erro detalhado para debugging e monitoramento.
-      AppLogger.e(
-        '[usuario_repository_impl - refreshToken] ${erro.mensagem}',
-        tag: 'UsuarioRepositoryImpl',
-        error: e,
-        stackTrace: s,
-      );
-
-      /// Re-lança erro tratado para camada superior.
-      throw erro;
-    }
+    return await executeWithLogging(
+      operationName: 'refreshToken',
+      operation: () async {
+        final response = await dio.post(ApiConstants.refreshToken, data: {
+          'refreshToken': refreshToken,
+        });
+        return await LoginResponseDto.fromJson(response.data);
+      },
+      logLevel: log_mixin.LogLevel.info,
+    );
   }
 }

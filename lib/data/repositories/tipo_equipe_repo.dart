@@ -3,9 +3,9 @@ import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/data/datasources/local/tipo_equipe_dao.dart';
 import 'package:nexa_app/data/models/tipo_equipe_table_dto.dart';
 import 'package:nexa_app/core/sync/syncable_repository.dart';
-import 'package:nexa_app/core/utils/errors/error_handler.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
+import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 
 /// Repositório responsável pelo gerenciamento de dados de tipos de equipe.
 ///
@@ -55,7 +55,9 @@ import 'package:nexa_app/core/network/dio_client.dart';
 /// final novoTipoEquipe = TipoEquipeTableDto(...);
 /// await tipoEquipeRepo.criar(novoTipoEquipe);
 /// ```
-class TipoEquipeRepo implements SyncableRepository<TipoEquipeTableDto> {
+class TipoEquipeRepo
+    with log_mixin.LoggingMixin
+    implements SyncableRepository<TipoEquipeTableDto> {
   final DioClient _dio;
   final AppDatabase _db;
   late final TipoEquipeDao _dao;
@@ -67,203 +69,127 @@ class TipoEquipeRepo implements SyncableRepository<TipoEquipeTableDto> {
   }
 
   @override
+  String get repositoryName => 'TipoEquipeRepository';
+
+  @override
   String get nomeEntidade => 'tipo_equipe';
 
-  /// Lista todos os tipos de equipe do banco local
   Future<List<TipoEquipeTableDto>> listar() async {
-    try {
-      AppLogger.d('Listando tipos de equipe', tag: 'TipoEquipeRepository');
-
-      final entidades = await _dao.listar();
-      final dtos =
-          entidades.map((e) => TipoEquipeTableDto.fromEntity(e)).toList();
-
-      AppLogger.d('${dtos.length} tipos de equipe encontrados',
-          tag: 'TipoEquipeRepository');
-      return dtos;
-    } catch (e) {
-      AppLogger.e('Erro ao listar tipos de equipe: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeWithLogging(
+      operationName: 'listar',
+      operation: () async {
+        final entidades = await _dao.listar();
+        return entidades.map((e) => TipoEquipeTableDto.fromEntity(e)).toList();
+      },
+    );
   }
 
-  /// Busca um tipo de equipe por ID
   Future<TipoEquipeTableDto?> buscarPorId(String id) async {
-    try {
-      AppLogger.d('Buscando tipo de equipe por ID: $id',
-          tag: 'TipoEquipeRepository');
-
-      final entidade = await _dao.buscarPorIdOuNull(int.parse(id));
-      if (entidade == null) {
-        AppLogger.d('Tipo de equipe não encontrado',
-            tag: 'TipoEquipeRepository');
-        return null;
-      }
-
-      final dto = TipoEquipeTableDto.fromEntity(entidade);
-      AppLogger.d('Tipo de equipe encontrado: ${dto.nome}',
-          tag: 'TipoEquipeRepository');
-      return dto;
-    } catch (e) {
-      AppLogger.e('Erro ao buscar tipo de equipe por ID: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorId',
+      operation: () async {
+        final entidade = await _dao.buscarPorIdOuNull(int.parse(id));
+        if (entidade == null) {
+          AppLogger.d('Tipo de equipe não encontrado', tag: repositoryName);
+          return null;
+        }
+        return TipoEquipeTableDto.fromEntity(entidade);
+      },
+    );
   }
 
-  /// Busca tipos de equipe por nome
   Future<List<TipoEquipeTableDto>> buscarPorNome(String nome) async {
-    try {
-      AppLogger.d('Buscando tipos de equipe por nome: $nome',
-          tag: 'TipoEquipeRepository');
-
-      final entidades = await _dao.buscarPorNome(nome);
-      final dtos =
-          entidades.map((e) => TipoEquipeTableDto.fromEntity(e)).toList();
-
-      AppLogger.d('${dtos.length} tipos de equipe encontrados',
-          tag: 'TipoEquipeRepository');
-      return dtos;
-    } catch (e) {
-      AppLogger.e('Erro ao buscar tipos de equipe por nome: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorNome',
+      operation: () async {
+        final entidades = await _dao.buscarPorNome(nome);
+        return entidades.map((e) => TipoEquipeTableDto.fromEntity(e)).toList();
+      },
+    );
   }
 
-  /// Cria um novo tipo de equipe
   Future<TipoEquipeTableDto> criar(TipoEquipeTableDto dto) async {
-    try {
-      AppLogger.d('Criando tipo de equipe: ${dto.nome}',
-          tag: 'TipoEquipeRepository');
-
-      dto.validate();
-
-      final companion = dto.toCompanion();
-      final id = await _dao.inserirOuAtualizar(companion);
-
-      final novoDto = dto.copyWith(id: id.toString());
-      AppLogger.d('Tipo de equipe criado com ID: $id',
-          tag: 'TipoEquipeRepository');
-      return novoDto;
-    } catch (e) {
-      AppLogger.e('Erro ao criar tipo de equipe: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeWithLogging(
+      operationName: 'criar',
+      operation: () async {
+        dto.validate();
+        final companion = dto.toCompanion();
+        final id = await _dao.inserirOuAtualizar(companion);
+        return dto.copyWith(id: id.toString());
+      },
+    );
   }
 
-  /// Atualiza um tipo de equipe existente
   Future<TipoEquipeTableDto> atualizar(TipoEquipeTableDto dto) async {
-    try {
-      AppLogger.d('Atualizando tipo de equipe: ${dto.nome}',
-          tag: 'TipoEquipeRepository');
-
-      dto.validate();
-
-      final entidade = dto.toEntity();
-      await _dao.atualizar(entidade);
-
-      AppLogger.d('Tipo de equipe atualizado com sucesso',
-          tag: 'TipoEquipeRepository');
-      return dto;
-    } catch (e) {
-      AppLogger.e('Erro ao atualizar tipo de equipe: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeWithLogging(
+      operationName: 'atualizar',
+      operation: () async {
+        dto.validate();
+        final entidade = dto.toEntity();
+        await _dao.atualizar(entidade);
+        return dto;
+      },
+    );
   }
 
-  /// Deleta um tipo de equipe
   Future<void> deletar(String id) async {
-    try {
-      AppLogger.d('Deletando tipo de equipe: $id', tag: 'TipoEquipeRepository');
-
-      await _dao.deletar(int.parse(id));
-
-      AppLogger.d('Tipo de equipe deletado com sucesso',
-          tag: 'TipoEquipeRepository');
-    } catch (e) {
-      AppLogger.e('Erro ao deletar tipo de equipe: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeVoidWithLogging(
+      operationName: 'deletar',
+      operation: () async {
+        await _dao.deletar(int.parse(id));
+      },
+    );
   }
 
-  /// Conta o número de tipos de equipe
   Future<int> contar() async {
-    try {
-      AppLogger.d('Contando tipos de equipe', tag: 'TipoEquipeRepository');
-
-      final count = await _dao.contar();
-
-      AppLogger.d('Total de tipos de equipe: $count',
-          tag: 'TipoEquipeRepository');
-      return count;
-    } catch (e) {
-      AppLogger.e('Erro ao contar tipos de equipe: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeWithLogging(
+      operationName: 'contar',
+      operation: () async {
+        return await _dao.contar();
+      },
+    );
   }
 
   @override
   Future<bool> estaVazio(String entidade) async {
-    try {
-      final count = await _dao.contar();
-      return count == 0;
-    } catch (e) {
-      AppLogger.e('Erro ao verificar se tipos de equipe estão vazios: $e',
-          tag: 'TipoEquipeRepository');
-      return true; // Em caso de erro, considera vazio para forçar sincronização
-    }
+    return await executeWithLogging(
+      operationName: 'estaVazio',
+      operation: () async {
+        final count = await _dao.contar();
+        return count == 0;
+      },
+    );
   }
 
   @override
   Future<List<TipoEquipeTableDto>> buscarDaApi() async {
-    try {
-      AppLogger.d('Buscando tipos de equipe da API',
-          tag: 'TipoEquipeRepository');
-
-      final response = await _dio.get(ApiConstants.tiposEquipe);
-
-      if (response.data == null) {
-        AppLogger.w('Resposta da API vazia para tipos de equipe',
-            tag: 'TipoEquipeRepository');
-        return [];
-      }
-
-      final List<dynamic> data =
-          response.data is List ? response.data : [response.data];
-      final dtos =
-          data.map((json) => TipoEquipeTableDto.fromJson(json)).toList();
-
-      AppLogger.d('${dtos.length} tipos de equipe recebidos da API',
-          tag: 'TipoEquipeRepository');
-      return dtos;
-    } catch (e) {
-      AppLogger.e('Erro ao buscar tipos de equipe da API: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeWithLogging(
+      operationName: 'buscarDaApi',
+      operation: () async {
+        final response = await _dio.get(ApiConstants.tiposEquipe);
+        if (response.data == null) {
+          AppLogger.w('Resposta da API vazia para tipos de equipe',
+              tag: repositoryName);
+          return <TipoEquipeTableDto>[];
+        }
+        final List<dynamic> data =
+            response.data is List ? response.data : [response.data];
+        return data.map((json) => TipoEquipeTableDto.fromJson(json)).toList();
+      },
+    );
   }
 
   @override
   Future<void> sincronizarComBanco(List<TipoEquipeTableDto> dtos) async {
-    try {
-      AppLogger.d('Sincronizando ${dtos.length} tipos de equipe com o banco',
-          tag: 'TipoEquipeRepository');
-
-      final companions = dtos.map((dto) => dto.toCompanion()).toList();
-      await _dao.sincronizar(companions);
-
-      AppLogger.d('Sincronização de tipos de equipe concluída',
-          tag: 'TipoEquipeRepository');
-    } catch (e) {
-      AppLogger.e('Erro ao sincronizar tipos de equipe: $e',
-          tag: 'TipoEquipeRepository');
-      throw ErrorHandler.tratar(e);
-    }
+    return await executeVoidWithLogging(
+      operationName: 'sincronizarComBanco',
+      operation: () async {
+        final companions = dtos.map((dto) => dto.toCompanion()).toList();
+        await _dao.sincronizar(companions);
+        AppLogger.i('Sincronizados ${dtos.length} tipos de equipe',
+            tag: repositoryName);
+      },
+      logLevel: log_mixin.LogLevel.info,
+    );
   }
 }

@@ -3,9 +3,9 @@ import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/data/datasources/local/tipo_veiculo_dao.dart';
 import 'package:nexa_app/data/models/tipo_veiculo_table_dto.dart';
 import 'package:nexa_app/core/sync/syncable_repository.dart';
-import 'package:nexa_app/core/utils/errors/error_handler.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
+import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 
 /// Repositório responsável pelo gerenciamento de dados de tipos de veículo.
 ///
@@ -60,7 +60,9 @@ import 'package:nexa_app/core/network/dio_client.dart';
 /// - `AppDatabase`: Instância do banco de dados local
 /// - `TipoVeiculoDao`: Data Access Object para operações de tipo de veículo
 /// - `TipoVeiculoTableDto`: DTO para representação de dados de tipo de veículo
-class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
+class TipoVeiculoRepo
+    with log_mixin.LoggingMixin
+    implements SyncableRepository<TipoVeiculoTableDto> {
   // ============================================================================
   // DEPENDÊNCIAS E CONFIGURAÇÃO
   // ============================================================================
@@ -105,86 +107,51 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   // ============================================================================
 
   @override
+  String get repositoryName => 'TipoVeiculoRepository';
+
+  @override
   String get nomeEntidade => 'tipo_veiculo';
 
   @override
   Future<List<TipoVeiculoTableDto>> buscarDaApi() async {
-    try {
-      /// Envia requisição GET para endpoint de tipos de veículo.
-      final response = await dio.get(ApiConstants.tiposVeiculo);
-
-      /// Converte resposta JSON para lista de DTOs tipados.
-      return (response.data as List)
-          .map((json) => TipoVeiculoTableDto.fromJson(json))
-          .toList();
-    } catch (e, s) {
-      /// Trata erro bruto e converte para AppException padronizada.
-      final erro = ErrorHandler.tratar(e, s);
-
-      /// Registra erro detalhado para debugging e monitoramento.
-      AppLogger.e(
-        '[tipo_veiculo_repository - buscarDaApi] ${erro.mensagem}',
-        tag: 'TipoVeiculoRepository',
-        error: e,
-        stackTrace: s,
-      );
-
-      /// Re-lança erro tratado para camada superior.
-      throw erro;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarDaApi',
+      operation: () async {
+        final response = await dio.get(ApiConstants.tiposVeiculo);
+        return (response.data as List)
+            .map((json) => TipoVeiculoTableDto.fromJson(json))
+            .toList();
+      },
+    );
   }
 
   @override
   Future<void> sincronizarComBanco(List<TipoVeiculoTableDto> itens) async {
-    try {
-      /// Executa sincronização em transação para garantir atomicidade.
-      await db.transaction(() async {
-        /// Limpa todos os registros existentes.
-        await tipoVeiculoDao.deletarTodos();
-
-        /// Insere todos os novos itens.
-        for (final tipoVeiculo in itens) {
-          await tipoVeiculoDao.inserirOuAtualizar(tipoVeiculo.toCompanion());
-        }
-      });
-
-      AppLogger.i(
-        '[tipo_veiculo_repository - sincronizarComBanco] Sincronizados ${itens.length} tipos de veículo',
-        tag: 'TipoVeiculoRepository',
-      );
-    } catch (e, s) {
-      /// Trata erro bruto e converte para AppException padronizada.
-      final erro = ErrorHandler.tratar(e, s);
-
-      /// Registra erro detalhado para debugging e monitoramento.
-      AppLogger.e(
-        '[tipo_veiculo_repository - sincronizarComBanco] ${erro.mensagem}',
-        tag: 'TipoVeiculoRepository',
-        error: e,
-        stackTrace: s,
-      );
-
-      /// Re-lança erro tratado para camada superior.
-      throw erro;
-    }
+    return await executeVoidWithLogging(
+      operationName: 'sincronizarComBanco',
+      operation: () async {
+        await db.transaction(() async {
+          await tipoVeiculoDao.deletarTodos();
+          for (final tipoVeiculo in itens) {
+            await tipoVeiculoDao.inserirOuAtualizar(tipoVeiculo.toCompanion());
+          }
+        });
+        AppLogger.i('Sincronizados ${itens.length} tipos de veículo',
+            tag: repositoryName);
+      },
+      logLevel: log_mixin.LogLevel.info,
+    );
   }
 
   @override
   Future<bool> estaVazio(String entidade) async {
-    try {
-      /// Verifica se a tabela de tipos de veículo está vazia.
-      final tipos = await tipoVeiculoDao.listar();
-      return tipos.isEmpty;
-    } catch (e, s) {
-      /// Em caso de erro, assume que não está vazio para evitar perda de dados.
-      AppLogger.e(
-        '[tipo_veiculo_repository - estaVazio] Erro ao verificar se tabela está vazia: $e',
-        tag: 'TipoVeiculoRepository',
-        error: e,
-        stackTrace: s,
-      );
-      return false;
-    }
+    return await executeWithLogging(
+      operationName: 'estaVazio',
+      operation: () async {
+        final tipos = await tipoVeiculoDao.listar();
+        return tipos.isEmpty;
+      },
+    );
   }
 
   // ============================================================================
@@ -216,13 +183,15 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// tipos.forEach((tipo) => print('${tipo.nome} - ${tipo.descricao}'));
   /// ```
   Future<List<TipoVeiculoTableDto>> listar() async {
-    /// Executa consulta no banco para obter todas as entidades de tipo de veículo.
-    final tipos = await tipoVeiculoDao.listar();
-
-    /// Converte cada entidade para DTO padronizado e retorna como lista.
-    return tipos
-        .map((tipo) => TipoVeiculoTableDto.fromEntity(tipo))
-        .toList();
+    return await executeWithLogging(
+      operationName: 'listar',
+      operation: () async {
+        final tipos = await tipoVeiculoDao.listar();
+        return tipos
+            .map((tipo) => TipoVeiculoTableDto.fromEntity(tipo))
+            .toList();
+      },
+    );
   }
 
   /// Busca um tipo de veículo específico pelo seu identificador único.
@@ -252,11 +221,13 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// print('Tipo: ${tipo.nome}');
   /// ```
   Future<TipoVeiculoTableDto> buscarPorId(int id) async {
-    /// Executa consulta específica por ID no banco de dados.
-    final tipo = await tipoVeiculoDao.buscarPorIdOuFalha(id);
-
-    /// Converte a entidade encontrada para DTO padronizado.
-    return TipoVeiculoTableDto.fromEntity(tipo);
+    return await executeWithLogging(
+      operationName: 'buscarPorId',
+      operation: () async {
+        final tipo = await tipoVeiculoDao.buscarPorIdOuFalha(id);
+        return TipoVeiculoTableDto.fromEntity(tipo);
+      },
+    );
   }
 
   /// Busca um tipo de veículo específico pelo seu remote ID.
@@ -287,11 +258,13 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// print('Tipo encontrado: ${tipo.nome}');
   /// ```
   Future<TipoVeiculoTableDto> buscarPorRemoteId(int remoteId) async {
-    /// Executa consulta específica por remote ID no banco de dados.
-    final tipo = await tipoVeiculoDao.buscarPorRemoteIdOuFalha(remoteId);
-
-    /// Converte a entidade encontrada para DTO padronizado.
-    return TipoVeiculoTableDto.fromEntity(tipo);
+    return await executeWithLogging(
+      operationName: 'buscarPorRemoteId',
+      operation: () async {
+        final tipo = await tipoVeiculoDao.buscarPorRemoteIdOuFalha(remoteId);
+        return TipoVeiculoTableDto.fromEntity(tipo);
+      },
+    );
   }
 
   /// Busca tipos de veículo por nome.
@@ -321,13 +294,15 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// print('Encontrados ${tipos.length} tipos com "Carro"');
   /// ```
   Future<List<TipoVeiculoTableDto>> buscarPorNome(String nome) async {
-    /// Executa consulta por nome no banco de dados.
-    final tipos = await tipoVeiculoDao.buscarPorNome(nome);
-
-    /// Converte cada entidade para DTO padronizado e retorna como lista.
-    return tipos
-        .map((tipo) => TipoVeiculoTableDto.fromEntity(tipo))
-        .toList();
+    return await executeWithLogging(
+      operationName: 'buscarPorNome',
+      operation: () async {
+        final tipos = await tipoVeiculoDao.buscarPorNome(nome);
+        return tipos
+            .map((tipo) => TipoVeiculoTableDto.fromEntity(tipo))
+            .toList();
+      },
+    );
   }
 
   // ============================================================================
@@ -368,16 +343,15 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// print('ID gerado: ${tipoInserido.id}');
   /// ```
   Future<TipoVeiculoTableDto> inserir(TipoVeiculoTableDto tipoVeiculo) async {
-    /// Converte DTO para Companion (formato de inserção do Drift).
-    /// O ID é omitido para permitir geração automática pelo banco.
-    final id = await tipoVeiculoDao.inserirOuAtualizar(tipoVeiculo.toCompanion());
-
-    /// Busca o registro recém-inserido para obter dados completos
-    /// incluindo o ID gerado automaticamente.
-    final tipoInserido = await tipoVeiculoDao.buscarPorIdOuFalha(id);
-
-    /// Converte a entidade para DTO e retorna dados completos.
-    return TipoVeiculoTableDto.fromEntity(tipoInserido);
+    return await executeWithLogging(
+      operationName: 'inserir',
+      operation: () async {
+        final id =
+            await tipoVeiculoDao.inserirOuAtualizar(tipoVeiculo.toCompanion());
+        final tipoInserido = await tipoVeiculoDao.buscarPorIdOuFalha(id);
+        return TipoVeiculoTableDto.fromEntity(tipoInserido);
+      },
+    );
   }
 
   /// Atualiza os dados de um tipo de veículo existente.
@@ -414,16 +388,15 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// print('Tipo atualizado: ${resultado.nome}');
   /// ```
   Future<TipoVeiculoTableDto> atualizar(TipoVeiculoTableDto tipoVeiculo) async {
-    /// Converte DTO para entidade e executa atualização no banco.
-    await tipoVeiculoDao.atualizar(tipoVeiculo.toEntity());
-
-    /// Busca o registro atualizado para garantir dados consistentes
-    /// e obter qualquer valor calculado ou modificado pelo banco.
-    final tipoAtualizado =
-        await tipoVeiculoDao.buscarPorIdOuFalha(int.parse(tipoVeiculo.id));
-
-    /// Converte a entidade atualizada para DTO e retorna.
-    return TipoVeiculoTableDto.fromEntity(tipoAtualizado);
+    return await executeWithLogging(
+      operationName: 'atualizar',
+      operation: () async {
+        await tipoVeiculoDao.atualizar(tipoVeiculo.toEntity());
+        final tipoAtualizado =
+            await tipoVeiculoDao.buscarPorIdOuFalha(int.parse(tipoVeiculo.id));
+        return TipoVeiculoTableDto.fromEntity(tipoAtualizado);
+      },
+    );
   }
 
   /// Remove um tipo de veículo do banco de dados.
@@ -458,8 +431,11 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// Esta operação é **irreversível**. Certifique-se de que o tipo
   /// realmente deve ser removido antes de executar esta operação.
   Future<void> deletar(int id) async {
-    /// Executa exclusão do registro específico por ID.
-    /// A operação é atômica e falhará completamente se houver problemas.
-    await tipoVeiculoDao.deletar(id);
+    return await executeVoidWithLogging(
+      operationName: 'deletar',
+      operation: () async {
+        await tipoVeiculoDao.deletar(id);
+      },
+    );
   }
 }

@@ -5,9 +5,12 @@ import 'package:nexa_app/data/models/checklist_pergunta_table_dto.dart';
 import 'package:nexa_app/core/sync/syncable_repository.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
+import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 
 /// Repositório para gerenciar operações com Perguntas de Checklist.
-class ChecklistPerguntaRepo implements SyncableRepository<ChecklistPerguntaTableDto> {
+class ChecklistPerguntaRepo
+    with log_mixin.LoggingMixin
+    implements SyncableRepository<ChecklistPerguntaTableDto> {
   final DioClient _dio;
   final AppDatabase _db;
   late final ChecklistPerguntaDao _dao;
@@ -19,77 +22,68 @@ class ChecklistPerguntaRepo implements SyncableRepository<ChecklistPerguntaTable
   }
 
   @override
+  String get repositoryName => 'ChecklistPerguntaRepository';
+
+  @override
   String get nomeEntidade => 'checklist-pergunta';
 
   // ============================================================================
   // CRUD LOCAL
   // ============================================================================
 
-  /// Lista todas as perguntas de checklist.
   Future<List<ChecklistPerguntaTableDto>> listar() async {
-    try {
-      return await _dao.listarDto();
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao listar perguntas de checklist',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'listar',
+      operation: () async {
+        return await _dao.listarDto();
+      },
+    );
   }
 
-  /// Busca uma pergunta por ID local.
   Future<ChecklistPerguntaTableDto?> buscarPorId(int id) async {
-    try {
-      return await _dao.buscarPorIdDto(id);
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar pergunta por ID',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorId',
+      operation: () async {
+        return await _dao.buscarPorIdDto(id);
+      },
+    );
   }
 
-  /// Busca uma pergunta por remote ID.
   Future<ChecklistPerguntaTableDto?> buscarPorRemoteId(int remoteId) async {
-    try {
-      return await _dao.buscarPorRemoteIdDto(remoteId);
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar pergunta por remote ID',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorRemoteId',
+      operation: () async {
+        return await _dao.buscarPorRemoteIdDto(remoteId);
+      },
+    );
   }
 
-  /// Busca perguntas de um modelo de checklist.
   Future<List<ChecklistPerguntaTableDto>> buscarPorModelo(
       int checklistModeloId) async {
-    try {
-      return await _dao.buscarPorModelo(checklistModeloId);
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar perguntas por modelo',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorModelo',
+      operation: () async {
+        return await _dao.buscarPorModelo(checklistModeloId);
+      },
+    );
   }
 
-  /// Busca perguntas por nome (busca parcial).
   Future<List<ChecklistPerguntaTableDto>> buscarPorNome(String nome) async {
-    try {
-      return await _dao.buscarPorNome(nome);
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao buscar perguntas por nome',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarPorNome',
+      operation: () async {
+        return await _dao.buscarPorNome(nome);
+      },
+    );
   }
 
-  /// Conta o total de perguntas.
   Future<int> contar() async {
-    try {
-      return await _dao.contar();
-    } catch (e, stackTrace) {
-      AppLogger.e('Erro ao contar perguntas',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeWithLogging(
+      operationName: 'contar',
+      operation: () async {
+        return await _dao.contar();
+      },
+    );
   }
 
   // ============================================================================
@@ -98,88 +92,75 @@ class ChecklistPerguntaRepo implements SyncableRepository<ChecklistPerguntaTable
 
   @override
   Future<List<ChecklistPerguntaTableDto>> buscarDaApi() async {
-    try {
-      AppLogger.d('🔄 Buscando perguntas de checklist da API',
-          tag: 'ChecklistPerguntaRepo');
+    return await executeWithLogging(
+      operationName: 'buscarDaApi',
+      operation: () async {
+        final response = await _dio.get(ApiConstants.checklistPergunta);
 
-      final response = await _dio.get(ApiConstants.checklistPergunta);
+        if (response.statusCode == 200) {
+          final responseData = response.data;
+          if (responseData == null) {
+            AppLogger.w('⚠️ API retornou resposta vazia', tag: repositoryName);
+            return <ChecklistPerguntaTableDto>[];
+          }
 
-      if (response.statusCode == 200) {
-        // Valida se response.data existe
-        final responseData = response.data;
-        if (responseData == null) {
-          AppLogger.w('⚠️ API retornou resposta vazia',
-              tag: 'ChecklistPerguntaRepo');
-          return [];
+          final List<dynamic> data = responseData is List
+              ? responseData
+              : (responseData['data'] ?? []);
+          AppLogger.v('📦 API retornou ${data.length} perguntas',
+              tag: repositoryName);
+
+          return data.map((item) {
+            final now = DateTime.now();
+            return ChecklistPerguntaTableDto(
+              id: 0,
+              remoteId: item['id'] as int,
+              nome: item['nome'] as String,
+              createdAt: item['createdAt'] != null
+                  ? DateTime.parse(item['createdAt'])
+                  : (item['created_at'] != null
+                      ? DateTime.parse(item['created_at'])
+                      : now),
+              updatedAt: item['updatedAt'] != null
+                  ? DateTime.parse(item['updatedAt'])
+                  : (item['updated_at'] != null
+                      ? DateTime.parse(item['updated_at'])
+                      : now),
+            );
+          }).toList();
+        } else {
+          throw Exception(
+              'Erro ao buscar perguntas da API: ${response.statusCode}');
         }
-
-        // API retorna array diretamente, não dentro de 'data'
-        final List<dynamic> data =
-            responseData is List ? responseData : (responseData['data'] ?? []);
-        AppLogger.v('📦 API retornou ${data.length} perguntas',
-            tag: 'ChecklistPerguntaRepo');
-
-        return data.map((item) {
-          final now = DateTime.now();
-          return ChecklistPerguntaTableDto(
-            id: 0,
-            remoteId: item['id'] as int,
-            nome: item['nome'] as String,
-            // Se não vier da API, usa data atual
-            createdAt: item['createdAt'] != null
-                ? DateTime.parse(item['createdAt'])
-                : (item['created_at'] != null
-                    ? DateTime.parse(item['created_at'])
-                    : now),
-            updatedAt: item['updatedAt'] != null
-                ? DateTime.parse(item['updatedAt'])
-                : (item['updated_at'] != null
-                    ? DateTime.parse(item['updated_at'])
-                    : now),
-          );
-        }).toList();
-      } else {
-        throw Exception(
-            'Erro ao buscar perguntas da API: ${response.statusCode}');
-      }
-    } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao buscar perguntas de checklist da API',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+      },
+    );
   }
 
   @override
   Future<void> sincronizarComBanco(List<ChecklistPerguntaTableDto> itens) async {
-    try {
-      AppLogger.d('💾 Sincronizando ${itens.length} perguntas com o banco',
-          tag: 'ChecklistPerguntaRepo');
-
-      await _dao.deletarTodos();
-
-      for (final item in itens) {
-        await _dao.inserirOuAtualizarDto(item);
-      }
-
-      AppLogger.i('✅ ${itens.length} perguntas sincronizadas com sucesso',
-          tag: 'ChecklistPerguntaRepo');
-    } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao sincronizar perguntas com banco',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      rethrow;
-    }
+    return await executeVoidWithLogging(
+      operationName: 'sincronizarComBanco',
+      operation: () async {
+        await _dao.deletarTodos();
+        for (final item in itens) {
+          await _dao.inserirOuAtualizarDto(item);
+        }
+        AppLogger.i('✅ ${itens.length} perguntas sincronizadas com sucesso',
+            tag: repositoryName);
+      },
+      logLevel: log_mixin.LogLevel.info,
+    );
   }
 
   @override
   Future<bool> estaVazio(String entidade) async {
-    try {
-      final count = await _dao.contar();
-      return count == 0;
-    } catch (e, stackTrace) {
-      AppLogger.e('❌ Erro ao verificar se tabela está vazia',
-          tag: 'ChecklistPerguntaRepo', error: e, stackTrace: stackTrace);
-      return false;
-    }
+    return await executeWithLogging(
+      operationName: 'estaVazio',
+      operation: () async {
+        final count = await _dao.contar();
+        return count == 0;
+      },
+    );
   }
 }
 

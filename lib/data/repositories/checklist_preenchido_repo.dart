@@ -1,12 +1,16 @@
 import 'package:nexa_app/data/datasources/local/checklist_preenchido_dao.dart';
 import 'package:nexa_app/data/models/checklist_preenchido_table_dto.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 
 /// Repositório para ChecklistPreenchidoTable
-class ChecklistPreenchidoRepo {
+class ChecklistPreenchidoRepo with log_mixin.LoggingMixin {
   final ChecklistPreenchidoDao _dao;
 
   ChecklistPreenchidoRepo(this._dao);
+
+  @override
+  String get repositoryName => 'ChecklistPreenchidoRepository';
 
   /// Lista todos os checklists preenchidos
   Future<List<ChecklistPreenchidoTableDto>> listar() async {
@@ -71,7 +75,6 @@ class ChecklistPreenchidoRepo {
     return await _dao.existeParaTurno(turnoId);
   }
 
-  /// Salva um checklist preenchido com respostas
   Future<int> salvarChecklistCompleto({
     required int turnoId,
     required int checklistModeloId,
@@ -80,23 +83,36 @@ class ChecklistPreenchidoRepo {
     double? longitude,
     int? eletricistaRemoteId,
   }) async {
-    AppLogger.d('Salvando checklist completo para turno: $turnoId', tag: 'ChecklistPreenchidoRepo');
-    
-    try {
-      // Verifica se já existe um checklist para a mesma combinação
-      final existente = await _dao.buscarPorChave(
-        turnoId: turnoId,
-        checklistModeloId: checklistModeloId,
-        eletricistaRemoteId: eletricistaRemoteId,
-      );
+    return await executeWithLogging(
+      operationName: 'salvarChecklistCompleto',
+      operation: () async {
+        final existente = await _dao.buscarPorChave(
+          turnoId: turnoId,
+          checklistModeloId: checklistModeloId,
+          eletricistaRemoteId: eletricistaRemoteId,
+        );
 
-      if (existente != null) {
-        AppLogger.d(
-            'Checklist existente encontrado (ID ${existente.id}). Atualizando registro.',
-            tag: 'ChecklistPreenchidoRepo');
+        if (existente != null) {
+          AppLogger.d(
+              'Checklist existente encontrado (ID ${existente.id}). Atualizando.',
+              tag: repositoryName);
 
-        final dtoAtualizado = ChecklistPreenchidoTableDto(
-          id: existente.id.toString(),
+          final dtoAtualizado = ChecklistPreenchidoTableDto(
+            id: existente.id.toString(),
+            turnoId: turnoId,
+            checklistModeloId: checklistModeloId,
+            eletricistaRemoteId: eletricistaRemoteId,
+            latitude: latitude,
+            longitude: longitude,
+            dataPreenchimento: DateTime.now(),
+          );
+
+          await _dao.atualizar(dtoAtualizado);
+          return int.parse(existente.id);
+        }
+
+        final checklistDto = ChecklistPreenchidoTableDto(
+          id: '0',
           turnoId: turnoId,
           checklistModeloId: checklistModeloId,
           eletricistaRemoteId: eletricistaRemoteId,
@@ -105,30 +121,11 @@ class ChecklistPreenchidoRepo {
           dataPreenchimento: DateTime.now(),
         );
 
-        await _dao.atualizar(dtoAtualizado);
-        return int.parse(existente.id);
-      }
-
-      // 1. Criar o checklist preenchido
-      final checklistDto = ChecklistPreenchidoTableDto(
-        id: '0', // Será autoincrementado
-        turnoId: turnoId,
-        checklistModeloId: checklistModeloId,
-        eletricistaRemoteId: eletricistaRemoteId,
-        latitude: latitude,
-        longitude: longitude,
-        dataPreenchimento: DateTime.now(),
-      );
-
-      // 2. Inserir o checklist preenchido
-      final checklistId = await inserir(checklistDto);
-      
-      AppLogger.i('Checklist preenchido criado com ID: $checklistId', tag: 'ChecklistPreenchidoRepo');
-      
-      return checklistId;
-    } catch (e) {
-      AppLogger.e('Erro ao salvar checklist completo: $e', tag: 'ChecklistPreenchidoRepo');
-      rethrow;
-    }
+        final checklistId = await inserir(checklistDto);
+        AppLogger.i('Checklist preenchido criado com ID: $checklistId',
+            tag: repositoryName);
+        return checklistId;
+      },
+    );
   }
 }

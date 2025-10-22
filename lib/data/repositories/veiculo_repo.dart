@@ -3,9 +3,9 @@ import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/data/datasources/local/veiculo_dao.dart';
 import 'package:nexa_app/data/models/veiculo_table_dto.dart';
 import 'package:nexa_app/core/sync/syncable_repository.dart';
-import 'package:nexa_app/core/utils/errors/error_handler.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
+import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 
 /// Repositório responsável pelo gerenciamento de dados de veículos.
 ///
@@ -60,7 +60,9 @@ import 'package:nexa_app/core/network/dio_client.dart';
 /// - `AppDatabase`: Instância do banco de dados local
 /// - `VeiculoDao`: Data Access Object para operações de veículo
 /// - `VeiculoTableDto`: DTO para representação de dados de veículo
-class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
+class VeiculoRepo
+    with log_mixin.LoggingMixin
+    implements SyncableRepository<VeiculoTableDto> {
   // ============================================================================
   // DEPENDÊNCIAS E CONFIGURAÇÃO
   // ============================================================================
@@ -101,6 +103,13 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
       : veiculoDao = db.veiculoDao;
 
   // ============================================================================
+  // IMPLEMENTAÇÃO DO LOGGING MIXIN
+  // ============================================================================
+
+  @override
+  String get repositoryName => 'VeiculoRepository';
+
+  // ============================================================================
   // IMPLEMENTAÇÃO DO SYNCABLE REPOSITORY
   // ============================================================================
 
@@ -109,82 +118,44 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
 
   @override
   Future<List<VeiculoTableDto>> buscarDaApi() async {
-    try {
-      /// Envia requisição GET para endpoint de veículos.
-      final response = await dio.get(ApiConstants.veiculos);
-
-      /// Converte resposta JSON para lista de DTOs tipados.
-      return (response.data as List)
-          .map((json) => VeiculoTableDto.fromJson(json))
-          .toList();
-    } catch (e, s) {
-      /// Trata erro bruto e converte para AppException padronizada.
-      final erro = ErrorHandler.tratar(e, s);
-
-      /// Registra erro detalhado para debugging e monitoramento.
-      AppLogger.e(
-        '[veiculo_repository - buscarDaApi] ${erro.mensagem}',
-        tag: 'VeiculoRepository',
-        error: e,
-        stackTrace: s,
-      );
-
-      /// Re-lança erro tratado para camada superior.
-      throw erro;
-    }
+    return await executeWithLogging(
+      operationName: 'buscarDaApi',
+      operation: () async {
+        final response = await dio.get(ApiConstants.veiculos);
+        return (response.data as List)
+            .map((json) => VeiculoTableDto.fromJson(json))
+            .toList();
+      },
+    );
   }
 
   @override
   Future<void> sincronizarComBanco(List<VeiculoTableDto> itens) async {
-    try {
-      /// Executa sincronização em transação para garantir atomicidade.
-      await db.transaction(() async {
-        /// Limpa todos os registros existentes.
-        await veiculoDao.deletarTodos();
-
-        /// Insere todos os novos itens.
-        for (final veiculo in itens) {
-          await veiculoDao.inserirOuAtualizar(veiculo.toCompanion());
-        }
-      });
-
-      AppLogger.i(
-        '[veiculo_repository - sincronizarComBanco] Sincronizados ${itens.length} veículos',
-        tag: 'VeiculoRepository',
-      );
-    } catch (e, s) {
-      /// Trata erro bruto e converte para AppException padronizada.
-      final erro = ErrorHandler.tratar(e, s);
-
-      /// Registra erro detalhado para debugging e monitoramento.
-      AppLogger.e(
-        '[veiculo_repository - sincronizarComBanco] ${erro.mensagem}',
-        tag: 'VeiculoRepository',
-        error: e,
-        stackTrace: s,
-      );
-
-      /// Re-lança erro tratado para camada superior.
-      throw erro;
-    }
+    return await executeVoidWithLogging(
+      operationName: 'sincronizarComBanco',
+      operation: () async {
+        await db.transaction(() async {
+          await veiculoDao.deletarTodos();
+          for (final veiculo in itens) {
+            await veiculoDao.inserirOuAtualizar(veiculo.toCompanion());
+          }
+        });
+        AppLogger.i('Sincronizados ${itens.length} veículos',
+            tag: repositoryName);
+      },
+      logLevel: log_mixin.LogLevel.info,
+    );
   }
 
   @override
   Future<bool> estaVazio(String entidade) async {
-    try {
-      /// Verifica se a tabela de veículos está vazia.
-      final count = await veiculoDao.contarVeiculosAtivos();
-      return count == 0;
-    } catch (e, s) {
-      /// Em caso de erro, assume que não está vazio para evitar perda de dados.
-      AppLogger.e(
-        '[veiculo_repository - estaVazio] Erro ao verificar se tabela está vazia: $e',
-        tag: 'VeiculoRepository',
-        error: e,
-        stackTrace: s,
-      );
-      return false;
-    }
+    return await executeWithLogging(
+      operationName: 'estaVazio',
+      operation: () async {
+        final count = await veiculoDao.contarVeiculosAtivos();
+        return count == 0;
+      },
+    );
   }
 
   // ============================================================================
@@ -216,13 +187,15 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
   /// veiculos.forEach((veiculo) => print('${veiculo.modelo} - ${veiculo.placa}'));
   /// ```
   Future<List<VeiculoTableDto>> listar() async {
-    /// Executa consulta no banco para obter todas as entidades de veículo.
-    final veiculos = await veiculoDao.listar();
-
-    /// Converte cada entidade para DTO padronizado e retorna como lista.
-    return veiculos
-        .map((veiculo) => VeiculoTableDto.fromEntity(veiculo))
-        .toList();
+    return await executeWithLogging(
+      operationName: 'listar',
+      operation: () async {
+        final veiculos = await veiculoDao.listar();
+        return veiculos
+            .map((veiculo) => VeiculoTableDto.fromEntity(veiculo))
+            .toList();
+      },
+    );
   }
 
   /// Busca um veículo específico pelo seu identificador único.
@@ -252,11 +225,13 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
   /// print('Veículo: ${veiculo.modelo}');
   /// ```
   Future<VeiculoTableDto> buscarPorId(int id) async {
-    /// Executa consulta específica por ID no banco de dados.
-    final veiculo = await veiculoDao.buscarPorIdOuFalha(id);
-
-    /// Converte a entidade encontrada para DTO padronizado.
-    return VeiculoTableDto.fromEntity(veiculo);
+    return await executeWithLogging(
+      operationName: 'buscarPorId',
+      operation: () async {
+        final veiculo = await veiculoDao.buscarPorIdOuFalha(id);
+        return VeiculoTableDto.fromEntity(veiculo);
+      },
+    );
   }
 
   /// Busca um veículo específico pela sua placa.
@@ -287,11 +262,13 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
   /// print('Veículo encontrado: ${veiculo.modelo}');
   /// ```
   Future<VeiculoTableDto> buscarPorPlaca(String placa) async {
-    /// Executa consulta específica por placa no banco de dados.
-    final veiculo = await veiculoDao.buscarPorPlaca(placa);
-
-    /// Converte a entidade encontrada para DTO padronizado.
-    return VeiculoTableDto.fromEntity(veiculo);
+    return await executeWithLogging(
+      operationName: 'buscarPorPlaca',
+      operation: () async {
+        final veiculo = await veiculoDao.buscarPorPlaca(placa);
+        return VeiculoTableDto.fromEntity(veiculo);
+      },
+    );
   }
 
   /// Busca veículos por tipo de veículo.
@@ -321,13 +298,15 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
   /// print('Encontrados ${carros.length} carros');
   /// ```
   Future<List<VeiculoTableDto>> buscarPorTipoVeiculo(int tipoVeiculoId) async {
-    /// Executa consulta por tipo de veículo no banco de dados.
-    final veiculos = await veiculoDao.buscarPorTipoVeiculo(tipoVeiculoId);
-
-    /// Converte cada entidade para DTO padronizado e retorna como lista.
-    return veiculos
-        .map((veiculo) => VeiculoTableDto.fromEntity(veiculo))
-        .toList();
+    return await executeWithLogging(
+      operationName: 'buscarPorTipoVeiculo',
+      operation: () async {
+        final veiculos = await veiculoDao.buscarPorTipoVeiculo(tipoVeiculoId);
+        return veiculos
+            .map((veiculo) => VeiculoTableDto.fromEntity(veiculo))
+            .toList();
+      },
+    );
   }
 
   // ============================================================================
@@ -369,16 +348,14 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
   /// print('ID gerado: ${veiculoInserido.id}');
   /// ```
   Future<VeiculoTableDto> inserir(VeiculoTableDto veiculo) async {
-    /// Converte DTO para Companion (formato de inserção do Drift).
-    /// O ID é omitido para permitir geração automática pelo banco.
-    final id = await veiculoDao.inserirOuAtualizar(veiculo.toCompanion());
-
-    /// Busca o registro recém-inserido para obter dados completos
-    /// incluindo o ID gerado automaticamente.
-    final veiculoInserido = await veiculoDao.buscarPorIdOuFalha(id);
-
-    /// Converte a entidade para DTO e retorna dados completos.
-    return VeiculoTableDto.fromEntity(veiculoInserido);
+    return await executeWithLogging(
+      operationName: 'inserir',
+      operation: () async {
+        final id = await veiculoDao.inserirOuAtualizar(veiculo.toCompanion());
+        final veiculoInserido = await veiculoDao.buscarPorIdOuFalha(id);
+        return VeiculoTableDto.fromEntity(veiculoInserido);
+      },
+    );
   }
 
   /// Atualiza os dados de um veículo existente.
@@ -416,16 +393,15 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
   /// print('Veículo atualizado: ${resultado.modelo}');
   /// ```
   Future<VeiculoTableDto> atualizar(VeiculoTableDto veiculo) async {
-    /// Converte DTO para entidade e executa atualização no banco.
-    await veiculoDao.atualizar(veiculo.toEntity());
-
-    /// Busca o registro atualizado para garantir dados consistentes
-    /// e obter qualquer valor calculado ou modificado pelo banco.
-    final veiculoAtualizado =
-        await veiculoDao.buscarPorIdOuFalha(int.parse(veiculo.id));
-
-    /// Converte a entidade atualizada para DTO e retorna.
-    return VeiculoTableDto.fromEntity(veiculoAtualizado);
+    return await executeWithLogging(
+      operationName: 'atualizar',
+      operation: () async {
+        await veiculoDao.atualizar(veiculo.toEntity());
+        final veiculoAtualizado =
+            await veiculoDao.buscarPorIdOuFalha(int.parse(veiculo.id));
+        return VeiculoTableDto.fromEntity(veiculoAtualizado);
+      },
+    );
   }
 
   /// Remove um veículo do banco de dados.
@@ -460,9 +436,12 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
   /// Esta operação é **irreversível**. Certifique-se de que o veículo
   /// realmente deve ser removido antes de executar esta operação.
   Future<void> deletar(int id) async {
-    /// Executa exclusão do registro específico por ID.
-    /// A operação é atômica e falhará completamente se houver problemas.
-    await veiculoDao.deletar(id);
+    return await executeVoidWithLogging(
+      operationName: 'deletar',
+      operation: () async {
+        await veiculoDao.deletar(id);
+      },
+    );
   }
 
 }

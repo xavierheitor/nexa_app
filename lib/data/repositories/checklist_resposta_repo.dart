@@ -1,12 +1,16 @@
 import 'package:nexa_app/data/datasources/local/checklist_resposta_dao.dart';
 import 'package:nexa_app/data/models/checklist_resposta_table_dto.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 
 /// Repositório para ChecklistRespostaTable
-class ChecklistRespostaRepo {
+class ChecklistRespostaRepo with log_mixin.LoggingMixin {
   final ChecklistRespostaDao _dao;
 
   ChecklistRespostaRepo(this._dao);
+
+  @override
+  String get repositoryName => 'ChecklistRespostaRepository';
 
   /// Lista todas as respostas
   Future<List<ChecklistRespostaTableDto>> listar() async {
@@ -74,32 +78,28 @@ class ChecklistRespostaRepo {
     return await _dao.existeRespostaParaPergunta(checklistPreenchidoId, perguntaId);
   }
 
-  /// Salva múltiplas respostas para um checklist preenchido
   Future<List<int>> salvarRespostas({
     required int checklistPreenchidoId,
     required List<Map<String, dynamic>> respostas,
   }) async {
-    AppLogger.d('Salvando ${respostas.length} respostas para checklist: $checklistPreenchidoId', tag: 'ChecklistRespostaRepo');
-    
-    try {
-      final dtos = respostas.map((resposta) {
-        return ChecklistRespostaTableDto(
-          id: '0', // Será autoincrementado
-          checklistPreenchidoId: checklistPreenchidoId,
-          perguntaId: resposta['perguntaId'] as int,
-          opcaoRespostaId: resposta['opcaoRespostaId'] as int,
-          dataResposta: DateTime.now(),
-        );
-      }).toList();
+    return await executeWithLogging(
+      operationName: 'salvarRespostas',
+      operation: () async {
+        final dtos = respostas.map((resposta) {
+          return ChecklistRespostaTableDto(
+            id: '0',
+            checklistPreenchidoId: checklistPreenchidoId,
+            perguntaId: resposta['perguntaId'] as int,
+            opcaoRespostaId: resposta['opcaoRespostaId'] as int,
+            dataResposta: DateTime.now(),
+          );
+        }).toList();
 
-      final ids = await inserirMultiplos(dtos);
-      
-      AppLogger.i('${ids.length} respostas salvas com sucesso', tag: 'ChecklistRespostaRepo');
-      
-      return ids;
-    } catch (e) {
-      AppLogger.e('Erro ao salvar respostas: $e', tag: 'ChecklistRespostaRepo');
-      rethrow;
-    }
+        final ids = await inserirMultiplos(dtos);
+        AppLogger.i('${ids.length} respostas salvas com sucesso',
+            tag: repositoryName);
+        return ids;
+      },
+    );
   }
 }
