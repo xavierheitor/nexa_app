@@ -1,5 +1,6 @@
 import 'package:nexa_app/core/utils/errors/error_handler.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart' hide LogLevel;
+import 'package:nexa_app/data/repositories/turno_repo.dart';
 
 /// Mixin para adicionar logging automático e consistente em repositories.
 ///
@@ -163,6 +164,18 @@ mixin LoggingMixin {
 
       return result;
     } catch (e, stackTrace) {
+      // Se for uma exceção específica de negócio, preserva ela
+      if (e is TurnoAberturaException) {
+        AppLogger.e(
+          '[$repositoryName - $operationName] ${e.message}',
+          tag: repositoryName,
+          error: e,
+          stackTrace: stackTrace,
+        );
+        // Re-lança a exceção específica sem conversão
+        rethrow;
+      }
+
       // Trata o erro bruto e converte para AppException padronizada
       final erro = ErrorHandler.tratar(e, stackTrace);
 

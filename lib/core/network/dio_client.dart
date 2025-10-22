@@ -1,6 +1,9 @@
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' as dio;
+import 'package:get/get.dart';
 import 'package:nexa_app/core/constants/api_constants.dart';
+import 'package:nexa_app/core/network/connectivity_service.dart';
 import 'package:nexa_app/core/network/interceptors/auth_interceptor.dart';
+import 'package:nexa_app/core/network/interceptors/connectivity_interceptor.dart';
 import 'package:nexa_app/core/network/interceptors/error_handler_interceptor.dart';
 import 'package:nexa_app/core/network/interceptors/headers_interceptor.dart';
 import 'package:nexa_app/core/network/interceptors/logging_interceptor.dart';
@@ -73,7 +76,7 @@ class DioClient {
   // ==========================================================================
 
   /// Instância do cliente HTTP Dio configurado com interceptors.
-  final Dio _dio;
+  final dio.Dio _dio;
 
   /// Construtor do DioClient que inicializa o cliente HTTP.
   ///
@@ -94,8 +97,8 @@ class DioClient {
   /// 3. `LoggingInterceptor`: Logging detalhado
   /// 4. `ErrorHandlerInterceptor`: Tratamento de erros
   DioClient()
-      : _dio = Dio(
-          BaseOptions(
+      : _dio = dio.Dio(
+          dio.BaseOptions(
             baseUrl: ApiConstants.baseUrl,
             connectTimeout: const Duration(seconds: 30),
             receiveTimeout: const Duration(seconds: 30),
@@ -115,17 +118,21 @@ class DioClient {
   /// - Na requisição: executam na ordem de adição
   /// - Na resposta/erro: executam na ordem inversa
   void _setupInterceptors() {
-    // 1. Headers padrão (executado primeiro em requests)
+    // 1. Connectivity (executado primeiro - verifica conectividade)
+    _dio.interceptors
+        .add(ConnectivityInterceptor(Get.find<ConnectivityService>()));
+
+    // 2. Headers padrão (executado após verificação de conectividade)
     _dio.interceptors.add(HeadersInterceptor());
 
-    // 2. Autenticação (adiciona token após headers padrão)
+    // 3. Autenticação (adiciona token após headers padrão)
     // Passa a instância do Dio para permitir retry de requisições
     _dio.interceptors.add(AuthInterceptor(_dio));
 
-    // 3. Logging (registra tudo após configuração completa)
+    // 4. Logging (registra tudo após configuração completa)
     _dio.interceptors.add(LoggingInterceptor());
 
-    // 4. Tratamento de erros (último na cadeia de errors)
+    // 5. Tratamento de erros (último na cadeia de errors)
     _dio.interceptors.add(ErrorHandlerInterceptor());
   }
 
@@ -149,7 +156,7 @@ class DioClient {
   ///   queryParameters: {'page': 1, 'limit': 10},
   /// );
   /// ```
-  Future<Response> get(
+  Future<dio.Response> get(
     String path, {
     Map<String, dynamic>? queryParameters,
   }) {
@@ -172,7 +179,7 @@ class DioClient {
   ///   data: {'email': 'user@example.com', 'password': '123456'},
   /// );
   /// ```
-  Future<Response> post(String path, {dynamic data}) {
+  Future<dio.Response> post(String path, {dynamic data}) {
     return _dio.post(path, data: data);
   }
 
@@ -192,7 +199,7 @@ class DioClient {
   ///   data: {'name': 'John Doe', 'email': 'john@example.com'},
   /// );
   /// ```
-  Future<Response> put(String path, {dynamic data}) {
+  Future<dio.Response> put(String path, {dynamic data}) {
     return _dio.put(path, data: data);
   }
 
@@ -208,7 +215,7 @@ class DioClient {
   /// ```dart
   /// final response = await dioClient.delete('/users/123');
   /// ```
-  Future<Response> delete(String path) {
+  Future<dio.Response> delete(String path) {
     return _dio.delete(path);
   }
 
@@ -228,7 +235,7 @@ class DioClient {
   ///   data: {'status': 'active'},
   /// );
   /// ```
-  Future<Response> patch(String path, {dynamic data}) {
+  Future<dio.Response> patch(String path, {dynamic data}) {
     return _dio.patch(path, data: data);
   }
 
@@ -250,5 +257,5 @@ class DioClient {
   /// final dio = dioClient.client;
   /// final response = await dio.download('/file', '/path/to/save');
   /// ```
-  Dio get client => _dio;
+  dio.Dio get client => _dio;
 }
