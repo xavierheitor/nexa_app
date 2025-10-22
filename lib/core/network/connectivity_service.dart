@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 
@@ -202,30 +201,15 @@ class ConnectivityService extends GetxService {
 
   /// Mostra mensagem quando conexão é restaurada
   void _showConnectionRestoredMessage() {
-    Get.snackbar(
-      '🌐 Conectado',
-      'Conexão restaurada via $connectionTypeDescription',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-      snackPosition: SnackPosition.TOP,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 8,
-    );
+    // Removido snackbar - agora o indicador visual no AppBar mostra o status
+    AppLogger.i('🌐 Conexão restaurada via $connectionTypeDescription',
+        tag: 'ConnectivityService');
   }
 
   /// Mostra mensagem quando fica offline
   void _showOfflineMessage() {
-    Get.snackbar(
-      '🔌 Sem Conexão',
-      'Você está offline. Algumas funcionalidades não estarão disponíveis.',
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 5),
-      snackPosition: SnackPosition.TOP,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 8,
-    );
+    // Removido snackbar - agora o indicador visual no AppBar mostra o status
+    AppLogger.w('🔌 Desconectado - sem internet', tag: 'ConnectivityService');
   }
 
   // ==========================================================================
@@ -235,8 +219,8 @@ class ConnectivityService extends GetxService {
   /// Executa uma operação apenas se estiver online
   Future<T?> executeIfOnline<T>(Future<T> Function() operation) async {
     if (!isOnline.value) {
-      AppLogger.w('Operação cancelada: sem conexão', tag: 'ConnectivityService');
-      _showOfflineMessage();
+      AppLogger.w('Operação cancelada: sem conexão',
+          tag: 'ConnectivityService');
       return null;
     }
     

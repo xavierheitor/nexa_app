@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:nexa_app/presentation/home/home_controller.dart';
 import 'package:nexa_app/app/routes/routes.dart';
 import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart';
+import 'package:nexa_app/presentation/shared/widgets/connectivity_indicator.dart';
 import 'package:intl/intl.dart';
 
 /// Página principal da aplicação (Home).
@@ -85,6 +86,11 @@ class HomePage extends StatelessWidget {
         ],
       ),
       actions: [
+        /// Indicador de conectividade.
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: ConnectivityIndicator(),
+        ),
         /// Botão de logout.
         IconButton(
           icon: const Icon(Icons.logout_outlined),
