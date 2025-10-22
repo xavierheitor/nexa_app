@@ -131,7 +131,8 @@ class TipoVeiculoRepo
       operationName: 'sincronizarComBanco',
       operation: () async {
         await db.transaction(() async {
-          await tipoVeiculoDao.deletarTodos();
+          // ⚠️ NÃO deleta tudo porque veiculo_table tem FK para tipo_veiculo_table
+          // Usa apenas UPSERT para sincronizar
           for (final tipoVeiculo in itens) {
             await tipoVeiculoDao.inserirOuAtualizar(tipoVeiculo.toCompanion());
           }

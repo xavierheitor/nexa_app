@@ -204,8 +204,11 @@ class EquipeRepo
     return await executeVoidWithLogging(
       operationName: 'sincronizarComBanco',
       operation: () async {
-        final companions = dtos.map((dto) => dto.toCompanion()).toList();
-        await _dao.sincronizar(companions);
+        // ⚠️ NÃO deleta tudo porque turno_table tem FK para equipe_table
+        // Usa apenas UPSERT para sincronizar
+        for (final equipe in dtos) {
+          await _dao.inserirOuAtualizar(equipe.toCompanion());
+        }
         AppLogger.i('Sincronizados ${dtos.length} equipes',
             tag: repositoryName);
       },
