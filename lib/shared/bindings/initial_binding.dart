@@ -6,6 +6,7 @@ import 'package:nexa_app/core/core_app/services/sync_service.dart';
 import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/network/connectivity_service.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
+import 'package:nexa_app/core/cache/cache_manager.dart';
 import 'package:nexa_app/core/security/session_manager.dart';
 import 'package:nexa_app/core/security/token_storage_service.dart';
 import 'package:nexa_app/data/repositories/equipe_repo.dart';
@@ -67,6 +68,12 @@ class InitialBinding extends Bindings {
     // Cliente HTTP (Dio) - Depende do ConnectivityService
     Get.put<DioClient>(
       DioClient(),
+      permanent: true,
+    );
+
+    // CacheManager - Sistema de cache centralizado
+    Get.put<CacheManager>(
+      CacheManager.instance,
       permanent: true,
     );
 

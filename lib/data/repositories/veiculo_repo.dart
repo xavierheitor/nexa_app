@@ -6,6 +6,7 @@ import 'package:nexa_app/core/sync/syncable_repository.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
+import 'package:nexa_app/core/cache/cache_mixin.dart';
 
 /// Repositório responsável pelo gerenciamento de dados de veículos.
 ///
@@ -61,7 +62,7 @@ import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 /// - `VeiculoDao`: Data Access Object para operações de veículo
 /// - `VeiculoTableDto`: DTO para representação de dados de veículo
 class VeiculoRepo
-    with log_mixin.LoggingMixin
+    with log_mixin.LoggingMixin, CacheMixin
     implements SyncableRepository<VeiculoTableDto> {
   // ============================================================================
   // DEPENDÊNCIAS E CONFIGURAÇÃO
@@ -141,6 +142,10 @@ class VeiculoRepo
             await veiculoDao.inserirOuAtualizar(veiculo.toCompanion());
           }
         });
+        
+        // Invalida cache após sincronização
+        await invalidarCacheAposSincronizacao('veiculos');
+        
         AppLogger.i('Sincronizados ${itens.length} veículos',
             tag: repositoryName);
       },
@@ -191,10 +196,15 @@ class VeiculoRepo
     return await executeWithLogging(
       operationName: 'listar',
       operation: () async {
-        final veiculos = await veiculoDao.listar();
-        return veiculos
-            .map((veiculo) => VeiculoTableDto.fromEntity(veiculo))
-            .toList();
+        return await listarComCache(
+          'veiculos',
+          () async {
+            final veiculos = await veiculoDao.listar();
+            return veiculos
+                .map((veiculo) => VeiculoTableDto.fromEntity(veiculo))
+                .toList();
+          },
+        );
       },
     );
   }
@@ -229,8 +239,15 @@ class VeiculoRepo
     return await executeWithLogging(
       operationName: 'buscarPorId',
       operation: () async {
-        final veiculo = await veiculoDao.buscarPorIdOuFalha(id);
-        return VeiculoTableDto.fromEntity(veiculo);
+        return await buscarPorIdComCache(
+              'veiculos',
+              id,
+              () async {
+                final veiculo = await veiculoDao.buscarPorIdOuFalha(id);
+                return VeiculoTableDto.fromEntity(veiculo);
+              },
+            ) ??
+            (throw Exception('Veículo não encontrado'));
       },
     );
   }

@@ -5,6 +5,7 @@ import 'package:nexa_app/data/models/login_response_dto.dart';
 import 'package:nexa_app/data/models/usuario_table_dto.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
+import 'package:nexa_app/core/cache/cache_mixin.dart';
 
 /// Repositório responsável pelo gerenciamento de dados de usuários.
 ///
@@ -57,7 +58,7 @@ import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 /// - `AppDatabase`: Instância do banco de dados local
 /// - `UsuarioDao`: Data Access Object para operações de usuário
 /// - `UsuarioTableDto`: DTO para representação de dados de usuário
-class UsuarioRepo with log_mixin.LoggingMixin {
+class UsuarioRepo with log_mixin.LoggingMixin, CacheMixin {
   // ============================================================================
   // DEPENDÊNCIAS E CONFIGURAÇÃO
   // ============================================================================
@@ -136,10 +137,15 @@ class UsuarioRepo with log_mixin.LoggingMixin {
     return await executeWithLogging(
       operationName: 'listar',
       operation: () async {
-        final usuarios = await usuarioDao.listar();
-        return usuarios
-            .map((usuario) => UsuarioTableDto.fromEntity(usuario))
-            .toList();
+        return await listarComCache(
+          'usuarios',
+          () async {
+            final usuarios = await usuarioDao.listar();
+            return usuarios
+                .map((usuario) => UsuarioTableDto.fromEntity(usuario))
+                .toList();
+          },
+        );
       },
     );
   }
@@ -148,8 +154,15 @@ class UsuarioRepo with log_mixin.LoggingMixin {
     return await executeWithLogging(
       operationName: 'buscarPorId',
       operation: () async {
-        final usuario = await usuarioDao.buscarPorIdOuFalha(id);
-        return UsuarioTableDto.fromEntity(usuario);
+        return await buscarPorIdComCache(
+              'usuarios',
+              id,
+              () async {
+                final usuario = await usuarioDao.buscarPorIdOuFalha(id);
+                return UsuarioTableDto.fromEntity(usuario);
+              },
+            ) ??
+            (throw Exception('Usuário não encontrado'));
       },
     );
   }

@@ -6,10 +6,11 @@ import 'package:nexa_app/core/sync/syncable_repository.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
+import 'package:nexa_app/core/cache/cache_mixin.dart';
 
 /// Repositório para gerenciar operações com Opções de Resposta de Checklist.
 class ChecklistOpcaoRespostaRepo
-    with log_mixin.LoggingMixin
+    with log_mixin.LoggingMixin, CacheMixin
     implements SyncableRepository<ChecklistOpcaoRespostaTableDto> {
   final DioClient _dio;
   final AppDatabase _db;
@@ -35,7 +36,12 @@ class ChecklistOpcaoRespostaRepo
     return await executeWithLogging(
       operationName: 'listar',
       operation: () async {
-        return await _dao.listarDto();
+        return await listarComCache(
+          'checklist_opcao_resposta',
+          () async {
+            return await _dao.listarDto();
+          },
+        );
       },
     );
   }

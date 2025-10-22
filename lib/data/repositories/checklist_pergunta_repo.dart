@@ -6,10 +6,11 @@ import 'package:nexa_app/core/sync/syncable_repository.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
+import 'package:nexa_app/core/cache/cache_mixin.dart';
 
 /// Repositório para gerenciar operações com Perguntas de Checklist.
 class ChecklistPerguntaRepo
-    with log_mixin.LoggingMixin
+    with log_mixin.LoggingMixin, CacheMixin
     implements SyncableRepository<ChecklistPerguntaTableDto> {
   final DioClient _dio;
   final AppDatabase _db;
@@ -35,7 +36,12 @@ class ChecklistPerguntaRepo
     return await executeWithLogging(
       operationName: 'listar',
       operation: () async {
-        return await _dao.listarDto();
+        return await listarComCache(
+          'checklist_pergunta',
+          () async {
+            return await _dao.listarDto();
+          },
+        );
       },
     );
   }

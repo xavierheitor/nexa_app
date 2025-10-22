@@ -6,6 +6,7 @@ import 'package:nexa_app/core/sync/syncable_repository.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
+import 'package:nexa_app/core/cache/cache_mixin.dart';
 
 /// Repositório responsável pelo gerenciamento de dados de eletricistas.
 ///
@@ -61,7 +62,7 @@ import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 /// - `EletricistaDao`: Data Access Object para operações de eletricista
 /// - `EletricistaTableDto`: DTO para representação de dados de eletricista
 class EletricistaRepo
-    with log_mixin.LoggingMixin
+    with log_mixin.LoggingMixin, CacheMixin
     implements SyncableRepository<EletricistaTableDto> {
   // ============================================================================
   // DEPENDÊNCIAS E CONFIGURAÇÃO
@@ -140,6 +141,10 @@ class EletricistaRepo
             await eletricistaDao.inserirOuAtualizar(eletricista.toCompanion());
           }
         });
+        
+        // Invalida cache após sincronização
+        await invalidarCacheAposSincronizacao('eletricistas');
+        
         AppLogger.i('Sincronizados ${itens.length} eletricistas',
             tag: repositoryName);
       },
@@ -190,10 +195,16 @@ class EletricistaRepo
     return await executeWithLogging(
       operationName: 'listar',
       operation: () async {
-        final eletricistas = await eletricistaDao.listar();
-        return eletricistas
-            .map((eletricista) => EletricistaTableDto.fromEntity(eletricista))
-            .toList();
+        return await listarComCache(
+          'eletricistas',
+          () async {
+            final eletricistas = await eletricistaDao.listar();
+            return eletricistas
+                .map((eletricista) =>
+                    EletricistaTableDto.fromEntity(eletricista))
+                .toList();
+          },
+        );
       },
     );
   }
@@ -202,8 +213,15 @@ class EletricistaRepo
     return await executeWithLogging(
       operationName: 'buscarPorId',
       operation: () async {
-        final eletricista = await eletricistaDao.buscarPorIdOuFalha(id);
-        return EletricistaTableDto.fromEntity(eletricista);
+        return await buscarPorIdComCache(
+              'eletricistas',
+              id,
+              () async {
+                final eletricista = await eletricistaDao.buscarPorIdOuFalha(id);
+                return EletricistaTableDto.fromEntity(eletricista);
+              },
+            ) ??
+            (throw Exception('Eletricista não encontrado'));
       },
     );
   }

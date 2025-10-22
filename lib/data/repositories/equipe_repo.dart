@@ -6,6 +6,7 @@ import 'package:nexa_app/core/sync/syncable_repository.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
+import 'package:nexa_app/core/cache/cache_mixin.dart';
 
 /// Repositório responsável pelo gerenciamento de dados de equipes.
 ///
@@ -56,7 +57,7 @@ import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
 /// await equipeRepo.criar(novaEquipe);
 /// ```
 class EquipeRepo
-    with log_mixin.LoggingMixin
+    with log_mixin.LoggingMixin, CacheMixin
     implements SyncableRepository<EquipeTableDto> {
   final DioClient _dio;
   final AppDatabase _db;
@@ -78,8 +79,13 @@ class EquipeRepo
     return await executeWithLogging(
       operationName: 'listar',
       operation: () async {
-        final entidades = await _dao.listar();
-        return entidades.map((e) => EquipeTableDto.fromEntity(e)).toList();
+        return await listarComCache(
+          'equipes',
+          () async {
+            final entidades = await _dao.listar();
+            return entidades.map((e) => EquipeTableDto.fromEntity(e)).toList();
+          },
+        );
       },
     );
   }
@@ -88,12 +94,18 @@ class EquipeRepo
     return await executeWithLogging(
       operationName: 'buscarPorId',
       operation: () async {
-        final entidade = await _dao.buscarPorIdOuNull(int.parse(id));
-        if (entidade == null) {
-          AppLogger.d('Equipe não encontrada', tag: repositoryName);
-          return null;
-        }
-        return EquipeTableDto.fromEntity(entidade);
+        return await buscarPorIdComCache(
+          'equipes',
+          int.parse(id),
+          () async {
+            final entidade = await _dao.buscarPorIdOuNull(int.parse(id));
+            if (entidade == null) {
+              AppLogger.d('Equipe não encontrada', tag: repositoryName);
+              return null;
+            }
+            return EquipeTableDto.fromEntity(entidade);
+          },
+        );
       },
     );
   }
@@ -209,6 +221,10 @@ class EquipeRepo
         for (final equipe in dtos) {
           await _dao.inserirOuAtualizar(equipe.toCompanion());
         }
+        
+        // Invalida cache após sincronização
+        await invalidarCacheAposSincronizacao('equipes');
+        
         AppLogger.i('Sincronizados ${dtos.length} equipes',
             tag: repositoryName);
       },

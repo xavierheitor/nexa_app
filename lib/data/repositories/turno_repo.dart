@@ -9,13 +9,14 @@ import 'package:nexa_app/core/database/converters/situacao_turno_converter.dart'
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/network/dio_client.dart';
 import 'package:nexa_app/core/mixins/logging_mixin.dart' as log_mixin;
+import 'package:nexa_app/core/cache/cache_mixin.dart';
 
 /// Repositório unificado para gerenciar turnos e seus eletricistas.
 ///
 /// Este repositório combina operações de turno e relacionamentos turno-eletricista
 /// em uma única interface, já que eles sempre trabalham juntos no contexto
 /// de abertura e fechamento de turnos.
-class TurnoRepo with log_mixin.LoggingMixin {
+class TurnoRepo with log_mixin.LoggingMixin, CacheMixin {
   // ignore: unused_field
   final DioClient _dio;
   final AppDatabase _db;
@@ -39,7 +40,12 @@ class TurnoRepo with log_mixin.LoggingMixin {
   Future<List<TurnoTableDto>> listarTurnos() async {
     return await executeWithLogging(
       operationName: 'listarTurnos',
-      operation: () async => await _turnoDao.listar(),
+      operation: () async {
+        return await listarComCache(
+          'turnos',
+          () async => await _turnoDao.listar(),
+        );
+      },
     );
   }
 
@@ -60,7 +66,13 @@ class TurnoRepo with log_mixin.LoggingMixin {
   Future<TurnoTableDto?> buscarTurnoAtivo() async {
     return await executeWithLogging(
       operationName: 'buscarTurnoAtivo',
-      operation: () async => await _turnoDao.buscarTurnoAtivo(),
+      operation: () async {
+        return await cacheExecute(
+          'turno_ativo',
+          'buscarTurnoAtivo',
+          () async => await _turnoDao.buscarTurnoAtivo(),
+        );
+      },
     );
   }
 
