@@ -28,7 +28,7 @@ class ChecklistOpcaoRespostaRepo implements SyncableRepository<ChecklistOpcaoRes
   /// Lista todas as opções de resposta.
   Future<List<ChecklistOpcaoRespostaTableDto>> listar() async {
     try {
-      return await _dao.listar();
+      return await _dao.listarDto();
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao listar opções de resposta',
           tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
@@ -39,7 +39,7 @@ class ChecklistOpcaoRespostaRepo implements SyncableRepository<ChecklistOpcaoRes
   /// Busca uma opção por ID local.
   Future<ChecklistOpcaoRespostaTableDto?> buscarPorId(int id) async {
     try {
-      return await _dao.buscarPorId(id);
+      return await _dao.buscarPorIdDto(id);
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao buscar opção por ID',
           tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
@@ -51,7 +51,7 @@ class ChecklistOpcaoRespostaRepo implements SyncableRepository<ChecklistOpcaoRes
   Future<ChecklistOpcaoRespostaTableDto?> buscarPorRemoteId(
       int remoteId) async {
     try {
-      return await _dao.buscarPorRemoteId(remoteId);
+      return await _dao.buscarPorRemoteIdDto(remoteId);
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao buscar opção por remote ID',
           tag: 'ChecklistOpcaoRespostaRepo', error: e, stackTrace: stackTrace);
@@ -183,7 +183,7 @@ class ChecklistOpcaoRespostaRepo implements SyncableRepository<ChecklistOpcaoRes
       await _dao.deletarTodos();
 
       for (final item in itens) {
-        await _dao.inserirOuAtualizar(item);
+        await _dao.inserirOuAtualizarDto(item);
       }
 
       AppLogger.i('✅ ${itens.length} opções sincronizadas com sucesso',

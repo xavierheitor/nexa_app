@@ -25,7 +25,7 @@ class ChecklistTipoEquipeRelacaoRepo
 
   Future<List<ChecklistTipoEquipeRelacaoTableDto>> listar() async {
     try {
-      return await _dao.listar();
+      return await _dao.listarDto();
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao listar relações tipo-equipe-modelo',
           tag: 'ChecklistTipoEquipeRelacaoRepo',
@@ -114,7 +114,7 @@ class ChecklistTipoEquipeRelacaoRepo
       await _dao.deletarTodos();
 
       for (final item in itens) {
-        await _dao.inserirOuAtualizar(item);
+        await _dao.inserirOuAtualizarDto(item);
       }
 
       AppLogger.i('✅ ${itens.length} relações sincronizadas com sucesso',

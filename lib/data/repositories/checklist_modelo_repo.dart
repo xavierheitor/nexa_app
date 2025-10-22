@@ -28,7 +28,7 @@ class ChecklistModeloRepo implements SyncableRepository<ChecklistModeloTableDto>
   /// Lista todos os modelos de checklist.
   Future<List<ChecklistModeloTableDto>> listar() async {
     try {
-      return await _dao.listar();
+      return await _dao.listarDto();
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao listar modelos de checklist',
           tag: 'ChecklistModeloRepo', error: e, stackTrace: stackTrace);
@@ -39,7 +39,7 @@ class ChecklistModeloRepo implements SyncableRepository<ChecklistModeloTableDto>
   /// Busca um modelo por ID local.
   Future<ChecklistModeloTableDto?> buscarPorId(int id) async {
     try {
-      return await _dao.buscarPorId(id);
+      return await _dao.buscarPorIdDto(id);
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao buscar modelo por ID',
           tag: 'ChecklistModeloRepo', error: e, stackTrace: stackTrace);
@@ -50,7 +50,7 @@ class ChecklistModeloRepo implements SyncableRepository<ChecklistModeloTableDto>
   /// Busca um modelo por remote ID.
   Future<ChecklistModeloTableDto?> buscarPorRemoteId(int remoteId) async {
     try {
-      return await _dao.buscarPorRemoteId(remoteId);
+      return await _dao.buscarPorRemoteIdDto(remoteId);
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao buscar modelo por remote ID',
           tag: 'ChecklistModeloRepo', error: e, stackTrace: stackTrace);
@@ -201,7 +201,7 @@ class ChecklistModeloRepo implements SyncableRepository<ChecklistModeloTableDto>
 
       // Insere novos dados
       for (final item in itens) {
-        await _dao.inserirOuAtualizar(item);
+        await _dao.inserirOuAtualizarDto(item);
       }
 
       AppLogger.i('✅ ${itens.length} modelos sincronizados com sucesso',

@@ -3,42 +3,57 @@ import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/database/models/checklist_modelo_table.dart';
 import 'package:nexa_app/data/models/checklist_modelo_table_dto.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
+import 'package:nexa_app/core/database/syncable_dao.dart';
 
 part 'checklist_modelo_dao.g.dart';
 
 /// DAO para operações com a tabela ChecklistModelo.
+///
+/// Estende [SyncableDao] para herdar operações CRUD genéricas e métodos de sincronização.
+/// Mantém métodos específicos de busca por relacionamentos (tipo equipe, tipo veículo, etc).
 @DriftAccessor(tables: [ChecklistModeloTable])
-class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistModeloDaoMixin {
+class ChecklistModeloDao
+    extends SyncableDao<ChecklistModeloTable, ChecklistModeloTableData>
+    with _$ChecklistModeloDaoMixin {
   ChecklistModeloDao(super.db);
 
-  /// Lista todos os modelos de checklist.
-  Future<List<ChecklistModeloTableDto>> listar() async {
-    return await (select(db.checklistModeloTable)
+  @override
+  TableInfo<ChecklistModeloTable, ChecklistModeloTableData> get table =>
+      db.checklistModeloTable;
+
+  // ============================================================================
+  // WRAPPERS PARA DTO (Mantém compatibilidade com código existente)
+  // ============================================================================
+
+  /// Lista todos os modelos ordenados por nome (retorna DTOs).
+  Future<List<ChecklistModeloTableDto>> listarDto() async {
+    final results = await (select(db.checklistModeloTable)
           ..orderBy([(t) => OrderingTerm.asc(t.nome)]))
-        .map((row) => ChecklistModeloTableDto.fromTable(row))
         .get();
+    return results
+        .map((row) => ChecklistModeloTableDto.fromTable(row))
+        .toList();
   }
 
-  /// Busca um modelo por ID.
-  Future<ChecklistModeloTableDto?> buscarPorId(int id) async {
-    final result = await (select(db.checklistModeloTable)
-          ..where((t) => t.id.equals(id)))
-        .map((row) => ChecklistModeloTableDto.fromTable(row))
-        .getSingleOrNull();
-    return result;
+  /// Busca um modelo por ID (retorna DTO).
+  Future<ChecklistModeloTableDto?> buscarPorIdDto(int id) async {
+    final result = await buscarPorId(id);
+    return result != null ? ChecklistModeloTableDto.fromTable(result) : null;
   }
 
-  /// Busca um modelo por remote ID.
-  Future<ChecklistModeloTableDto?> buscarPorRemoteId(int remoteId) async {
-    final result = await (select(db.checklistModeloTable)
-          ..where((t) => t.remoteId.equals(remoteId)))
-        .map((row) => ChecklistModeloTableDto.fromTable(row))
-        .getSingleOrNull();
-    return result;
+  /// Busca um modelo por remote ID (retorna DTO ou null).
+  Future<ChecklistModeloTableDto?> buscarPorRemoteIdDto(int remoteId) async {
+    final result = await buscarPorRemoteId(remoteId);
+    return result != null ? ChecklistModeloTableDto.fromTable(result) : null;
   }
+
+  // ============================================================================
+  // MÉTODOS ESPECÍFICOS DE CHECKLIST MODELO
+  // ============================================================================
 
   /// Busca modelos por tipo de checklist.
-  Future<List<ChecklistModeloTableDto>> buscarPorTipoChecklist(int tipoChecklistId) async {
+  Future<List<ChecklistModeloTableDto>> buscarPorTipoChecklist(
+      int tipoChecklistId) async {
     return await (select(db.checklistModeloTable)
           ..where((t) => t.tipoChecklistId.equals(tipoChecklistId))
           ..orderBy([(t) => OrderingTerm.asc(t.nome)]))
@@ -91,7 +106,8 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
   }
 
   /// Busca modelos por tipo de veículo.
-  Future<List<ChecklistModeloTableDto>> buscarPorTipoVeiculo(int tipoVeiculoId) async {
+  Future<List<ChecklistModeloTableDto>> buscarPorTipoVeiculo(
+      int tipoVeiculoId) async {
     AppLogger.d(
         '🔍 [DIAGNÓSTICO DAO] Buscando checklist para tipoVeiculoId: $tipoVeiculoId',
         tag: 'ChecklistModeloDao');
@@ -115,7 +131,7 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
             tag: 'ChecklistModeloDao');
       }
     }
-        
+
     // Log dos modelos para comparar
     AppLogger.d('🔍 [DIAGNÓSTICO DAO] Modelos disponíveis:',
         tag: 'ChecklistModeloDao');
@@ -127,22 +143,22 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
     }
 
     // Implementação com JOIN manual - CORREÇÃO: buscar pelo remoteId
-    final query = select(db.checklistModeloTable)
-        .join([
-          leftOuterJoin(
-            db.checklistTipoVeiculoRelacaoTable,
+    final query = select(db.checklistModeloTable).join([
+      leftOuterJoin(
+        db.checklistTipoVeiculoRelacaoTable,
         db.checklistTipoVeiculoRelacaoTable.checklistModeloId
             .equalsExp(db.checklistModeloTable.remoteId),
-          )
-        ])
-        ..where(db.checklistTipoVeiculoRelacaoTable.tipoVeiculoId.equals(tipoVeiculoId))
-        ..orderBy([OrderingTerm.asc(db.checklistModeloTable.nome)]);
-    
+      )
+    ])
+      ..where(db.checklistTipoVeiculoRelacaoTable.tipoVeiculoId
+          .equals(tipoVeiculoId))
+      ..orderBy([OrderingTerm.asc(db.checklistModeloTable.nome)]);
+
     AppLogger.d('🔍 [DIAGNÓSTICO DAO] Executando query com JOIN...',
         tag: 'ChecklistModeloDao');
-    
+
     final results = await query.get();
-    
+
     AppLogger.d(
         '🔍 [DIAGNÓSTICO DAO] Query executada. ${results.length} resultados brutos encontrados',
         tag: 'ChecklistModeloDao');
@@ -170,7 +186,6 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
 
     return dtos;
   }
-
 
   /// Busca modelos por tipo de checklist e tipo de equipe.
   Future<List<ChecklistModeloTableDto>> buscarPorTipoChecklistETipoEquipe(
@@ -220,38 +235,21 @@ class ChecklistModeloDao extends DatabaseAccessor<AppDatabase> with _$ChecklistM
         .get();
   }
 
-  /// Insere ou atualiza um modelo.
-  Future<int> inserirOuAtualizar(ChecklistModeloTableDto modelo) async {
-    return await into(db.checklistModeloTable).insertOnConflictUpdate(
-      modelo.toCompanion(),
-    );
+  // ============================================================================
+  // MÉTODOS CUSTOMIZADOS DE UPSERT/UPDATE (para compatibilidade com DTOs)
+  // ============================================================================
+
+  /// Insere ou atualiza um modelo usando DTO.
+  Future<int> inserirOuAtualizarDto(ChecklistModeloTableDto modelo) async {
+    return await inserirOuAtualizar(modelo.toCompanion());
   }
 
-  /// Atualiza um modelo existente.
-  Future<bool> atualizar(ChecklistModeloTableDto modelo) async {
+  /// Atualiza um modelo existente usando DTO.
+  Future<bool> atualizarDto(ChecklistModeloTableDto modelo) async {
     final result = await (update(db.checklistModeloTable)
           ..where((t) => t.id.equals(modelo.id)))
         .write(modelo.toCompanion());
     return result > 0;
-  }
-
-  /// Deleta um modelo.
-  Future<bool> deletar(int id) async {
-    final result = await (delete(db.checklistModeloTable)
-          ..where((t) => t.id.equals(id)))
-        .go();
-    return result > 0;
-  }
-
-  /// Deleta todos os modelos.
-  Future<int> deletarTodos() async {
-    return await delete(db.checklistModeloTable).go();
-  }
-
-  /// Conta o total de modelos.
-  Future<int> contar() async {
-    final lista = await listar();
-    return lista.length;
   }
 
   /// Conta modelos por tipo de checklist.

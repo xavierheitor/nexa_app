@@ -28,7 +28,7 @@ class ChecklistPerguntaRelacaoRepo
 
   Future<List<ChecklistPerguntaRelacaoTableDto>> listar() async {
     try {
-      return await _dao.listar();
+      return await _dao.listarDto();
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao listar relações pergunta-modelo',
           tag: 'ChecklistPerguntaRelacaoRepo',
@@ -40,7 +40,7 @@ class ChecklistPerguntaRelacaoRepo
 
   Future<ChecklistPerguntaRelacaoTableDto?> buscarPorId(int id) async {
     try {
-      return await _dao.buscarPorId(id);
+      return await _dao.buscarPorIdDto(id);
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao buscar relação por ID',
           tag: 'ChecklistPerguntaRelacaoRepo',
@@ -132,7 +132,7 @@ class ChecklistPerguntaRelacaoRepo
       await _dao.deletarTodos();
 
       for (final item in itens) {
-        await _dao.inserirOuAtualizar(item);
+        await _dao.inserirOuAtualizarDto(item);
       }
 
       AppLogger.i('✅ ${itens.length} relações sincronizadas com sucesso',

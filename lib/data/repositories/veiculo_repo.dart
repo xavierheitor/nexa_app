@@ -253,7 +253,7 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
   /// ```
   Future<VeiculoTableDto> buscarPorId(int id) async {
     /// Executa consulta específica por ID no banco de dados.
-    final veiculo = await veiculoDao.buscarPorId(id);
+    final veiculo = await veiculoDao.buscarPorIdOuFalha(id);
 
     /// Converte a entidade encontrada para DTO padronizado.
     return VeiculoTableDto.fromEntity(veiculo);
@@ -375,7 +375,7 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
 
     /// Busca o registro recém-inserido para obter dados completos
     /// incluindo o ID gerado automaticamente.
-    final veiculoInserido = await veiculoDao.buscarPorId(id);
+    final veiculoInserido = await veiculoDao.buscarPorIdOuFalha(id);
 
     /// Converte a entidade para DTO e retorna dados completos.
     return VeiculoTableDto.fromEntity(veiculoInserido);
@@ -422,7 +422,7 @@ class VeiculoRepo implements SyncableRepository<VeiculoTableDto> {
     /// Busca o registro atualizado para garantir dados consistentes
     /// e obter qualquer valor calculado ou modificado pelo banco.
     final veiculoAtualizado =
-        await veiculoDao.buscarPorId(int.parse(veiculo.id));
+        await veiculoDao.buscarPorIdOuFalha(int.parse(veiculo.id));
 
     /// Converte a entidade atualizada para DTO e retorna.
     return VeiculoTableDto.fromEntity(veiculoAtualizado);

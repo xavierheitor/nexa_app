@@ -1,140 +1,97 @@
 import 'package:drift/drift.dart';
 import 'package:nexa_app/core/database/app_database.dart';
+import 'package:nexa_app/core/database/syncable_dao.dart';
 import 'package:nexa_app/core/database/models/equipe_table.dart';
 import 'package:nexa_app/core/database/models/tipo_equipe_table.dart';
 
 part 'equipe_dao.g.dart';
 
+/// DAO para operações com a tabela de equipes.
+///
+/// Herda de [SyncableDao] que fornece automaticamente:
+/// - `listar()`, `buscarPorId()`, `inserir()`, `atualizar()`, `deletar()`
+/// - `buscarPorRemoteId()`, `inserirOuAtualizar()`, `sincronizar()`
+/// - `deletarTodos()`, `contar()`, `existe()`, `estaVazia()`
+/// - `buscarNaoSincronizados()`, `marcarComoSincronizado()`
+///
+/// Este DAO adiciona apenas métodos **específicos** de equipes.
 @DriftAccessor(tables: [EquipeTable, TipoEquipeTable])
-class EquipeDao extends DatabaseAccessor<AppDatabase> with _$EquipeDaoMixin {
+class EquipeDao extends SyncableDao<EquipeTable, EquipeTableData>
+    with _$EquipeDaoMixin {
   EquipeDao(super.db);
 
-  /// Lista todas as equipes
-  Future<List<EquipeTableData>> listar() async {
-    return await select(equipeTable).get();
-  }
+  /// Tabela gerenciada por este DAO.
+  @override
+  TableInfo<EquipeTable, EquipeTableData> get table => db.equipeTable;
 
-  /// Busca uma equipe por ID
-  Future<EquipeTableData> buscarPorId(int id) async {
-    return await (select(equipeTable)..where((e) => e.id.equals(id)))
-        .getSingle();
-  }
+  // ==========================================================================
+  // MÉTODOS ESPECÍFICOS DE EQUIPE
+  // ==========================================================================
+  // Nota: Métodos genéricos foram removidos (herdados do SyncableDao)
+  // ==========================================================================
 
-  /// Busca uma equipe por ID (retorna null se não encontrar)
+  /// Alias para compatibilidade com código existente.
   Future<EquipeTableData?> buscarPorIdOuNull(int id) async {
-    try {
-      return await (select(equipeTable)..where((e) => e.id.equals(id)))
-          .getSingleOrNull();
-    } catch (e) {
-      return null;
-    }
+    return await buscarPorId(id);
   }
 
-  /// Busca uma equipe por remote ID
-  Future<EquipeTableData> buscarPorRemoteId(int remoteId) async {
-    return await (select(equipeTable)
-          ..where((e) => e.remoteId.equals(remoteId)))
-        .getSingle();
-  }
-
-  /// Busca uma equipe por remote ID (retorna null se não encontrar)
-  Future<EquipeTableData?> buscarPorRemoteIdOuNull(int remoteId) async {
-    try {
-      return await (select(equipeTable)
-            ..where((e) => e.remoteId.equals(remoteId)))
-          .getSingleOrNull();
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Busca equipes por nome
+  /// Busca equipes por nome (busca parcial).
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final equipes = await equipeDao.buscarPorNome('Limpeza');
+  /// print('${equipes.length} equipes encontradas');
+  /// ```
   Future<List<EquipeTableData>> buscarPorNome(String nome) async {
-    return await (select(equipeTable)
-          ..where((e) => e.nome.contains(nome)))
-        .get();
+    return await (select(table)..where((e) => e.nome.contains(nome))).get();
   }
 
-  /// Busca equipes por tipo de equipe
+  /// Busca equipes por tipo.
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final equipesLimpeza = await equipeDao.buscarPorTipoEquipe(1);
+  /// ```
   Future<List<EquipeTableData>> buscarPorTipoEquipe(int tipoEquipeId) async {
-    return await (select(equipeTable)
+    return await (select(table)
           ..where((e) => e.tipoEquipeId.equals(tipoEquipeId)))
         .get();
   }
 
-  /// Lista equipes com informações do tipo de equipe
+  /// Lista equipes com informações do tipo (JOIN).
+  ///
+  /// Retorna equipes com dados do tipo populados.
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final equipesComTipo = await equipeDao.listarComTipoEquipe();
+  /// ```
   Future<List<EquipeTableData>> listarComTipoEquipe() async {
-    return await (select(equipeTable)
+    return await (select(db.equipeTable)
           ..join([
-            leftOuterJoin(tipoEquipeTable,
-                tipoEquipeTable.id.equalsExp(equipeTable.tipoEquipeId))
+            leftOuterJoin(db.tipoEquipeTable,
+                db.tipoEquipeTable.id.equalsExp(db.equipeTable.tipoEquipeId))
           ]))
         .get();
   }
 
-  /// Insere ou atualiza uma equipe baseado no remote ID
-  Future<int> inserirOuAtualizar(EquipeTableCompanion equipe) async {
-    final existente = await buscarPorRemoteIdOuNull(equipe.remoteId.value);
-    if (existente != null) {
-      return await (update(equipeTable)
-            ..where((e) => e.remoteId.equals(equipe.remoteId.value)))
-          .write(equipe);
-    } else {
-      return await into(equipeTable).insert(equipe);
-    }
-  }
-
-  /// Atualiza uma equipe por ID
-  Future<int> atualizar(EquipeTableData equipe) async {
-    return await (update(equipeTable)
-          ..where((e) => e.id.equals(equipe.id)))
-        .write(EquipeTableCompanion(
-      nome: Value(equipe.nome),
-      descricao: Value(equipe.descricao),
-      tipoEquipeId: Value(equipe.tipoEquipeId),
-      updatedAt: Value(DateTime.now()),
-    ));
-  }
-
-  /// Deleta fisicamente uma equipe por ID
-  Future<int> deletar(int id) async {
-    return await (delete(equipeTable)..where((e) => e.id.equals(id))).go();
-  }
-
-  /// Limpa todos os registros da tabela de equipes
-  Future<void> deletarTodos() async {
-    await delete(equipeTable).go();
-  }
-
-  /// Sincroniza uma lista de equipes (insere ou atualiza)
-  Future<void> sincronizar(List<EquipeTableCompanion> equipes) async {
-    for (final equipe in equipes) {
-      await inserirOuAtualizar(equipe);
-    }
-  }
-
-  /// Conta o número de equipes
-  Future<int> contar() async {
-    final result = await (selectOnly(equipeTable)
-          ..addColumns([equipeTable.id.count()]))
-        .getSingle();
-    return result.read(equipeTable.id.count()) ?? 0;
-  }
-
-  /// Marca equipes como sincronizadas
+  /// Marca múltiplas equipes como sincronizadas.
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// await equipeDao.marcarComoSincronizadas([1, 2, 3]);
+  /// ```
   Future<void> marcarComoSincronizadas(List<int> ids) async {
-    await (update(equipeTable)
-          ..where((e) => e.id.isIn(ids)))
-        .write(EquipeTableCompanion(
-      sincronizado: Value(true),
-      updatedAt: Value(DateTime.now()),
-    ));
+    await (update(table)..where((e) => e.id.isIn(ids))).write(
+      EquipeTableCompanion(
+        sincronizado: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
 
-  /// Lista equipes não sincronizadas
+  /// Alias para `buscarNaoSincronizados()` herdado (compatibilidade).
   Future<List<EquipeTableData>> listarNaoSincronizadas() async {
-    return await (select(equipeTable)
-          ..where((e) => e.sincronizado.equals(false)))
-        .get();
+    return await buscarNaoSincronizados();
   }
 }

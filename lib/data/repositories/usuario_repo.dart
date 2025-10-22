@@ -164,7 +164,7 @@ class UsuarioRepo {
   /// ```
   Future<UsuarioTableDto> buscarPorId(int id) async {
     /// Executa consulta específica por ID no banco de dados.
-    final usuario = await usuarioDao.buscarPorId(id);
+    final usuario = await usuarioDao.buscarPorIdOuFalha(id);
 
     /// Converte a entidade encontrada para DTO padronizado.
     return UsuarioTableDto.fromEntity(usuario);
@@ -244,12 +244,13 @@ class UsuarioRepo {
   /// ```
   Future<UsuarioTableDto> inserir(UsuarioTableDto usuario) async {
     /// Converte DTO para Companion (formato de inserção do Drift).
-    /// O ID é omitido para permitir geração automática pelo banco.
-    final id = await usuarioDao.inserir(usuario.toCompanion());
+    /// Usa o método que insere ou atualiza baseado na matrícula.
+    final id =
+        await usuarioDao.inserirOuAtualizarPorMatricula(usuario.toCompanion());
 
     /// Busca o registro recém-inserido para obter dados completos
     /// incluindo o ID gerado automaticamente.
-    final usuarioInserido = await usuarioDao.buscarPorId(id);
+    final usuarioInserido = await usuarioDao.buscarPorIdOuFalha(id);
 
     /// Converte a entidade para DTO e retorna dados completos.
     return UsuarioTableDto.fromEntity(usuarioInserido);
@@ -289,13 +290,14 @@ class UsuarioRepo {
   /// print('Usuário atualizado: ${resultado.nome}');
   /// ```
   Future<UsuarioTableDto> atualizar(UsuarioTableDto usuario) async {
-    /// Converte DTO para entidade e executa atualização no banco.
-    await usuarioDao.atualizar(usuario.toEntity());
+    /// Converte DTO para companion e executa atualização no banco usando ID separado.
+    await usuarioDao.atualizarPorId(
+        int.parse(usuario.id), usuario.toCompanion());
 
     /// Busca o registro atualizado para garantir dados consistentes
     /// e obter qualquer valor calculado ou modificado pelo banco.
     final usuarioAtualizado =
-        await usuarioDao.buscarPorId(int.parse(usuario.id));
+        await usuarioDao.buscarPorIdOuFalha(int.parse(usuario.id));
 
     /// Converte a entidade atualizada para DTO e retorna.
     return UsuarioTableDto.fromEntity(usuarioAtualizado);

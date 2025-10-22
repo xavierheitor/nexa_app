@@ -109,22 +109,33 @@ class SyncService {
   SyncService() {
     _syncManager = SyncManager();
 
-    // Registrar repositórios sincronizáveis
-    _syncManager.registrar(VeiculoRepo(dio: Get.find(), db: Get.find()));
+    // ⚠️ IMPORTANTE: Ordem de registro respeita dependências de Foreign Keys!
+    // Tabelas de referência (sem dependências) devem ser registradas PRIMEIRO.
+
+    // 1️⃣ TABELAS DE REFERÊNCIA (independentes)
     _syncManager.registrar(TipoVeiculoRepo(dio: Get.find(), db: Get.find()));
     _syncManager.registrar(TipoEquipeRepo(dio: Get.find(), db: Get.find()));
-    _syncManager.registrar(EquipeRepo(dio: Get.find(), db: Get.find()));
+    
+    // 2️⃣ TABELAS COM FK PARA REFERÊNCIAS
+    _syncManager.registrar(
+        VeiculoRepo(dio: Get.find(), db: Get.find())); // FK: tipo_veiculo_id
+    _syncManager.registrar(
+        EquipeRepo(dio: Get.find(), db: Get.find())); // FK: tipo_equipe_id
     _syncManager.registrar(EletricistaRepo(dio: Get.find(), db: Get.find()));
+    
+    // 3️⃣ TABELAS DE CHECKLIST (independentes)
     _syncManager
         .registrar(ChecklistModeloRepo(dio: Get.find(), db: Get.find()));
     _syncManager
         .registrar(ChecklistPerguntaRepo(dio: Get.find(), db: Get.find()));
     _syncManager
         .registrar(ChecklistOpcaoRespostaRepo(dio: Get.find(), db: Get.find()));
-    _syncManager.registrar(
-        ChecklistOpcaoRespostaRelacaoRepo(dio: Get.find(), db: Get.find()));
+    
+    // 4️⃣ TABELAS DE RELAÇÃO (dependem das anteriores)
     _syncManager.registrar(
         ChecklistPerguntaRelacaoRepo(dio: Get.find(), db: Get.find()));
+    _syncManager.registrar(
+        ChecklistOpcaoRespostaRelacaoRepo(dio: Get.find(), db: Get.find()));
     _syncManager.registrar(
         ChecklistTipoEquipeRelacaoRepo(dio: Get.find(), db: Get.find()));
     _syncManager.registrar(

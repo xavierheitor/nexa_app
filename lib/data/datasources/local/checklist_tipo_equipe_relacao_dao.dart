@@ -2,74 +2,66 @@ import 'package:drift/drift.dart';
 import 'package:nexa_app/core/database/app_database.dart';
 import 'package:nexa_app/core/database/models/checklist_tipo_equipe_relacao_table.dart';
 import 'package:nexa_app/data/models/checklist_tipo_equipe_relacao_table_dto.dart';
+import 'package:nexa_app/core/database/syncable_dao.dart';
 
 part 'checklist_tipo_equipe_relacao_dao.g.dart';
 
+/// DAO para gerenciar relações entre checklists e tipos de equipe.
+///
+/// Estende [SyncableDao] para herdar operações CRUD genéricas e métodos de sincronização.
+/// Esta é uma tabela de relação que usa DTOs.
 @DriftAccessor(tables: [ChecklistTipoEquipeRelacaoTable])
-class ChecklistTipoEquipeRelacaoDao extends DatabaseAccessor<AppDatabase>
+class ChecklistTipoEquipeRelacaoDao extends SyncableDao<
+        ChecklistTipoEquipeRelacaoTable, ChecklistTipoEquipeRelacaoTableData>
     with _$ChecklistTipoEquipeRelacaoDaoMixin {
   ChecklistTipoEquipeRelacaoDao(super.db);
 
-  Future<List<ChecklistTipoEquipeRelacaoTableDto>> listar() async {
-    final result = await select(checklistTipoEquipeRelacaoTable).get();
+  @override
+  TableInfo<ChecklistTipoEquipeRelacaoTable,
+          ChecklistTipoEquipeRelacaoTableData>
+      get table => db.checklistTipoEquipeRelacaoTable;
+
+  // ============================================================================
+  // WRAPPERS PARA DTO
+  // ============================================================================
+
+  /// Wrapper para manter compatibilidade com DTOs.
+  Future<List<ChecklistTipoEquipeRelacaoTableDto>> listarDto() async {
+    final result = await listar();
     return result.map(ChecklistTipoEquipeRelacaoTableDto.fromTable).toList();
   }
 
-  Future<ChecklistTipoEquipeRelacaoTableDto?> buscarPorId(int id) async {
-    final result = await (select(checklistTipoEquipeRelacaoTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+  /// Wrapper para manter compatibilidade com DTOs.
+  Future<ChecklistTipoEquipeRelacaoTableDto?> buscarPorIdDto(int id) async {
+    final result = await buscarPorId(id);
     return result != null
         ? ChecklistTipoEquipeRelacaoTableDto.fromTable(result)
         : null;
   }
 
-  Future<ChecklistTipoEquipeRelacaoTableDto?> buscarPorRemoteId(
+  /// Wrapper para manter compatibilidade com DTOs.
+  Future<ChecklistTipoEquipeRelacaoTableDto?> buscarPorRemoteIdDto(
       int remoteId) async {
-    final result = await (select(checklistTipoEquipeRelacaoTable)
-          ..where((t) => t.remoteId.equals(remoteId)))
-        .getSingleOrNull();
-    return result != null
-        ? ChecklistTipoEquipeRelacaoTableDto.fromTable(result)
-        : null;
+    final result = await buscarPorRemoteId(remoteId);
+    if (result == null) return null;
+    return ChecklistTipoEquipeRelacaoTableDto.fromTable(result);
   }
 
-  Future<int> inserirOuAtualizar(
+  /// Insere ou atualiza usando DTO.
+  Future<int> inserirOuAtualizarDto(
       ChecklistTipoEquipeRelacaoTableDto dto) async {
-    final remoteId = dto.remoteId;
-    if (remoteId != null) {
-      final existente = await buscarPorRemoteId(remoteId);
-      if (existente != null) {
-        await atualizar(dto.copyWith(id: existente.id));
-        return existente.id;
-      }
-    }
-    return await inserir(dto);
+    return await inserirOuAtualizar(dto.toCompanion());
   }
 
-  Future<int> inserir(ChecklistTipoEquipeRelacaoTableDto dto) async {
-    return await into(checklistTipoEquipeRelacaoTable)
+  /// Insere usando DTO.
+  Future<int> inserirDto(ChecklistTipoEquipeRelacaoTableDto dto) async {
+    return await into(db.checklistTipoEquipeRelacaoTable)
         .insert(dto.toCompanion());
   }
 
-  Future<bool> atualizar(ChecklistTipoEquipeRelacaoTableDto dto) async {
-    return await update(checklistTipoEquipeRelacaoTable)
+  /// Atualiza usando DTO.
+  Future<bool> atualizarDto(ChecklistTipoEquipeRelacaoTableDto dto) async {
+    return await update(db.checklistTipoEquipeRelacaoTable)
         .replace(dto.toCompanion());
   }
-
-  Future<int> deletar(int id) async {
-    return await (delete(checklistTipoEquipeRelacaoTable)
-          ..where((t) => t.id.equals(id)))
-        .go();
-  }
-
-  Future<int> deletarTodos() async {
-    return await delete(checklistTipoEquipeRelacaoTable).go();
-  }
-
-  Future<int> contar() async {
-    final result = await listar();
-    return result.length;
-  }
 }
-

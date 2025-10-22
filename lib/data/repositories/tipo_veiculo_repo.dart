@@ -253,7 +253,7 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// ```
   Future<TipoVeiculoTableDto> buscarPorId(int id) async {
     /// Executa consulta específica por ID no banco de dados.
-    final tipo = await tipoVeiculoDao.buscarPorId(id);
+    final tipo = await tipoVeiculoDao.buscarPorIdOuFalha(id);
 
     /// Converte a entidade encontrada para DTO padronizado.
     return TipoVeiculoTableDto.fromEntity(tipo);
@@ -288,7 +288,7 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
   /// ```
   Future<TipoVeiculoTableDto> buscarPorRemoteId(int remoteId) async {
     /// Executa consulta específica por remote ID no banco de dados.
-    final tipo = await tipoVeiculoDao.buscarPorRemoteId(remoteId);
+    final tipo = await tipoVeiculoDao.buscarPorRemoteIdOuFalha(remoteId);
 
     /// Converte a entidade encontrada para DTO padronizado.
     return TipoVeiculoTableDto.fromEntity(tipo);
@@ -374,7 +374,7 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
 
     /// Busca o registro recém-inserido para obter dados completos
     /// incluindo o ID gerado automaticamente.
-    final tipoInserido = await tipoVeiculoDao.buscarPorId(id);
+    final tipoInserido = await tipoVeiculoDao.buscarPorIdOuFalha(id);
 
     /// Converte a entidade para DTO e retorna dados completos.
     return TipoVeiculoTableDto.fromEntity(tipoInserido);
@@ -420,7 +420,7 @@ class TipoVeiculoRepo implements SyncableRepository<TipoVeiculoTableDto> {
     /// Busca o registro atualizado para garantir dados consistentes
     /// e obter qualquer valor calculado ou modificado pelo banco.
     final tipoAtualizado =
-        await tipoVeiculoDao.buscarPorId(int.parse(tipoVeiculo.id));
+        await tipoVeiculoDao.buscarPorIdOuFalha(int.parse(tipoVeiculo.id));
 
     /// Converte a entidade atualizada para DTO e retorna.
     return TipoVeiculoTableDto.fromEntity(tipoAtualizado);

@@ -253,7 +253,7 @@ class EletricistaRepo implements SyncableRepository<EletricistaTableDto> {
   /// ```
   Future<EletricistaTableDto> buscarPorId(int id) async {
     /// Busca entidade específica no banco através do DAO.
-    final eletricista = await eletricistaDao.buscarPorId(id);
+    final eletricista = await eletricistaDao.buscarPorIdOuFalha(id);
 
     /// Converte entidade para DTO e retorna dados padronizados.
     return EletricistaTableDto.fromEntity(eletricista);
@@ -267,7 +267,7 @@ class EletricistaRepo implements SyncableRepository<EletricistaTableDto> {
 
   /// Busca um eletricista pelo identificador remoto (lançando se não encontrar).
   Future<EletricistaTableDto> buscarPorRemoteId(int remoteId) async {
-    final entidade = await eletricistaDao.buscarPorRemoteId(remoteId);
+    final entidade = await eletricistaDao.buscarPorRemoteIdOuFalha(remoteId);
     return EletricistaTableDto.fromEntity(entidade);
   }
 
@@ -386,7 +386,7 @@ class EletricistaRepo implements SyncableRepository<EletricistaTableDto> {
 
     /// Busca o registro recém-inserido para obter dados completos
     /// incluindo o ID gerado automaticamente.
-    final eletricistaInserido = await eletricistaDao.buscarPorId(id);
+    final eletricistaInserido = await eletricistaDao.buscarPorIdOuFalha(id);
 
     /// Converte a entidade para DTO e retorna dados completos.
     return EletricistaTableDto.fromEntity(eletricistaInserido);
@@ -432,7 +432,7 @@ class EletricistaRepo implements SyncableRepository<EletricistaTableDto> {
     /// Busca o registro atualizado para garantir dados consistentes
     /// e obter qualquer valor calculado ou modificado pelo banco.
     final eletricistaAtualizado =
-        await eletricistaDao.buscarPorId(int.parse(eletricista.id));
+        await eletricistaDao.buscarPorIdOuFalha(int.parse(eletricista.id));
 
     /// Converte a entidade atualizada para DTO e retorna.
     return EletricistaTableDto.fromEntity(eletricistaAtualizado);

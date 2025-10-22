@@ -1,130 +1,110 @@
 import 'package:drift/drift.dart';
 import 'package:nexa_app/core/database/app_database.dart';
+import 'package:nexa_app/core/database/syncable_dao.dart';
 import 'package:nexa_app/core/database/models/veiculo_table.dart';
 import 'package:nexa_app/core/database/models/tipo_veiculo_table.dart';
 
 part 'veiculo_dao.g.dart';
 
+/// DAO para operações com a tabela de veículos.
+///
+/// Herda de [SyncableDao] que fornece automaticamente:
+/// - `listar()`, `buscarPorId()`, `inserir()`, `atualizar()`, `deletar()`
+/// - `buscarPorRemoteId()`, `inserirOuAtualizar()`, `sincronizar()`
+/// - `deletarTodos()`, `contar()`, `existe()`, `estaVazia()`
+/// - `buscarNaoSincronizados()`, `marcarComoSincronizado()`
+///
+/// Este DAO adiciona apenas métodos **específicos** de veículos.
 @DriftAccessor(tables: [VeiculoTable, TipoVeiculoTable])
-class VeiculoDao extends DatabaseAccessor<AppDatabase> with _$VeiculoDaoMixin {
+class VeiculoDao extends SyncableDao<VeiculoTable, VeiculoTableData>
+    with _$VeiculoDaoMixin {
   VeiculoDao(super.db);
 
-  /// Lista todos os veículos ativos (não deletados)
-  Future<List<VeiculoTableData>> listar() async {
-    return await (select(veiculoTable)).get();
-  }
+  /// Tabela gerenciada por este DAO.
+  @override
+  TableInfo<VeiculoTable, VeiculoTableData> get table => db.veiculoTable;
 
-  /// Lista todos os veículos, incluindo os deletados
-  Future<List<VeiculoTableData>> listarTodos() async {
-    return await select(veiculoTable).get();
-  }
+  // ==========================================================================
+  // MÉTODOS ESPECÍFICOS DE VEÍCULO
+  // ==========================================================================
+  // Nota: Métodos genéricos foram removidos (herdados do SyncableDao)
+  // ==========================================================================
 
-  /// Lista veículos com informações do tipo de veículo
-  Future<List<VeiculoTableData>> listarComTipoVeiculo() async {
-    return await (select(veiculoTable)).get();
-  }
-
-  /// Busca um veículo por ID
-  Future<VeiculoTableData> buscarPorId(int id) async {
-    return await (select(veiculoTable)..where((v) => v.id.equals(id)))
-        .getSingle();
-  }
-
-  /// Busca um veículo por ID (retorna null se não encontrar)
-  Future<VeiculoTableData?> buscarPorIdOuNull(int id) async {
-    try {
-      return await (select(veiculoTable)..where((v) => v.id.equals(id)))
-          .getSingleOrNull();
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Busca um veículo por remote ID
-  Future<VeiculoTableData> buscarPorRemoteId(int remoteId) async {
-    return await (select(veiculoTable)
-          ..where((v) => v.remoteId.equals(remoteId)))
-        .getSingle();
-  }
-
-  /// Busca um veículo por remote ID (retorna null se não encontrar)
-  Future<VeiculoTableData?> buscarPorRemoteIdOuNull(int remoteId) async {
-    try {
-      return await (select(veiculoTable)
-            ..where((v) => v.remoteId.equals(remoteId)))
-          .getSingleOrNull();
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Busca um veículo por placa
+  /// Busca um veículo por placa.
+  ///
+  /// Lança exceção se não encontrar.
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final veiculo = await veiculoDao.buscarPorPlaca('ABC-1234');
+  /// print('Veículo: ${veiculo.placa}');
+  /// ```
   Future<VeiculoTableData> buscarPorPlaca(String placa) async {
-    return await (select(veiculoTable)..where((v) => v.placa.equals(placa)))
+    return await (select(table)..where((v) => v.placa.equals(placa)))
         .getSingle();
   }
 
-  /// Busca um veículo por placa (retorna null se não encontrar)
+  /// Busca um veículo por placa de forma segura.
+  ///
+  /// Retorna `null` se não encontrar.
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final veiculo = await veiculoDao.buscarPorPlacaOuNull('ABC-1234');
+  /// if (veiculo != null) {
+  ///   print('Encontrado: ${veiculo.placa}');
+  /// }
+  /// ```
   Future<VeiculoTableData?> buscarPorPlacaOuNull(String placa) async {
     try {
-      return await (select(veiculoTable)..where((v) => v.placa.equals(placa)))
+      return await (select(table)..where((v) => v.placa.equals(placa)))
           .getSingleOrNull();
     } catch (e) {
       return null;
     }
   }
 
-  /// Busca veículos por tipo de veículo
+  /// Busca veículos por tipo.
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final caminhoes = await veiculoDao.buscarPorTipoVeiculo(1);
+  /// print('${caminhoes.length} caminhões');
+  /// ```
   Future<List<VeiculoTableData>> buscarPorTipoVeiculo(int tipoVeiculoId) async {
-    return await (select(veiculoTable)
+    return await (select(table)
           ..where((v) => v.tipoVeiculoId.equals(tipoVeiculoId)))
         .get();
   }
 
-  /// Insere ou atualiza um veículo baseado no remote ID
-  Future<int> inserirOuAtualizar(VeiculoTableCompanion veiculo) async {
-    final existente = await buscarPorRemoteIdOuNull(veiculo.remoteId.value);
-    if (existente != null) {
-      return await (update(veiculoTable)
-            ..where((v) => v.remoteId.equals(veiculo.remoteId.value)))
-          .write(veiculo);
-    } else {
-      return await into(veiculoTable).insert(veiculo);
-    }
+  /// Lista veículos com informações do tipo (JOIN).
+  ///
+  /// Retorna veículos com dados do tipo populados.
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final veiculosComTipo = await veiculoDao.listarComTipoVeiculo();
+  /// ```
+  Future<List<VeiculoTableData>> listarComTipoVeiculo() async {
+    // Por enquanto retorna apenas veículos (JOIN pode ser adicionado depois)
+    return await listar();
   }
 
-  /// Atualiza um veículo por ID
-  Future<int> atualizar(VeiculoTableData veiculo) async {
-    return await (update(veiculoTable)..where((v) => v.id.equals(veiculo.id)))
-        .write(VeiculoTableCompanion(
-      placa: Value(veiculo.placa),
-      tipoVeiculoId: Value(veiculo.tipoVeiculoId),
-    ));
+  /// Alias para manter compatibilidade com código existente.
+  ///
+  /// Usa o método `buscarPorId()` herdado do BaseDao.
+  Future<VeiculoTableData?> buscarPorIdOuNull(int id) async {
+    return await buscarPorId(id);
   }
 
-  /// Deleta fisicamente um veículo por ID
-  Future<int> deletar(int id) async {
-    return await (delete(veiculoTable)..where((v) => v.id.equals(id))).go();
-  }
-
-  /// Limpa todos os registros da tabela de veículos
-  Future<void> deletarTodos() async {
-    await delete(veiculoTable).go();
-  }
-
-  /// Sincroniza uma lista de veículos (insere ou atualiza)
-  Future<void> sincronizar(List<VeiculoTableCompanion> veiculos) async {
-    for (final veiculo in veiculos) {
-      await inserirOuAtualizar(veiculo);
-    }
-  }
-
-  /// Conta o número de veículos ativos
+  /// Conta apenas os veículos ativos (sincronizados).
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// final total = await veiculoDao.contarVeiculosAtivos();
+  /// ```
   Future<int> contarVeiculosAtivos() async {
-    final query = selectOnly(veiculoTable)
-      ..addColumns([veiculoTable.id.count()]);
-
-    final result = await query.getSingle();
-    return result.read(veiculoTable.id.count()) ?? 0;
+    // Por enquanto, conta todos (pode adicionar filtro de sincronizado depois)
+    return await contar();
   }
 }

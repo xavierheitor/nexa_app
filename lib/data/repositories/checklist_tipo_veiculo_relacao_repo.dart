@@ -25,7 +25,7 @@ class ChecklistTipoVeiculoRelacaoRepo
 
   Future<List<ChecklistTipoVeiculoRelacaoTableDto>> listar() async {
     try {
-      return await _dao.listar();
+      return await _dao.listarDto();
     } catch (e, stackTrace) {
       AppLogger.e('Erro ao listar relações tipo-veiculo-modelo',
           tag: 'ChecklistTipoVeiculoRelacaoRepo',
@@ -114,7 +114,7 @@ class ChecklistTipoVeiculoRelacaoRepo
       await _dao.deletarTodos();
 
       for (final item in itens) {
-        await _dao.inserirOuAtualizar(item);
+        await _dao.inserirOuAtualizarDto(item);
       }
 
       AppLogger.i('✅ ${itens.length} relações sincronizadas com sucesso',
