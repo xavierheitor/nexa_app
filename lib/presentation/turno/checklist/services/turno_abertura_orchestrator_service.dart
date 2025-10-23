@@ -122,6 +122,11 @@ class TurnoAberturaOrchestratorService extends GetxService {
         AppLogger.w(
             '⚠️ [ABERTURA TURNO] Não foi possível atualizar o turno localmente após envio',
             tag: 'TurnoAberturaService');
+      } else {
+        // Invalida cache do turno ativo para forçar recarregamento
+        await _turnoRepo.invalidarCacheAposSincronizacao('turno_ativo');
+        AppLogger.d('🔄 [ABERTURA TURNO] Cache do turno ativo invalidado',
+            tag: 'TurnoAberturaService');
       }
 
       AppLogger.i(

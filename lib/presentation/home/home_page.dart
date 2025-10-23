@@ -34,9 +34,9 @@ class HomePage extends StatelessWidget {
                 return _buildTurnoCardOptimized(turno, controller, colorScheme);
               }),
 
-              /// Card de erro de abertura de turno (se houver)
-              Obx(() => controller.temErroAberturaTurno
-                  ? _buildErroCard(controller, colorScheme)
+              /// Card de erro unificado (se houver)
+              Obx(() => controller.temErro
+                  ? _buildErroCardUnificado(controller, colorScheme)
                   : const SizedBox.shrink()),
 
               const SizedBox(height: 24),
@@ -510,6 +510,26 @@ class HomePage extends StatelessWidget {
                   );
                 },
             ),
+
+              const SizedBox(height: 20),
+
+              /// Botão de fechar turno
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showFecharTurnoDialog(controller, turno),
+                  icon: const Icon(Icons.close, size: 20),
+                  label: const Text('Fechar Turno'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
         ),
@@ -730,8 +750,9 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Constrói o card de erro de abertura de turno.
-  Widget _buildErroCard(HomeController controller, ColorScheme colorScheme) {
+  /// Constrói o card de erro unificado.
+  Widget _buildErroCardUnificado(
+      HomeController controller, ColorScheme colorScheme) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 3,
@@ -765,7 +786,7 @@ class HomePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Erro ao Abrir Turno',
+                        'Erro',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -774,8 +795,7 @@ class HomePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        controller.mensagemErroAberturaTurno ??
-                            'Erro desconhecido',
+                        controller.mensagemErro ?? 'Erro desconhecido',
                         style: TextStyle(
                           fontSize: 14,
                           color: colorScheme.onErrorContainer,
@@ -785,7 +805,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: controller.limparErroAberturaTurno,
+                  onPressed: controller.limparErro,
                   icon: Icon(
                     Icons.close,
                     color: colorScheme.onErrorContainer,
@@ -799,5 +819,11 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+
+  /// Mostra dialog de confirmação para fechar turno
+  void _showFecharTurnoDialog(HomeController controller, dynamic turno) {
+    controller.fecharTurno();
+  }
+
 }
 

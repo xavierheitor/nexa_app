@@ -92,5 +92,42 @@ class SnackbarUtils {
       mensagem: 'Ocorreu um erro inesperado. Tente novamente.',
     );
   }
+
+  /// Exibe snackbar de sucesso padronizado.
+  ///
+  /// ## Parâmetros:
+  /// - `titulo`: Título do sucesso (ex: "Sucesso", "Salvo com sucesso")
+  /// - `mensagem`: Descrição detalhada do sucesso
+  /// - `duracao`: Duração de exibição (padrão: 3 segundos)
+  ///
+  /// ## Exemplo:
+  /// ```dart
+  /// SnackbarUtils.sucesso(
+  ///   titulo: 'Turno Fechado',
+  ///   mensagem: 'Turno foi fechado com sucesso!',
+  /// );
+  /// ```
+  static void sucesso({
+    required String titulo,
+    required String mensagem,
+    Duration duracao = const Duration(seconds: 3),
+  }) {
+    Get.snackbar(
+      titulo,
+      mensagem,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Get.theme.colorScheme.primary,
+      colorText: Get.theme.colorScheme.onPrimary,
+      icon: Icon(
+        Icons.check_circle_outline,
+        color: Get.theme.colorScheme.onPrimary,
+      ),
+      duration: duracao,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 8,
+      isDismissible: true,
+      dismissDirection: DismissDirection.horizontal,
+    );
+  }
 }
 

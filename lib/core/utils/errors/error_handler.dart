@@ -120,6 +120,9 @@ class ErrorHandler {
           } else if (messageField is String) {
             /// Message é uma string simples.
             message = messageField;
+          } else if (messageField is List) {
+            /// Message é uma lista de strings (erros de validação).
+            message = messageField.join(', ');
           } else {
             /// Fallback para outros campos ou mensagem padrão.
             message = responseData['error'] ??

@@ -41,6 +41,21 @@ class ErrorMessageService extends GetxService {
     _statusCode.value = statusCode;
   }
 
+  /// Define uma mensagem de erro de fechamento de turno
+  void definirErroFechamentoTurno({
+    required String mensagem,
+    int? statusCode,
+    String tipo = 'error',
+  }) {
+    AppLogger.w(
+        '🔴 [ERROR_SERVICE] Definindo erro de fechamento de turno: $mensagem',
+        tag: 'ErrorMessageService');
+
+    _mensagemErro.value = mensagem;
+    _tipoErro.value = tipo;
+    _statusCode.value = statusCode;
+  }
+
   /// Define uma mensagem de erro de conflito (409)
   void definirErroConflito(String mensagem) {
     definirErroAberturaTurno(
@@ -71,6 +86,16 @@ class ErrorMessageService extends GetxService {
   /// Remove a mensagem de erro atual
   void limparErro() {
     AppLogger.d('🟢 [ERROR_SERVICE] Limpando mensagem de erro',
+        tag: 'ErrorMessageService');
+
+    _mensagemErro.value = null;
+    _tipoErro.value = null;
+    _statusCode.value = null;
+  }
+
+  /// Remove mensagem de erro de fechamento de turno
+  void limparErroFechamentoTurno() {
+    AppLogger.d('🟢 [ERROR_SERVICE] Limpando erro de fechamento de turno',
         tag: 'ErrorMessageService');
 
     _mensagemErro.value = null;

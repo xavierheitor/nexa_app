@@ -25,6 +25,7 @@ abstract class ApiConstants {
 
   // Turno
   static const turnoAbrir = '/turno/abrir';
+  static const turnoFechar = '/turno/fechar';
 
   // ============================================================================
   // IDs DE TIPO DE CHECKLIST

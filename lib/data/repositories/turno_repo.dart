@@ -492,7 +492,12 @@ class TurnoRepo with log_mixin.LoggingMixin, CacheMixin {
     );
   }
 
-  Future<bool> fecharTurno(int turnoId, {int? kmFinal}) async {
+  Future<bool> fecharTurno(
+    int turnoId, {
+    int? kmFinal,
+    String? latitude,
+    String? longitude,
+  }) async {
     return await executeWithLogging(
       operationName: 'fecharTurno',
       logLevel: log_mixin.LogLevel.info,
@@ -502,21 +507,98 @@ class TurnoRepo with log_mixin.LoggingMixin, CacheMixin {
           throw Exception('Turno não encontrado');
         }
 
-        final turnoAtualizado = turno.copyWith(
-          situacaoTurno: SituacaoTurno.fechado,
-          horaFim: DateTime.now(),
-          kmFinal: kmFinal,
-        );
+        // Primeiro tenta enviar para a API
+        try {
+          await _enviarFechamentoParaApi(turnoId, kmFinal, latitude, longitude);
 
-        final sucesso = await atualizarTurno(turnoAtualizado);
-        if (sucesso) {
-          AppLogger.d('Turno $turnoId fechado com sucesso',
+          // Se chegou aqui, a API confirmou o fechamento
+          AppLogger.i('API confirmou fechamento do turno $turnoId',
               tag: repositoryName);
+
+          // Agora atualiza localmente
+          final turnoAtualizado = turno.copyWith(
+            situacaoTurno: SituacaoTurno.fechado,
+            horaFim: DateTime.now(),
+            kmFinal: kmFinal,
+            latitude: latitude,
+            longitude: longitude,
+          );
+
+          final sucesso = await atualizarTurno(turnoAtualizado);
+          if (sucesso) {
+            // Invalida cache do turno ativo para forçar recarregamento
+            await invalidarCacheAposSincronizacao('turno_ativo');
+            AppLogger.d('Turno $turnoId fechado com sucesso',
+                tag: repositoryName);
+            AppLogger.d('🔄 Cache do turno ativo invalidado após fechamento',
+                tag: repositoryName);
+          }
+          return sucesso;
+          
+        } catch (e) {
+          // Se a API falhou, NÃO fecha o turno localmente
+          AppLogger.e('Erro ao enviar fechamento para API: $e',
+              tag: repositoryName);
+          AppLogger.w(
+              'Turno $turnoId NÃO será fechado localmente devido ao erro da API',
+              tag: repositoryName);
+
+          // Re-lança o erro para que o controller saiba que falhou
+          rethrow;
         }
-        return sucesso;
       },
     );
   }
+
+  /// Envia o fechamento do turno para a API
+  Future<void> _enviarFechamentoParaApi(
+    int turnoId,
+    int? kmFinal,
+    String? latitude,
+    String? longitude,
+  ) async {
+    try {
+      // Busca o turno para obter o remoteId
+      final turno = await buscarTurnoPorId(turnoId);
+      if (turno == null) {
+        throw Exception('Turno não encontrado');
+      }
+
+      if (turno.remoteId == null) {
+        throw Exception(
+            'Turno não possui remoteId - não foi sincronizado com a API');
+      }
+
+      final payload = {
+        'turnoId': turno.remoteId, // Envia o remoteId da API, não o ID local
+        'kmFinal': kmFinal,
+        'latitude': latitude,
+        'longitude': longitude,
+        'horaFim': DateTime.now().toIso8601String(),
+      };
+
+      AppLogger.d(
+          '📤 Enviando fechamento para API - RemoteID: ${turno.remoteId}, LocalID: $turnoId',
+          tag: repositoryName);
+
+      final response = await _dio.post(
+        '/turno/fechar', // Será resolvido pelo interceptor
+        data: payload,
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception('Erro ao fechar turno na API: ${response.statusCode}');
+      }
+
+      AppLogger.i('Turno $turnoId enviado para API com sucesso',
+          tag: repositoryName);
+    } catch (e) {
+      AppLogger.e('Erro ao enviar fechamento para API: $e',
+          tag: repositoryName);
+      rethrow; // Re-lança para que o método fecharTurno saiba que houve erro
+    }
+  }
+
 
   Future<Map<String, dynamic>?> buscarTurnoCompleto(int turnoId) async {
     return await executeWithLogging(
@@ -640,6 +722,9 @@ class TurnoRepo with log_mixin.LoggingMixin, CacheMixin {
           );
 
           await _turnoDao.atualizar(turnoAtualizado);
+
+          // Invalida cache do turno ativo para forçar recarregamento
+          await invalidarCacheAposSincronizacao('turno_ativo');
 
           AppLogger.i('✅ Turno aberto com sucesso! RemoteID: $remoteId',
               tag: repositoryName);
