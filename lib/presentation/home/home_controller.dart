@@ -82,6 +82,22 @@ class HomeController extends GetxController {
   String? get mensagemErro => _errorMessageService.mensagemErro;
 
   // ============================================================================
+  // GETTERS PARA HABILITAÇÃO DE FUNCIONALIDADES
+  // ============================================================================
+
+  /// Verifica se a funcionalidade de checklist deve estar habilitada.
+  /// Só habilitada quando há turno aberto.
+  bool get checklistHabilitado => turnoController.hasTurnoAberto;
+
+  /// Verifica se a funcionalidade de APR deve estar habilitada.
+  /// Só habilitada quando há turno aberto.
+  bool get aprHabilitado => turnoController.hasTurnoAberto;
+
+  /// Verifica se a funcionalidade de almoxarifado deve estar habilitada.
+  /// Sempre habilitada independente do estado do turno.
+  bool get almoxarifadoHabilitado => true;
+
+  // ============================================================================
   // MÉTODOS DE INICIALIZAÇÃO
   // ============================================================================
 
@@ -151,12 +167,24 @@ class HomeController extends GetxController {
 
   /// Navega para tela de APR (Análise Preliminar de Risco).
   void abrirAPR() {
+    if (!aprHabilitado) {
+      SnackbarUtils.validacao(
+          'APR só está disponível quando há um turno aberto.');
+      return;
+    }
+
     AppLogger.i('Navegando para tela de APR', tag: 'HomeController');
     SnackbarUtils.validacao('Tela de APR em desenvolvimento');
   }
 
   /// Navega para tela de checklist.
   void abrirChecklist() {
+    if (!checklistHabilitado) {
+      SnackbarUtils.validacao(
+          'Checklist só está disponível quando há um turno aberto.');
+      return;
+    }
+
     AppLogger.i('Navegando para tela de checklist', tag: 'HomeController');
     SnackbarUtils.validacao('Tela de checklist em desenvolvimento');
   }
@@ -164,6 +192,7 @@ class HomeController extends GetxController {
   /// Navega para tela de almoxarifado.
   void abrirAlmoxarifado() {
     AppLogger.i('Navegando para tela de almoxarifado', tag: 'HomeController');
+    SnackbarUtils.validacao('Recurso ainda não implementado');
   }
 
   /// Fecha o turno atual com confirmação e captura de dados.

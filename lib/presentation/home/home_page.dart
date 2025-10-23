@@ -597,21 +597,21 @@ class HomePage extends StatelessWidget {
           icon: Icons.assignment_outlined,
           label: 'APR',
           color: Colors.orange,
-          enabled: true,
+          enabled: controller.aprHabilitado,
           onTap: controller.abrirAPR,
         ),
         _buildFuncionalidadeCard(
           icon: Icons.checklist_outlined,
           label: 'Checklist',
           color: Colors.green,
-          enabled: true,
+          enabled: controller.checklistHabilitado,
           onTap: controller.abrirChecklist,
         ),
         _buildFuncionalidadeCard(
           icon: Icons.inventory_2_outlined,
           label: 'Almoxarifado',
           color: Colors.purple,
-          enabled: false,
+          enabled: controller.almoxarifadoHabilitado,
           onTap: controller.abrirAlmoxarifado,
         ),
         _buildFuncionalidadeCard(
@@ -686,7 +686,9 @@ class HomePage extends StatelessWidget {
               if (!enabled) ...[
                 const SizedBox(height: 4),
                 Text(
-                  'Em breve',
+                  label == 'APR' || label == 'Checklist'
+                      ? 'Turno fechado'
+                      : 'Em breve',
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.grey.shade600,
