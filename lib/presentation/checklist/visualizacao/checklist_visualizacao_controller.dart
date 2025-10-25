@@ -275,7 +275,7 @@ class ChecklistVisualizacaoController extends GetxController {
         if (opcao != null) {
           respostaTexto = opcao.nome;
           AppLogger.d(
-              '✅ Pergunta: ${pergunta.nome} | Resposta: ${respostaTexto}',
+              '✅ Pergunta: ${pergunta.nome} | Resposta: $respostaTexto',
               tag: 'ChecklistVisualizacaoController');
         } else {
           AppLogger.w(
