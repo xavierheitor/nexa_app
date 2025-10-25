@@ -19,12 +19,14 @@ class ChecklistCompletoModel {
 /// Modelo para pergunta do checklist
 class ChecklistPerguntaModel {
   final int id;
+  final int remoteId;
   final String nome;
   final List<ChecklistOpcaoRespostaModel> opcoes;
   int? respostaSelecionada;
 
   ChecklistPerguntaModel({
     required this.id,
+    required this.remoteId,
     required this.nome,
     required this.opcoes,
     this.respostaSelecionada,
@@ -227,7 +229,8 @@ class ChecklistService {
           .toList();
 
       perguntasComOpcoes.add(ChecklistPerguntaModel(
-        id: perguntaRemoteId,
+        id: pergunta.id,
+        remoteId: perguntaRemoteId,
         nome: pergunta.nome,
         opcoes: opcoesModel,
       ));
@@ -326,7 +329,8 @@ class ChecklistService {
           .toList();
 
       perguntasComOpcoes.add(ChecklistPerguntaModel(
-        id: perguntaRemoteId,
+        id: pergunta.id,
+        remoteId: perguntaRemoteId,
         nome: pergunta.nome,
         opcoes: opcoesModel,
       ));
@@ -365,13 +369,17 @@ class ChecklistService {
         return false;
       }
 
-      // Validação segura de remoteId do modelo
+      // CORREÇÃO: Sempre usa o modelo específico do checklist carregado
       final modeloRemoteId = checklist.modelo.remoteId;
       if (modeloRemoteId == null) {
         AppLogger.e('❌ Modelo de checklist sem remoteId ao salvar',
             tag: 'ChecklistService');
         return false;
       }
+      
+      AppLogger.d(
+          '🔧 [SALVAMENTO] Usando modelo: $modeloRemoteId (tipo: ${checklist.modelo.tipoChecklistId}, nome: ${checklist.modelo.nome})',
+          tag: 'ChecklistService');
 
       // 2. Salvar o checklist preenchido
       final checklistPreenchidoId =
@@ -392,9 +400,13 @@ class ChecklistService {
       for (final pergunta in perguntasRespondidas) {
         if (pergunta.respostaSelecionada != null) {
           respostas.add({
-            'perguntaId': pergunta.id,
+            'perguntaId': pergunta.remoteId, // Usa remoteId da pergunta
             'opcaoRespostaId': pergunta.respostaSelecionada!,
           });
+          
+          AppLogger.d(
+              '📝 Salvando resposta - perguntaRemoteId: ${pergunta.remoteId}, opcaoId: ${pergunta.respostaSelecionada}',
+              tag: 'ChecklistService');
         }
       }
 

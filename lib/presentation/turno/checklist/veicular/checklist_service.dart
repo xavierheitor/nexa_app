@@ -183,7 +183,7 @@ class ChecklistService extends GetxService {
   Future<ChecklistCompletoModel?> buscarChecklistEPIParaEletricista(
       int eletricistaRemoteId) async {
     AppLogger.d(
-      '🔍 Carregando checklist EPI para eletricista remoto $eletricistaRemoteId',
+      '🔍 [CARREGAMENTO EPI] Iniciando carregamento para eletricista $eletricistaRemoteId',
       tag: 'ChecklistService',
     );
 
@@ -195,16 +195,21 @@ class ChecklistService extends GetxService {
             await _equipeRepo.buscarPorId(turnoAtivo.equipeId.toString());
         if (equipe != null) {
           AppLogger.d(
-              '🔍 Tentando buscar checklist EPI para tipoEquipeId: ${equipe.tipoEquipeId}',
+              '🔍 [CARREGAMENTO EPI] Buscando modelo EPI para tipoEquipeId: ${equipe.tipoEquipeId}',
               tag: 'ChecklistService');
 
           final checklist = await _buscarChecklistPorTipoChecklistETipoEquipe(
               ApiConstants.tipoChecklistEpiId, equipe.tipoEquipeId);
 
           if (checklist != null) {
-            AppLogger.d('✅ Checklist EPI encontrado por tipo de equipe',
+            AppLogger.d(
+                '✅ Checklist EPI encontrado por tipo de equipe - Modelo: ${checklist.nome} (ID: ${checklist.remoteId}, Tipo: ${checklist.tipoChecklistId})',
                 tag: 'ChecklistService');
             return checklist;
+          } else {
+            AppLogger.w(
+                '❌ Nenhum modelo EPI encontrado para tipoEquipeId: ${equipe.tipoEquipeId}',
+                tag: 'ChecklistService');
           }
         }
       }
@@ -224,7 +229,9 @@ class ChecklistService extends GetxService {
     return null;
   }
 
-  int get checklistEpiModeloRemoteId => ApiConstants.tipoChecklistEpiId;
+  /// Retorna o ID do modelo de checklist EPI (não o tipo, mas o modelo específico)
+  /// O modelo EPI tem ID 1, enquanto o tipo EPI tem ID 3
+  int get checklistEpiModeloRemoteId => 1; // ID do modelo EPI específico
 
   Future<ChecklistCompletoModel?> _montarChecklistCompleto(
       ChecklistModeloTableDto modelo) async {
@@ -436,7 +443,7 @@ class ChecklistService extends GetxService {
   Future<bool> checklistJaPreenchido(int checklistModeloRemoteId,
       {int? eletricistaRemoteId}) async {
     AppLogger.d(
-      '🔎 Verificando preenchimento prévio do checklist modelo $checklistModeloRemoteId',
+      '🔎 Verificando preenchimento prévio do checklist modelo $checklistModeloRemoteId (eletricista: $eletricistaRemoteId)',
       tag: 'ChecklistService',
     );
 
@@ -448,23 +455,47 @@ class ChecklistService extends GetxService {
         return false;
       }
 
+      AppLogger.d('🔍 [VERIFICAÇÃO] Turno ativo: ${turnoAtivo.id}',
+          tag: 'ChecklistService');
+
       final preenchidos =
           await _checklistPreenchidoRepo.buscarPorTurno(turnoAtivo.id);
 
+      AppLogger.d(
+          '📋 [VERIFICAÇÃO] Total de checklists preenchidos: ${preenchidos.length}',
+          tag: 'ChecklistService');
+
+      for (final preenchido in preenchidos) {
+        AppLogger.d(
+            '  - Preenchido: id=${preenchido.id}, modeloId=${preenchido.checklistModeloId}, eletricistaId=${preenchido.eletricistaRemoteId}',
+            tag: 'ChecklistService');
+      }
+
       final encontrado = preenchidos.any((item) {
+        AppLogger.d(
+            '🔍 [VERIFICAÇÃO] Comparando: modeloId=${item.checklistModeloId} == $checklistModeloRemoteId, eletricistaId=${item.eletricistaRemoteId} == $eletricistaRemoteId',
+            tag: 'ChecklistService');
+
         if (item.checklistModeloId != checklistModeloRemoteId) {
+          AppLogger.d('  ❌ Modelo não confere', tag: 'ChecklistService');
           return false;
         }
 
         if (eletricistaRemoteId == null) {
-          return item.eletricistaRemoteId == null;
+          final match = item.eletricistaRemoteId == null;
+          AppLogger.d('  🔍 Eletricista null - match: $match',
+              tag: 'ChecklistService');
+          return match;
         }
 
-        return item.eletricistaRemoteId == eletricistaRemoteId;
+        final match = item.eletricistaRemoteId == eletricistaRemoteId;
+        AppLogger.d('  🔍 Eletricista específico - match: $match',
+            tag: 'ChecklistService');
+        return match;
       });
 
       AppLogger.d(
-        '📌 Checklist modelo $checklistModeloRemoteId já preenchido: $encontrado',
+        '📌 [VERIFICAÇÃO] RESULTADO: Checklist modelo $checklistModeloRemoteId já preenchido: $encontrado',
         tag: 'ChecklistService',
       );
 

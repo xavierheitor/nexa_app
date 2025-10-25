@@ -10,6 +10,12 @@ import 'package:nexa_app/core/cache/cache_manager.dart';
 import 'package:nexa_app/core/security/session_manager.dart';
 import 'package:nexa_app/core/security/token_storage_service.dart';
 import 'package:nexa_app/data/repositories/equipe_repo.dart';
+import 'package:nexa_app/data/repositories/eletricista_repo.dart';
+import 'package:nexa_app/data/repositories/checklist_preenchido_repo.dart';
+import 'package:nexa_app/data/repositories/checklist_modelo_repo.dart';
+import 'package:nexa_app/data/repositories/checklist_pergunta_repo.dart';
+import 'package:nexa_app/data/repositories/checklist_opcao_resposta_repo.dart';
+import 'package:nexa_app/data/repositories/checklist_resposta_repo.dart';
 import 'package:nexa_app/data/repositories/turno_repo.dart';
 import 'package:nexa_app/data/repositories/usuario_repo.dart';
 import 'package:nexa_app/data/repositories/veiculo_repo.dart';
@@ -134,7 +140,49 @@ class InitialBinding extends Bindings {
       fenix: true,
     );
 
-    // NOTA: Outros repositories (ChecklistRepos, etc) são registrados nos
+    // EletricistaRepo - Usado em: AbrirTurnoBinding, ChecklistListaController
+    // Ciclo de vida: fenix (recreável)
+    Get.lazyPut<EletricistaRepo>(
+      () => builder.createEletricistaRepo(),
+      fenix: true,
+    );
+
+    // ChecklistPreenchidoRepo - Usado em: ChecklistListaController, ChecklistVisualizacaoController
+    // Ciclo de vida: fenix (recreável)
+    Get.lazyPut<ChecklistPreenchidoRepo>(
+      () => builder.createChecklistPreenchidoRepo(),
+      fenix: true,
+    );
+
+    // ChecklistModeloRepo - Usado em: ChecklistListaController, ChecklistVisualizacaoController
+    // Ciclo de vida: fenix (recreável)
+    Get.lazyPut<ChecklistModeloRepo>(
+      () => builder.createChecklistModeloRepo(),
+      fenix: true,
+    );
+
+    // ChecklistPerguntaRepo - Usado em: ChecklistVisualizacaoController
+    // Ciclo de vida: fenix (recreável)
+    Get.lazyPut<ChecklistPerguntaRepo>(
+      () => builder.createChecklistPerguntaRepo(),
+      fenix: true,
+    );
+
+    // ChecklistOpcaoRespostaRepo - Usado em: ChecklistVisualizacaoController
+    // Ciclo de vida: fenix (recreável)
+    Get.lazyPut<ChecklistOpcaoRespostaRepo>(
+      () => builder.createChecklistOpcaoRespostaRepo(),
+      fenix: true,
+    );
+
+    // ChecklistRespostaRepo - Usado em: ChecklistVisualizacaoController
+    // Ciclo de vida: fenix (recreável)
+    Get.lazyPut<ChecklistRespostaRepo>(
+      () => builder.createChecklistRespostaRepo(),
+      fenix: true,
+    );
+
+    // NOTA: Outros repositories são registrados nos
     // bindings específicos dos módulos que os usam.
     // Isso melhora gestão de memória e organização.
   }

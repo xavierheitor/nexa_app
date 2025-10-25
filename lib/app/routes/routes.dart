@@ -105,4 +105,16 @@ abstract class Routes {
   /// Tela intermediária que analisa o estado do turno e decide
   /// automaticamente para qual tela navegar (checklist, serviços, etc).
   static const String turnoNavigationLoading = '/turno/navigation/loading';
+
+  /// Rota da tela de listagem de checklists preenchidos.
+  ///
+  /// Tela que exibe todos os checklists preenchidos do turno ativo,
+  /// permitindo visualizar as respostas de cada checklist.
+  static const String checklistLista = '/checklist/lista';
+
+  /// Rota da tela de visualização de checklist.
+  ///
+  /// Tela que exibe as respostas detalhadas de um checklist específico,
+  /// incluindo perguntas e respostas selecionadas.
+  static const String checklistVisualizacao = '/checklist/visualizacao';
 }

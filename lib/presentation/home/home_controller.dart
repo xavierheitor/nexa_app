@@ -8,6 +8,7 @@ import 'package:nexa_app/core/security/session_manager.dart';
 import 'package:nexa_app/data/repositories/equipe_repo.dart';
 import 'package:nexa_app/data/repositories/veiculo_repo.dart';
 import 'package:nexa_app/data/repositories/turno_repo.dart';
+import 'package:nexa_app/data/repositories/checklist_preenchido_repo.dart';
 import 'package:nexa_app/core/utils/logger/app_logger.dart';
 import 'package:nexa_app/core/utils/snackbar_utils.dart';
 import 'package:nexa_app/app/routes/routes.dart';
@@ -186,7 +187,7 @@ class HomeController extends GetxController {
     }
 
     AppLogger.i('Navegando para tela de checklist', tag: 'HomeController');
-    SnackbarUtils.validacao('Tela de checklist em desenvolvimento');
+    Get.toNamed(Routes.checklistLista);
   }
 
   /// Navega para tela de almoxarifado.
@@ -549,6 +550,52 @@ class HomeController extends GetxController {
     } catch (e) {
       AppLogger.w('Erro ao buscar placa do veículo: $e', tag: 'HomeController');
       return 'Veículo $veiculoId';
+    }
+  }
+
+  // ============================================================================
+  // MÉTODOS HELPER PARA DEBUG
+  // ============================================================================
+
+  /// 🗑️ Limpa todos os checklists preenchidos do turno atual (apenas para debug/testes)
+  Future<void> limparChecklistsDoTurnoAtual() async {
+    try {
+      AppLogger.d('🗑️ Iniciando limpeza de checklists do turno atual',
+          tag: 'HomeController');
+
+      if (!turnoController.hasTurnoAberto) {
+        AppLogger.w('⚠️ Nenhum turno ativo encontrado', tag: 'HomeController');
+        SnackbarUtils.validacao('Nenhum turno ativo encontrado');
+        return;
+      }
+
+      final turnoId = turnoController.turnoAtivo.value?.id;
+      if (turnoId == null) {
+        AppLogger.w('⚠️ ID do turno ativo não encontrado',
+            tag: 'HomeController');
+        return;
+      }
+
+      final checklistPreenchidoRepo = Get.find<ChecklistPreenchidoRepo>();
+      final removidos = await checklistPreenchidoRepo.removerPorTurno(turnoId);
+
+      AppLogger.i(
+          '✅ $removidos checklists preenchidos removidos do turno $turnoId',
+          tag: 'HomeController');
+      SnackbarUtils.sucesso(
+        titulo: 'Checklists Removidos',
+        mensagem: '$removidos checklists removidos! Agora preencha novamente.',
+      );
+
+      // Recarrega o estado do turno
+      await turnoController.recarregar();
+    } catch (e, stackTrace) {
+      AppLogger.e('❌ Erro ao limpar checklists do turno atual',
+          tag: 'HomeController', error: e, stackTrace: stackTrace);
+      SnackbarUtils.erro(
+        titulo: 'Erro ao Limpar',
+        mensagem: 'Não foi possível limpar os checklists: $e',
+      );
     }
   }
 

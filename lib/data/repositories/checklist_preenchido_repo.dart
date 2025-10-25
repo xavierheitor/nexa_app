@@ -63,6 +63,21 @@ class ChecklistPreenchidoRepo with log_mixin.LoggingMixin {
     return await _dao.remover(id);
   }
 
+  /// Remove todos os checklists preenchidos de um turno
+  Future<int> removerPorTurno(int turnoId) async {
+    AppLogger.d('Removendo todos os checklists preenchidos do turno: $turnoId',
+        tag: 'ChecklistPreenchidoRepo');
+    final checklists = await buscarPorTurno(turnoId);
+    int removidos = 0;
+    for (final checklist in checklists) {
+      final sucesso = await remover(int.parse(checklist.id));
+      if (sucesso) removidos++;
+    }
+    AppLogger.i('$removidos checklists preenchidos removidos do turno $turnoId',
+        tag: 'ChecklistPreenchidoRepo');
+    return removidos;
+  }
+
   /// Conta checklists preenchidos por turno
   Future<int> contarPorTurno(int turnoId) async {
     AppLogger.d('Contando checklists preenchidos por turno: $turnoId', tag: 'ChecklistPreenchidoRepo');

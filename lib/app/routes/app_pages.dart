@@ -18,6 +18,10 @@ import 'package:nexa_app/presentation/turno/servicos/turno_servicos_binding.dart
 import 'package:nexa_app/presentation/turno/servicos/turno_servicos_page.dart';
 import 'package:nexa_app/presentation/turno/navigation/turno_navigation_loading_binding.dart';
 import 'package:nexa_app/presentation/turno/navigation/turno_navigation_loading_page.dart';
+import 'package:nexa_app/presentation/checklist/lista/checklist_lista_binding.dart';
+import 'package:nexa_app/presentation/checklist/lista/checklist_lista_page.dart';
+import 'package:nexa_app/presentation/checklist/visualizacao/checklist_visualizacao_binding.dart';
+import 'package:nexa_app/presentation/checklist/visualizacao/checklist_visualizacao_page.dart';
 import 'package:nexa_app/app/routes/routes.dart';
 
 /// Classe responsável pela configuração e gerenciamento das páginas da aplicação.
@@ -243,6 +247,38 @@ class AppPages {
       name: Routes.turnoNavigationLoading,
       page: () => const TurnoNavigationLoadingPage(),
       binding: TurnoNavigationLoadingBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    /// Rota da tela de listagem de checklists preenchidos.
+    ///
+    /// Tela que exibe todos os checklists preenchidos do turno ativo,
+    /// permitindo visualizar as respostas de cada checklist.
+    ///
+    /// **Características:**
+    /// - Protegida por `AuthMiddleware`
+    /// - Lista checklists do turno atual
+    /// - Navegação para visualização detalhada
+    GetPage(
+      name: Routes.checklistLista,
+      page: () => const ChecklistListaPage(),
+      binding: ChecklistListaBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    /// Rota da tela de visualização de checklist.
+    ///
+    /// Tela que exibe as respostas detalhadas de um checklist específico,
+    /// incluindo perguntas e respostas selecionadas.
+    ///
+    /// **Características:**
+    /// - Protegida por `AuthMiddleware`
+    /// - Visualização detalhada das respostas
+    /// - Interface de leitura apenas
+    GetPage(
+      name: Routes.checklistVisualizacao,
+      page: () => const ChecklistVisualizacaoPage(),
+      binding: ChecklistVisualizacaoBinding(),
       middlewares: [AuthMiddleware()],
     ),
   ];
