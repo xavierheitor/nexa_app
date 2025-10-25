@@ -91,12 +91,17 @@ class HomePage extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 8.0),
           child: ConnectivityIndicator(),
         ),
-        /// Botão de logout.
-        IconButton(
-          icon: const Icon(Icons.logout_outlined),
-          tooltip: 'Sair',
-          onPressed: () => _showLogoutDialog(controller),
-        ),
+        /// Botão de logout (só aparece quando não há turno aberto).
+        Obx(() {
+          if (!controller.logoutVisivel) {
+            return const SizedBox.shrink();
+          }
+          return IconButton(
+            icon: const Icon(Icons.logout_outlined),
+            tooltip: 'Sair',
+            onPressed: () => _showLogoutDialog(controller),
+          );
+        }),
       ],
     );
   }

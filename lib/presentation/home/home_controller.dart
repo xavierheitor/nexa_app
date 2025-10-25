@@ -98,6 +98,10 @@ class HomeController extends GetxController {
   /// Sempre habilitada independente do estado do turno.
   bool get almoxarifadoHabilitado => true;
 
+  /// Verifica se o botão de logout deve estar visível.
+  /// Só aparece quando NÃO há turno aberto.
+  bool get logoutVisivel => !turnoController.hasTurnoAberto;
+
   // ============================================================================
   // MÉTODOS DE INICIALIZAÇÃO
   // ============================================================================

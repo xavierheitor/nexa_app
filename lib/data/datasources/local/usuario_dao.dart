@@ -49,10 +49,14 @@ class UsuarioDao extends BaseDao<UsuarioTable, UsuarioTableData>
       UsuarioTableCompanion usuario) async {
     final existente = await getUsuarioByMatricula(usuario.matricula.value);
     if (existente != null) {
-      return await (update(db.usuarioTable)
+      // Atualiza o usuário existente
+      await (update(db.usuarioTable)
             ..where((u) => u.matricula.equals(usuario.matricula.value)))
           .write(usuario);
+      // Retorna o ID do usuário existente
+      return existente.id;
     } else {
+      // Insere novo usuário e retorna o ID gerado
       return await into(db.usuarioTable).insert(usuario);
     }
   }
