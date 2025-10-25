@@ -316,7 +316,7 @@ class ChecklistVisualizacaoPage extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      '1', // TODO: Implementar ordem quando campo estiver disponível
+                      '1',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: colorScheme.primary,
